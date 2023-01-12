@@ -87,9 +87,9 @@ bootFailure:
   call Reboot
 
 # PROGRAM DATA
-loadmsg:          .asciz "Loading BROS...\n"
+loadmsg:          .asciz "Loading BROS...\r\n"
 diskerror:        .asciz "Disk error."
 rebootmsg:        .asciz "Press any key to reboot.\r\n"
 
 .fill (510-(.-_start)), 1, 0  # Pad with nulls up to 510 bytes (excl. boot magic)
-BootMagic:  .int 0xAA55     # magic word for BIOS
+BootMagic:  .word 0xAA55     # magic word for BIOS
