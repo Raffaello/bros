@@ -42,7 +42,6 @@ This is based on `FAT16` filesystem.
 - to run using qemu: `qemu-system-i386 -drive format=raw,file=bin/boot.bin,index=0,if=floppy`
 
 ### Create the floppy image
-You can skip these steps and use the provided `br-dos.img` file.
 
 1. create the floppy image: `dd if=/dev/zero of=br-dos.img count=50 bs=1M`
 2. create the partion: `fdisk br-dos.img` then `o`, `n`,`p`,`1`,`2048`,`99999`,`t`,`4`,`w`
@@ -61,3 +60,4 @@ dd if=bin/boot.bin of=br-dos.img bs=512 count=1
 ## Documentations:
 
 - http://independent-software.com/operating-system-development.html
+- https://en.wikibooks.org/wiki/QEMU/Images
