@@ -41,6 +41,22 @@ This is based on `FAT16` filesystem.
 - to compile: `make bootstrap_floppy`
 - to run using qemu: `qemu-system-i386 -drive format=raw,file=bin/boot.bin,index=0,if=floppy`
 
+### Create the floppy image
+You can skip these steps and use the provided `br-dos.img` file.
+
+1. create the floppy image: `dd if=/dev/zero of=br-dos.img count=50 bs=1M`
+2. create the partion: `fdisk br-dos.img` then `o`, `n`,`p`,`1`,`2048`,`99999`,`t`,`4`,`w`
+3. create FAT fs: `mkfs.vfat br-dos.img`
+
+### using a Floppy image
+
+1. copy the compiled `bin/boot.bin` into the floppy image:
+```bash
+dd if=bin/boot.bin of=br-dos.img bs=512 count=1
+```
+2. then run qemu to boot from floppy: `qemu-system-i386 -fda br-dos.img`
+
+
 
 ## Documentations:
 
