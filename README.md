@@ -38,8 +38,8 @@ This is based on `FAT16` filesystem.
 
 ## Usage
 
-to compile: `make bootstrap_floppy`
-to run using qemu: `qemu-system-i386 -drive format=raw,file=bin/boot.bin,index=0,if=floppy`
+- to compile: `make bootstrap_floppy`
+- to run using qemu: `qemu-system-i386 -drive format=raw,file=bin/boot.bin,index=0,if=floppy`
 
 
 ## Documentations:
