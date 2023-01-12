@@ -1,5 +1,5 @@
 floppy:
-	as -o bin/boot.o bootloader/floppy.asm
+	as -o bin/boot.o bootloader/floppy.asm -I utils/bios
 	ld -o bin/boot.out bin/boot.o -Ttext 0x7c00
 	objcopy -O binary -j .text bin/boot.out bin/boot.bin
 
