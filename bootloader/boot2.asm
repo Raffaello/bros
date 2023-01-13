@@ -15,8 +15,10 @@ _start:
 main:
   lea si, hello_msg
   call PrintString
-hang:
-  jmp hang
+# hang:
+#   jmp hang
+  cli
+  hlt
 
 
 hello_msg: .asciz "Hello 2nd Bootloader!\r\n"

@@ -22,7 +22,7 @@ bootsector:
   totalSect:    .word  2880          # total # of sectors if over 32 MB
   media:        .byte  0xF0          # media Descriptor
   fatSize:      .word  9             # size of each FAT
-  trackSect:    .word  9             # sectors per track
+  trackSect:    .word  9             # sectors per track, 18 if 1.44MB Floppy
   headCnt:      .word  2             # number of read-write heads
   hiddenSect:   .int   0             # number of hidden sectors
   sect32:       .int   0             # # sectors for over 32 MB
@@ -63,7 +63,6 @@ main:
   lea si, mem_msg
   call PrintString
   call GetMemorySize
-  # mov ax, 1000 # debug
   call PrintNumber
   lea si, mem_unit_msg
   call PrintString
@@ -75,15 +74,17 @@ main:
   jc   bootFailure   # display error message if carry set (error)
 
 # Read Drive sectors
-  # lea si, msg1
-  # call PrintString
-  # mov dl, BOOT_DRIVE
-  # mov dh, 2
-  # mov bx, LOAD_SEGMENT
-  # call DriveReadSectors
-  # lea si, msg2
-  # call PrintString
-
+  lea si, msg1
+  call PrintString
+  mov dl, BOOT_DRIVE
+  mov dh, 2
+  mov bx, LOAD_SEGMENT
+  call DriveReadSectors
+  lea si, msg2
+  call PrintString
+  mov ax, LOAD_SEGMENT
+  # mov ds, ax
+  jmp LOAD_SEGMENT
 
 
   # End of loader, for now. Reboot.
