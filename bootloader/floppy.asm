@@ -11,26 +11,27 @@ _start:
   jmp short main # jump to beginning of code
   nop
 
+# OEM Parameter Block
 bootsector:
-#   OEM:          .ascii "--BROS--"    # OEM String
-#   sectSize:     .word  0x200         # bytes per sector
-#   clustSize:    .byte  1             # sectors per cluster
-#   resSect:      .word  1             # #of reserved sectors
-#   fatCnt:       .byte  2             # #of FAT copies
-#   rootSize:     .word  224           # size of root directory
-#   totalSect:    .word  2880          # total # of sectors if over 32 MB
-#   media:        .byte  0xF0          # media Descriptor
-#   fatSize:      .word  9             # size of each FAT
-#   trackSect:    .word  9             # sectors per track
-#   headCnt:      .word  2             # number of read-write heads
-#   hiddenSect:   .int   0             # number of hidden sectors
-#   sect32:       .int   0             # # sectors for over 32 MB
+  OEM:          .ascii "--BROS--"    # OEM String
+  sectSize:     .word  0x200         # bytes per sector
+  clustSize:    .byte  1             # sectors per cluster
+  resSect:      .word  1             # #of reserved sectors
+  fatCnt:       .byte  2             # #of FAT copies
+  rootSize:     .word  224           # size of root directory
+  totalSect:    .word  2880          # total # of sectors if over 32 MB
+  media:        .byte  0xF0          # media Descriptor
+  fatSize:      .word  9             # size of each FAT
+  trackSect:    .word  9             # sectors per track
+  headCnt:      .word  2             # number of read-write heads
+  hiddenSect:   .int   0             # number of hidden sectors
+  sect32:       .int   0             # # sectors for over 32 MB
    BOOT_DRIVE:    .byte  0             # holds drive that the boot sector came from
-#   reserved:     .byte  0             # reserved, empty
-#   bootSign:     .byte  0x29          # extended boot sector signature
-#   volID:        .ascii "seri"        # disk serial
-#   volumeLabel:  .ascii "MYVOLUME   " # volume label
-#   fsType:       .ascii "FAT16   "    # file system type
+  reserved:     .byte  0             # reserved, empty
+  bootSign:     .byte  0x29          # extended boot sector signature
+  volID:        .ascii "seri"        # disk serial
+  volumeLabel:  .ascii "MYVOLUME   " # volume label
+  fsType:       .ascii "FAT16   "    # file system type
 
 
 .include "utils/bios/PrintString.asm"
@@ -39,6 +40,10 @@ bootsector:
 .ifndef "BootFailure"
 .include "utils/BootFailure.asm"
 .endif
+
+.include "utils/bios/GetMemorySize.asm"
+.include "utils/bios/PrintNumber.asm"
+
 main:
 # Setup segments:
   cli                # clear interrupts
@@ -54,23 +59,31 @@ main:
   lea  si, loadmsg
   call PrintString
 
+# Display Total Memory (it can be removed as it is a waste of instrunctions)
+  lea si, mem_msg
+  call PrintString
+  call GetMemorySize
+  call PrintNumber
+  lea si, mem_unit_msg
+  call PrintString
 
-# Reset disk system.
-# Jump to bootFailure on error.
+# Reset disk system. Jump to bootFailure on error.
   mov  dl, BOOT_DRIVE # drive to reset
   xor  ah, ah        # subfunction 0
   int  0x13          # call interrupt 13h
   jc   bootFailure   # display error message if carry set (error)
 
 # Read Drive sectors
-  lea si, msg1
-  call PrintString
-  mov dl, BOOT_DRIVE
-  mov dh, 2
-  mov bx, LOAD_SEGMENT
-  call DriveReadSectors
-  lea si, msg2
-  call PrintString
+  # lea si, msg1
+  # call PrintString
+  # mov dl, BOOT_DRIVE
+  # mov dh, 2
+  # mov bx, LOAD_SEGMENT
+  # call DriveReadSectors
+  # lea si, msg2
+  # call PrintString
+
+
 
   # End of loader, for now. Reboot.
   call Reboot
@@ -80,7 +93,9 @@ bootFailure:
   call BootFailure
 
 # PROGRAM DATA
-loadmsg:          .asciz "Booting BROS...\r\n"
+loadmsg:      .asciz "Booting BROS...\r\n"
+mem_msg:      .asciz "Free Memory: "
+mem_unit_msg: .asciz "KB\r\n"
 msg1: .asciz "read disk\r\n"
 msg2: .asciz "done\r\n"
 
