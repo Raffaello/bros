@@ -63,6 +63,7 @@ main:
   lea si, mem_msg
   call PrintString
   call GetMemorySize
+  # mov ax, 1000 # debug
   call PrintNumber
   lea si, mem_unit_msg
   call PrintString

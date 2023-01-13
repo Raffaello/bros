@@ -17,7 +17,8 @@ PrintNumber_loop:
   div dl     # AL = Quotient, AH = Remainder
   push ax
   inc cx
-  or ah, ah
+#   or al, al
+  and ax, 0xFF
   jnz PrintNumber_loop
 PrintNumber_loop_print:
   # 1 digits is always guaranteed: 0
@@ -32,3 +33,14 @@ PrintNumber_loop_print:
   pop cx
   ret
 .endfunc
+
+# 1000 / 10, 100, 0
+# 100 / 10, 10, 0
+# 10/ 10, 1, 0
+# 1/ 10, 0, 1
+
+# 1234 / 10, 123, 4
+# 123 / 10, 12, 3
+# 12 / 10, 1, 2
+# 1 / 10, 0, 1
+# 65535 / 10, 6553, 5
