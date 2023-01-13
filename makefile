@@ -10,7 +10,7 @@ boot2:
 	ld -o bin/boot2.out bin/boot2.o -Ttext 0x1000
 	objcopy -O binary -j .text bin/boot2.out bin/boot2.bin
 
-image:
+image: floppy boot2
 	dd if=/dev/zero of=br-dos.img count=2880 bs=512
 	mkfs.msdos br-dos.img
 	dd if=bin/boot.bin of=br-dos.img conv=notrunc
