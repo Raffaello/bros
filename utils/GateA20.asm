@@ -45,4 +45,11 @@ CheckGateA20:
 
   ret
 .endfunc
+
+# Enable Gate A20 Line
+.func EnableA20
+EnableA20:
+# TODO, Qemu is already enabled so...
+  hlt
+.endfunc
 .endif

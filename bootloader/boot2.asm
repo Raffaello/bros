@@ -22,8 +22,7 @@ main:
   call CheckGateA20
   # cmp ax,0
   jne a20_enabled
-  # TODO: enable A20 GATE
-  hlt
+  call EnableA20
 a20_enabled:
   lea si, ok_msg
   call PrintString
@@ -42,12 +41,12 @@ a20_enabled:
   mov eax, cr0
   or eax, 1    # enable bit 0
   mov cr0, eax
-  jmp 0x8:main32
+  jmp GDT_CODE_SEG:main32
 
 .code32
 main32:
   # Set Registers
-  mov ax, 0x10  # set Data segment to data selector (0x10)
+  mov ax, GDT_DATA_SEG  # set Data segment to data selector (0x10)
   mov ds, ax
   mov ss, ax
   mov es, ax
