@@ -34,4 +34,5 @@ LoadGDT:
   # sti
   popa
   ret
+.endfunc
 .endif

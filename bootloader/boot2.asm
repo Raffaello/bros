@@ -9,12 +9,25 @@
 
 _start:
   jmp main
-  nop
+  # nop
 
 .include "utils/bios/PrintString.asm"
 .include "bootloader/GDT.asm"
+.include "utils/GateA20.asm"
 
 main:
+  # Enable Gate A20
+  lea si, a20_msg
+  call PrintString
+  call CheckGateA20
+  # cmp ax,0
+  jne a20_enabled
+  # TODO: enable A20 GATE
+  hlt
+a20_enabled:
+  lea si, ok_msg
+  call PrintString
+
   # Load GDT
   lea si, gdt_msg
   call PrintString
@@ -40,18 +53,18 @@ main32:
   mov es, ax
   mov esp, 0x9000 # stack start at 9000h
   # sti
-  # *** test *** TODO: remove 
-  mov word PTR [0xB8000], 0x074F
-  mov word PTR [0xB8002], 0x074b
-
+ 
+ # *** test *** TODO: remove 
+  mov dword PTR [0xB8000], 0x074B074F
 
 # stop
   cli
   hlt
 
 
+a20_msg:    .asciz "Enabling A20..."
 gdt_msg:    .asciz "Loading GDT..."
 ok_msg:     .asciz "OK\r\n"
-pmode_msg:  .asciz "Enabling Protected Mode..."
+pmode_msg:  .asciz "Enabling Protected Mode and Loading Kernel..."
 # .fill 1024, 1, 1  # Pad 1K with 1-bytes to test file larger than 1 sector
 .fill (512-(.-_start)), 1, 0
