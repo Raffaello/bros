@@ -1,3 +1,6 @@
+# FAT12/16 Boot Sector
+# Loading the FAT Reserved Sector (boot2.asm)
+
 .code16
 .intel_syntax noprefix
 .text
@@ -9,11 +12,12 @@ LOAD_SEGMENT = 0x1000 # load the boot loader to segment 1000h
 
 _start:
   jmp short main # jump to beginning of code
-  nop
+  # nop
 
 # OEM Parameter Block
+.org 0x3			/* Ensure the BPB starts at the correct place */
 bootsector:
-  OEM:          .ascii "--BROS--"    # OEM String
+  OEM:          .ascii "--BROS--"    # OEM String (starting at offset 3)
   BytsPerSec:   .word  512           # bytes per sector
   SecPerClus:   .byte  1             # sectors per cluster
   RsvdSecCnt:   .word  1             # #of reserved sectors (2nd stage bootloader)
@@ -47,7 +51,7 @@ bootsector:
 main:
 # Setup segments:
   cli                # clear interrupts
-  mov  DrvNum, dl # save what drive we booted from (should be 0x0)
+  mov  DrvNum, dl    # save what drive we booted from (should be 0x0)
   mov  ax, cs        # CS = 0x0, since that's where boot sector is (0x07c00)
   mov  ds, ax        # DS = CS = 0x0
   mov  es, ax        # ES = CS = 0x0
@@ -64,7 +68,7 @@ main:
   call PrintString
   call GetMemorySize
   call PrintNumber
-  lea si, mem_unit_msg
+  lea si, kb_unit_msg
   call PrintString
 
 # Reset disk system. Jump to bootFailure on error.
@@ -73,32 +77,31 @@ main:
   jc   bootFailure   # display error message if carry set (error)
 
 # Read Drive sectors
-  lea si, msg1
+  lea si, read_rsv_sec_msg
   call PrintString
 
   mov dl, DrvNum
   mov dh, RsvdSecCnt    # Reading the FAT reserved sector(s), where the 2nd stage bootloader is located
   mov bx, LOAD_SEGMENT
   call DriveReadSectors
-  lea si, msg2
+  lea si, ok_msg
   call PrintString
-  mov ax, LOAD_SEGMENT
 
   jmp LOAD_SEGMENT
 
-  # End of loader, for now. Reboot.
-  call Reboot
+  # End of loader, shouldn't reach here
+  jmp short $
 
 bootFailure:
   lea  si, diskerror_msg
   call BootFailure
 
 # PROGRAM DATA
-loadmsg:      .asciz "Booting BROS...\r\n"
+loadmsg:      .asciz " -=| Booting BROS... |=-\r\n"
 mem_msg:      .asciz "Free Memory: "
-mem_unit_msg: .asciz "KB\r\n"
-msg1: .asciz "read disk\r\n"
-msg2: .asciz "done\r\n"
+kb_unit_msg: .asciz "KB\r\n"
+read_rsv_sec_msg: .asciz "Reading Reserved Sector..."
+ok_msg: .asciz "OK\r\n"
 
 .fill (510-(.-_start)), 1, 0  # Pad with nulls up to 510 bytes (excl. boot magic)
 BootMagic:  .word 0xAA55     # magic word for BIOS
