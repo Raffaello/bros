@@ -1,4 +1,5 @@
 all: floppy boot2 image
+	cat bin/boot.bin bin/boot2.bin > bin/bootloader.bin
 
 floppy:
 	as -o bin/boot.o bootloader/floppy.asm

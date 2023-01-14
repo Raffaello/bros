@@ -24,4 +24,4 @@ main:
 hello_msg: .asciz "Hello 2nd Bootloader!\r\n"
 
 # .fill 1024, 1, 1  # Pad 1K with 1-bytes to test file larger than 1 sector
-.fill (1024-(.-_start)), 1, 1
+.fill (512-(.-_start)), 1, 0
