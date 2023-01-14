@@ -39,7 +39,7 @@ main32:
   mov ss, ax
   mov es, ax
   mov esp, 0x9000 # stack start at 9000h
-  sti
+  # sti
   # *** test *** TODO: remove 
   mov word PTR [0xB8000], 0x074F
   mov word PTR [0xB8002], 0x074b

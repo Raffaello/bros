@@ -31,7 +31,7 @@ LoadGDT:
   cli
   pusha
   lgdt [GDT_TOC]
-  sti
+  # sti
   popa
   ret
 .endif

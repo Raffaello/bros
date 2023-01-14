@@ -57,7 +57,7 @@ main:
   mov  es, ax        # ES = CS = 0x0
   mov  ss, ax        # SS = CS = 0x0
   mov  sp, 0x7C00    # Stack grows down from offset 0x7C00 toward 0x0000.
-  sti                # enable interrupts
+  # sti                # enable interrupts
 
 # Display "loading" message:
   lea  si, loadmsg
@@ -97,7 +97,7 @@ bootFailure:
   call BootFailure
 
 # PROGRAM DATA
-loadmsg:      .asciz " -=| Booting BROS... |=-\r\n"
+loadmsg:      .asciz "\r\n       #### |-=*.*=-| BROS FAT Bootlader |-=*.*=-| ####\r\n\r\n"
 mem_msg:      .asciz "Free Memory: "
 kb_unit_msg: .asciz "KB\r\n"
 read_rsv_sec_msg: .asciz "Reading Reserved Sector..."
