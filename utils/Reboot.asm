@@ -3,12 +3,10 @@
 # Reboot the system
 #
 
-.ifndef "PrintString"
+.ifndef Reboot
+
 .include "utils/bios/PrintString.asm"
-.endif
-.ifndef "WaitKey"
 .include "utils/bios/WaitKey.asm"
-.endif
 
 .func Reboot
  Reboot:
@@ -21,3 +19,4 @@
 .endfunc
 
 rebootmsg: .asciz "Press any key to reboot.\r\n"
+.endif

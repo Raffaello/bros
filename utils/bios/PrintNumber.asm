@@ -3,9 +3,8 @@
 # it will then pop from the stack to display the number correctly as a string.
 # It will use the PrintString function.
 
-.ifndef "PrintChar"
+.ifndef PrintNumber
 .include "utils/bios/PrintChar.asm"
-.endif
 
 .func PrintNumber
 PrintNumber:
@@ -44,3 +43,4 @@ PrintNumber_loop_print:
 # 12 / 10, 1, 2
 # 1 / 10, 0, 1
 # 65535 / 10, 6553, 5
+.endif

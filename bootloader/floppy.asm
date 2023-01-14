@@ -36,11 +36,7 @@ bootsector:
 
 .include "utils/bios/PrintString.asm"
 .include "utils/bios/DriveReadSectors.asm"
-
-.ifndef "BootFailure"
 .include "utils/BootFailure.asm"
-.endif
-
 .include "utils/bios/GetMemorySize.asm"
 .include "utils/bios/PrintNumber.asm"
 

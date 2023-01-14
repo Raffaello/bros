@@ -1,6 +1,6 @@
 # BIOS print using interrupt 10h, ah=0Eh
 # expecting the char to be printed in AL
-
+.ifndef PrintChar
 .func PrintChar
 PrintChar:
   mov    ah, 0xE         # Subfunction 0xe of int 10h (video teletype output)
@@ -8,3 +8,4 @@ PrintChar:
   int    0x10            # call BIOS interrupt.
   ret
 .endfunc
+.endif

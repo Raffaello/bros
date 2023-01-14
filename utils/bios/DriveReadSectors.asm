@@ -17,12 +17,10 @@
 # AH = return code
 # AL = Actual Sectors Read Count
 
-.ifndef "PrintString"
+.ifndef DriverReadSectors
+
 .include "utils/bios/PrintString.asm"
-.endif
-.ifndef "BootFailure"
 .include "utils/BootFailure.asm"
-.endif
 
 .func DriveReadSectors
 DriveReadSectors:
@@ -44,3 +42,4 @@ DriveReadSectors_error:
 .endfunc
 
 diskerror_msg: .asciz "Disk read error\r\n"
+.endif

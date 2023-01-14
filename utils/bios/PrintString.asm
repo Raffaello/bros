@@ -2,9 +2,9 @@
 # expecting \0 terminated string in ds:si as paramter
 #
 
-.ifndef "PrintChar"
+.ifndef PrintString
+
 .include "utils/bios/PrintChar.asm"
-.endif
 
 .func PrintString
 PrintString:
@@ -16,3 +16,4 @@ PrintString:
 PrintString_end:
   ret # return
 .endfunc
+.endif
