@@ -11,7 +11,7 @@ KERNEL_FILENAME_ATTRIB = 0b00000111 # System, Hidden, Read-only
 
 _start:
   jmp main
-KERNEL_FILENAME:  .ascii "KERNEL  SYS"
+KERNEL_FILENAME:  .ascii "BROSKRNLSYS"
 DrvNum:      .byte  0
   # nop
 
@@ -32,12 +32,15 @@ main:
   mov dl, DrvNum
   call LoadRootDirectory
   # 2. find file
-  # lea si, KERNEL_FILENAME
-  # mov dl, KERNEL_FILENAME_ATTRIB
-  # call RootDirFindFile
+  lea si, KERNEL_FILENAME
+  mov dl, KERNEL_FILENAME_ATTRIB
+  call RootDirFindFile
+  cmp AX, 0xFFFF
+  jne load_fat
+  lea si, file_missing_msg
+  call BootFailure
   # 3. load file
-  
-
+load_fat:
   lea si, ok_msg
   call PrintString
   # Enable Gate A20
@@ -78,13 +81,14 @@ main32:
   # sti
  
  # *** test *** TODO: remove 
-  mov dword PTR [0xB8000], 0x074B074F
+  mov dword PTR [0xB8000], 0x154B154F
 
 # stop
   cli
   hlt
 
 
+file_missing_msg:   .asciz "File Missing\r\n"
 preload_kernel_msg: .asciz "Preloading Kernel..."
 a20_msg:            .asciz "Enabling A20..."
 gdt_msg:            .asciz "Loading GDT..."
