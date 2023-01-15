@@ -16,6 +16,17 @@ _start:
 .include "utils/GateA20.asm"
 
 main:
+  # Preloading Kernel
+  lea si, preload_kernel_msg
+  call PrintString
+  # TODO
+  # 1. read FAT root dir
+  # 2. find file
+  # 3. load file
+  
+
+  lea si, ok_msg
+  call PrintString
   # Enable Gate A20
   lea si, a20_msg
   call PrintString
@@ -61,9 +72,10 @@ main32:
   hlt
 
 
-a20_msg:    .asciz "Enabling A20..."
-gdt_msg:    .asciz "Loading GDT..."
-ok_msg:     .asciz "OK\r\n"
-pmode_msg:  .asciz "Enabling Protected Mode and Loading Kernel..."
+preload_kernel_msg: .asciz "Preloading Kernel..."
+a20_msg:            .asciz "Enabling A20..."
+gdt_msg:            .asciz "Loading GDT..."
+ok_msg:             .asciz "OK\r\n"
+pmode_msg:          .asciz "Enabling Protected Mode and Loading Kernel..."
 # .fill 1024, 1, 1  # Pad 1K with 1-bytes to test file larger than 1 sector
 .fill (512-(.-_start)), 1, 0

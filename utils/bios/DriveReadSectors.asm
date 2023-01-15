@@ -24,16 +24,12 @@
 
 .func DriveReadSectors
 DriveReadSectors:
-  push dx
   mov ah, 0x02
-  mov al, dh
-  mov ch, 0x00
-  mov dh, 0x00
-  mov cl, 0x02
+  push ax
   int 0x13 #   read data to [es:bx] 
   jc DriveReadSectors_error
   pop dx
-  cmp dh, al # if AL ( sectors read ) != DH ( sectors expected )
+  cmp dl, al # if AL ( sectors read ) != DH ( sectors expected )
   jne DriveReadSectors_error
   ret
 DriveReadSectors_error:

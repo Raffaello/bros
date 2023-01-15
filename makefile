@@ -8,7 +8,7 @@ floppy:
 
 boot2:
 	as -o bin/boot2.o bootloader/boot2.asm
-	ld -o bin/boot2.out bin/boot2.o -Ttext 0x1000
+	ld -o bin/boot2.out bin/boot2.o -Ttext 0x600
 	objcopy -O binary -j .text bin/boot2.out bin/boot2.bin
 
 image: floppy boot2
