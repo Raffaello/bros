@@ -2,12 +2,12 @@ all: floppy boot2 image
 	cat bin/boot.bin bin/boot2.bin > bin/bootloader.bin
 
 floppy:
-	as -o bin/boot.o bootloader/floppy.asm
+	as -o bin/boot.o bootloader/floppy.asm -I bootloader/
 	ld -o bin/boot.out bin/boot.o -Ttext 0x7c00
 	objcopy -O binary -j .text bin/boot.out bin/boot.bin
 
 boot2:
-	as -o bin/boot2.o bootloader/boot2.asm
+	as -o bin/boot2.o bootloader/boot2.asm -I bootloader/
 	ld -o bin/boot2.out bin/boot2.o -Ttext 0x600
 	objcopy -O binary -j .text bin/boot2.out bin/boot2.bin
 
