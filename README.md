@@ -4,6 +4,19 @@ BR Operating System.
 
 Educational project.
 
+## Info
+
+### Bootloader
+
+It boots from a FAT12/16 Boot sector (0), chain loading the FAT Reserved Sector(s), using BIOS interrupts.
+
+Then it will pre-load the kernel and switch the CPU to Protected MODE (32 bits) addressing up to 4GB RAM,
+to able to execute the kernel.
+
+### The Kernel
+
+TODO
+
 ## Usage
 
 - to compile: `make all`
