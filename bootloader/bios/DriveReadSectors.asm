@@ -1,16 +1,22 @@
 # *************************************
 # BIOS Read Sector from Drive         *
 # Input:                              *
-# DH = Sectors to read count          *
+# AL = Sectors to read count          *
 # DL = Drive                          *
 # BX = Buffer address offset pointer  *
 # ----------------------------------- *
-# int 13h, ah=02h parameters:         *
-# AL = Sectors To Read Count          *
-# CH = Cylinder                       *
-# CL = Sector                         *
-# DH = Head                           *
-# DL = Drive                          *
+# INT 13h, AH=02h parameters:         *
+#                                     *
+# AL = tot sector count, 0 is illegal *
+#      cannot cross ES page boundary, *
+#      or a cylinder boundary,        *
+#      and must be < 128              *
+#                                     *
+# CH = Low 8 bits of cylinder         *
+# CL = High 2 bits of cylinder,       *
+#      6 bits for sector              *
+# DH = Head number                    *
+# DL = Drive number                   *
 # ES:BX = Buffer Address Pointer      *
 #                                     *
 # returns:                            *
@@ -21,6 +27,7 @@
 .ifndef DriverReadSectors
 
 .include "bios/PrintString.asm"
+.include "bios/PrintNumber.asm"
 .include "utils/BootFailure.asm"
 
 .func DriveReadSectors
@@ -34,6 +41,8 @@ DriveReadSectors:
   jne DriveReadSectors_error
   ret
 DriveReadSectors_error:
+  shr AX, 8
+  call PrintNumber
   lea si, diskerror_msg
   call BootFailure
 .endfunc

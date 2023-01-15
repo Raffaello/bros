@@ -5,14 +5,14 @@ __BOOT_SECTOR__:
   # bsOEM = "--BROS--"    # OEM String (starting at offset 3)
   _BytsPerSec = 512           # bytes per sector
   _SecPerClus = 1             # sectors per cluster
-  _RsvdSecCnt = 1             # #of reserved sectors (2nd stage bootloader)
+  _RsvdSecCnt = 2             # #of reserved sectors (2nd stage bootloader)
   _NumFATs    = 2             # #of FAT copies
   _RootEntCnt = 224           # size of root directory (512 FAT16)
   # TotSec16:     .word  2880          # total # of sectors if over 32 MB
   # media:        .byte  0xF0          # media Descriptor (F0=removible)
   _FATSz16    = 9             # size of each FAT
-  # SecPerTrk:    .word  9             # sectors per track, 18 if 1.44MB Floppy
-  # headNumHeads: .word  2             # number of read-write heads
+  _SecPerTrk  = 18            # sectors per track, 9 if 720KB Floppy
+  _NumHeads   = 2             # number of read-write heads
   # HiddSec:      .int   0             # number of hidden sectors
   # TotSec32:     .int   0             # # sectors for over 32 MB
 

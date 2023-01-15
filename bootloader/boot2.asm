@@ -5,10 +5,13 @@
 .text
 .org 0x0
 
+KERNEL_FILENAME_ATTRIB = 0b00000111 # System, Hidden, Read-only
+
 .global _start
 
 _start:
   jmp main
+KERNEL_FILENAME:  .ascii "KERNEL  SYS"
 DrvNum:      .byte  0
   # nop
 
@@ -26,7 +29,12 @@ main:
   call PrintString
   # TODO
   # 1. read FAT root dir
+  mov dl, DrvNum
+  call LoadRootDirectory
   # 2. find file
+  # lea si, KERNEL_FILENAME
+  # mov dl, KERNEL_FILENAME_ATTRIB
+  # call RootDirFindFile
   # 3. load file
   
 
@@ -82,5 +90,6 @@ a20_msg:            .asciz "Enabling A20..."
 gdt_msg:            .asciz "Loading GDT..."
 ok_msg:             .asciz "OK\r\n"
 pmode_msg:          .asciz "Enabling Protected Mode and Loading Kernel..."
-# .fill 1024, 1, 1  # Pad 1K with 1-bytes to test file larger than 1 sector
-.fill (512-(.-_start)), 1, 0
+
+.fill ((_BytsPerSec*_RsvdSecCnt) -(.-_start)), 1, 0
+

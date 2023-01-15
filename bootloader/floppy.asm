@@ -28,8 +28,8 @@ OEM:          .ascii  "--BROS--"    # OEM String (starting at offset 3)
   TotSec16:     .word  2880         # total # of sectors if over 32 MB
   media:        .byte  0xF0         # media Descriptor (F0=removible)
   FATSz16:      .word  9            # size of each FAT
-  SecPerTrk:    .word  9            # sectors per track, 18 if 1.44MB Floppy
-  headNumHeads: .word  2            # number of read-write heads
+  SecPerTrk:    .word  _SecPerTrk   # sectors per track, 18 if 1.44MB Floppy
+  NumHeads:     .word  _NumHeads    # number of read-write heads
   HiddSec:      .int   0            # number of hidden sectors
   TotSec32:     .int   0            # # sectors for over 32 MB
 

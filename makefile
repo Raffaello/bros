@@ -13,7 +13,8 @@ boot2:
 
 image: floppy boot2
 	dd if=/dev/zero of=br-dos.img count=2880 bs=512
-	mkfs.fat -F 12 br-dos.img
+	# Using 2 Reserved Sectors
+	mkfs.fat -F 12 -R 2 -v br-dos.img
 	dd if=bin/boot.bin of=br-dos.img conv=notrunc
 	dd if=bin/boot2.bin of=br-dos.img conv=notrunc seek=1
 
