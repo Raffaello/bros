@@ -19,7 +19,7 @@
 
 .ifndef DriverReadSectors
 
-.include "utils/bios/PrintString.asm"
+.include "bios/PrintString.asm"
 .include "utils/BootFailure.asm"
 
 .func DriveReadSectors

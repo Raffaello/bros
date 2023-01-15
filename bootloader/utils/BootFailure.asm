@@ -3,7 +3,7 @@
 
 .ifndef BootFailure
 
-.include "utils/bios/PrintString.asm"
+.include "bios/PrintString.asm"
 .include "utils/Reboot.asm"
 
 .func BootFailure

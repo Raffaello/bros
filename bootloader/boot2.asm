@@ -11,8 +11,8 @@ _start:
   jmp main
   # nop
 
-.include "utils/bios/PrintString.asm"
-.include "bootloader/GDT.asm"
+.include "bios/PrintString.asm"
+.include "GDT.asm"
 .include "utils/GateA20.asm"
 
 main:

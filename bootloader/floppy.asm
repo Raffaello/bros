@@ -41,12 +41,12 @@ bootsector:
   volumeLab:   .ascii "NO NAME    " # volume label
   FilSysType:  .ascii "FAT     "    # file system type
 
-.include "utils/bios/PrintString.asm"
-.include "utils/bios/DriveReadSectors.asm"
+.include "bios/PrintString.asm"
+.include "bios/DriveReadSectors.asm"
 .include "utils/BootFailure.asm"
-.include "utils/bios/GetMemorySize.asm"
-.include "utils/bios/PrintNumber.asm"
-.include "utils/bios/ResetDrive.asm"
+.include "bios/GetMemorySize.asm"
+.include "bios/PrintNumber.asm"
+.include "bios/ResetDrive.asm"
 
 main:
 # Setup segments:

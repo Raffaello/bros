@@ -4,7 +4,7 @@
 
 .ifndef PrintString
 
-.include "utils/bios/PrintChar.asm"
+.include "bios/PrintChar.asm"
 
 .func PrintString
 PrintString:

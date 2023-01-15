@@ -4,7 +4,7 @@
 # It will use the PrintString function.
 
 .ifndef PrintNumber
-.include "utils/bios/PrintChar.asm"
+.include "bios/PrintChar.asm"
 
 .func PrintNumber
 PrintNumber:
