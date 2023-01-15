@@ -1,5 +1,6 @@
 # BIOS print using interrupt 10h, ah=0Eh
 # expecting the char to be printed in AL
+
 .ifndef PrintChar
 .func PrintChar
 PrintChar:

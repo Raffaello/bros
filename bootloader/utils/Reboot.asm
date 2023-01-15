@@ -1,7 +1,6 @@
 # Using BIOS Print to display a message to the user
 # Using BIOS WaitKey before reboot
 # Reboot the system
-#
 
 .ifndef Reboot
 

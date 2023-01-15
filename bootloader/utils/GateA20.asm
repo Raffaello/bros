@@ -49,7 +49,7 @@ CheckGateA20:
 # Enable Gate A20 Line
 .func EnableA20
 EnableA20:
-# TODO, Qemu is already enabled so...
+# TODO, Qemu has it already enabled
   hlt
 .endfunc
 .endif

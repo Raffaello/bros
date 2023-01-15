@@ -1,7 +1,7 @@
 # Print a number stored in AX
 # It uses the stack to store the digits
 # it will then pop from the stack to display the number correctly as a string.
-# It will use the PrintString function.
+# It usse the PrintString function.
 
 .ifndef PrintNumber
 .include "bios/PrintChar.asm"
@@ -14,9 +14,9 @@ PrintNumber:
   mov dl, 10 # divides by 10
 PrintNumber_loop:
   div dl     # AL = Quotient, AH = Remainder
+  # TODO: div error handling
   push ax
   inc cx
-#   or al, al
   and ax, 0xFF
   jnz PrintNumber_loop
 PrintNumber_loop_print:

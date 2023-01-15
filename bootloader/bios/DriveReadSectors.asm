@@ -1,22 +1,23 @@
-# BIOS Read Sector from Drive
-# Input:
-# DH = Sectors to read count
-# DL = Drive
-# BX = Buffer address offset pointer
-# -----------------------------
-# int 13h, ah=02h parameters:
-# AL = Sectors To Read Count
-# CH = Cylinder
-# CL = Sector
-# DH = Head
-# DL = Drive
-# ES:BX = Buffer Address Pointer
-#
-# returns:
-# CF = Set on error
-# AH = return code
-# AL = Actual Sectors Read Count
-
+# *************************************
+# BIOS Read Sector from Drive         *
+# Input:                              *
+# DH = Sectors to read count          *
+# DL = Drive                          *
+# BX = Buffer address offset pointer  *
+# ----------------------------------- *
+# int 13h, ah=02h parameters:         *
+# AL = Sectors To Read Count          *
+# CH = Cylinder                       *
+# CL = Sector                         *
+# DH = Head                           *
+# DL = Drive                          *
+# ES:BX = Buffer Address Pointer      *
+#                                     *
+# returns:                            *
+# CF = Set on error                   *
+# AH = return code                    *
+# AL = Actual Sectors Read Count      *
+# *************************************
 .ifndef DriverReadSectors
 
 .include "bios/PrintString.asm"

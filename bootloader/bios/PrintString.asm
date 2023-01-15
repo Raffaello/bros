@@ -1,6 +1,5 @@
 # BIOS print using interrupt 10h, ah=0Eh
-# expecting \0 terminated string in ds:si as paramter
-#
+# expecting zero ('\0') terminated string in ds:si as paramter
 
 .ifndef PrintString
 
@@ -14,6 +13,6 @@ PrintString:
   call   PrintChar
   jmp    PrintString     # Repeat for next character.
 PrintString_end:
-  ret # return
+  ret
 .endfunc
 .endif

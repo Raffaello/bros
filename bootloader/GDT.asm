@@ -1,4 +1,4 @@
-# GDT
+# Bootloader basic GDT
 
 .ifndef GDT
 GDT:
