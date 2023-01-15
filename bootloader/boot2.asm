@@ -9,13 +9,18 @@
 
 _start:
   jmp main
+DrvNum:      .byte  0
   # nop
 
 .include "bios/PrintString.asm"
 .include "GDT.asm"
 .include "utils/GateA20.asm"
+.include "filesystems/FAT12.asm"
+.include "bios/PrintNumber.asm"
 
 main:
+  # in AL has been passed the DrvNum, storing it
+  mov DrvNum, al
   # Preloading Kernel
   lea si, preload_kernel_msg
   call PrintString
