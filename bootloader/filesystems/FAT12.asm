@@ -60,28 +60,28 @@ RootDirFindFile:
   mov bx, si
   and dx, 0xFF
 RootDirFindFile_loop:
-    # check attributes first
-    cmp dl, BYTE PTR [DI]
-    jne RootDirFindFile_skip
-    # check filename
-    push cx
-    mov cx, 11
-    mov si, bx
-    push di
-    repe stosb # todo could be done 1 byte cmp then using stosw
-    pop di
-    je RootDirFindFile_found
-    pop cx
+  # check attributes first
+  cmp dl, BYTE PTR [DI + 11] # FAT Attribute Byte field
+  jne RootDirFindFile_skip
+  # check filename
+  push cx
+  mov cx, 11
+  mov si, bx
+  push di
+  repe stosb # todo could be done 1 byte cmp then using stosw
+  pop di
+  je RootDirFindFile_found
+  pop cx
 RootDirFindFile_skip:
-    add di, ROOT_DIR_ENTRY_SIZE
-    loop RootDirFindFile_loop
-    # Not Found
-    mov ax, 0xFFFF
-    ret
+  add di, ROOT_DIR_ENTRY_SIZE
+  loop RootDirFindFile_loop
+  # Not Found
+  mov ax, 0xFFFF
+  ret
 RootDirFindFile_found:
-    pop bx # it was push cx, loop counter
-    mov al, _RootEntCnt
-    sub al, bl # index value
-    ret
+  pop bx # it was push cx, loop counter
+  mov al, _RootEntCnt
+  sub al, bl # index value
+  ret
 .endfunc
 .endif

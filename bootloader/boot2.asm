@@ -6,6 +6,7 @@
 .org 0x0
 
 KERNEL_FILENAME_ATTRIB = 0b00000111 # System, Hidden, Read-only
+KERNEL_SEG = 0x1000
 
 .global _start
 
@@ -40,6 +41,7 @@ main:
   lea si, file_missing_msg
   call BootFailure
   # 3. load file
+  # TODO
 load_fat:
   lea si, ok_msg
   call PrintString
@@ -82,6 +84,7 @@ main32:
  
  # *** test *** TODO: remove 
   mov dword PTR [0xB8000], 0x154B154F
+  # jmp KERNEL_SEG
 
 # stop
   cli

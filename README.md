@@ -39,7 +39,7 @@ The kernel is a file in the FAT12, so it is a phisical file on the floppy image.
 
 The name must be `BROSKRNL.SYS` with Hidden, System, Read-Only attributes.
 
-The kernel is a 32 bit executable and therefore need at least a `80386` CPU running in protected mode
+The kernel is a 32 bit executable and therefore need at least a `80386` CPU running in protected mode.
 
 **NOTE:**
 
@@ -52,6 +52,9 @@ The actual memory mapping (and already on revision) is:
 1. The Boot sector is loaded by the BIOS at the default location `0x7C00` (at the moment I am considering a self-relocating boot sector).
 
 2. The 2nd stage Boot is loaded at `0x600`, this should be changed, as it is better going up in memory addressing rather then backward.
+
+This step uses the `0x1000` location for loading the Fat Root Directory, then the FAT and finaly the kernel.
+
 
 3. Finaly the kernel is loaded at `0x1000`, after that the kernel should self relocate to upper memory.
 

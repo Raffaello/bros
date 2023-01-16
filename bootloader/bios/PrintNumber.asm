@@ -10,6 +10,8 @@
 PrintNumber:
   push cx
   push dx
+  push bx
+
   xor cx, cx # storing number of digits
   mov dl, 10 # divides by 10
 PrintNumber_loop:
@@ -27,7 +29,8 @@ PrintNumber_loop_print:
   call PrintChar
   loop PrintNumber_loop_print
 
-  # restore cx,dx registers
+  # restore cx,dx,bx registers
+  pop bx
   pop dx
   pop cx
   ret
