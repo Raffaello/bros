@@ -25,7 +25,7 @@ OEM:          .ascii  "--BROS--"    # OEM String (starting at offset 3)
   RsvdSecCnt:   .word  _RsvdSecCnt  # #of reserved sectors (2nd stage bootloader)
   NumFATs:      .byte  _NumFATs     # #of FAT copies
   RootEntCnt:   .word  _RootEntCnt  # size of root directory (512 FAT16)
-  TotSec16:     .word  2880         # total # of sectors if over 32 MB
+  TotSec16:     .word  _TotSec16    # total # of sectors if over 32 MB
   media:        .byte  0xF0         # media Descriptor (F0=removible)
   FATSz16:      .word  9            # size of each FAT
   SecPerTrk:    .word  _SecPerTrk   # sectors per track, 18 if 1.44MB Floppy

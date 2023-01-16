@@ -20,6 +20,10 @@ ROOT_DIR_SEG = FAT_SEG # temporary loading here,
                       # load the fat and take the information required.
                       # then load kernel here
 
+# Variables Loading File
+MAX_CLUSTERS = _TotSec16 / _SecPerClus
+
+
 .include "bios/DriveReadSectors.asm"
 .include "utils/LBA2CHS.asm"
 
@@ -115,20 +119,23 @@ RootDirFindFile_found:
   ret
 .endfunc
 
-# *************************** #
-# Load File from FAT          #
-# --------------------------- #
-# Requirements:               #
-#  FAT loaded in FAT_SEG      #
-# Paramters:                  #
-#  AX = ???
-#  BX = NumCluster            #
-#  DL = Num Drive             #
-# Returns:                    #
-#
-# *************************** #
+# *********************************************** #
+# Load File from FAT                              #
+# ----------------------------------------------- #
+# Requirements:                                   #
+#  FAT loaded in FAT_SEG                          #
+# Paramters:                                      #
+#  BX = Memory Offset                             #
+#  CX = NumCluster                                #
+#  DL = Num Drive                                 #
+# Returns:                                        #
+#                                                 #
+# *********************************************** #
 .func LoadFile
 LoadFile:
+  push bx # store for later
+  mov bx, cx # using BX for NumCluster
+
   # Each FAT entry is 12 bits:
   # a WORD is 1.5 FAT12 entries
   # a BYTE is 0.5 FAT12 entries
@@ -145,15 +152,53 @@ LoadFile:
   # 0   3   6   9 <- bytes
   #
   # N=2 => offset=3 => read [FAT+3] AND 0xFFF (Bytes [3, 4.5])
-  # N=3 => offset=4 => read [FAT+4] SHL 4     (Bytes [4.5, 6])
-  
-
+  # N=3 => offset=4 => read [FAT+4] SHR 4     (Bytes [4.5, 6])
+  # ...
+  # ...
   # Parse the FAT to get all the Clusters
+  mov DI, SP
+  xor cx, cx        # counting the NumCluster of the file
+LoadFile_start:
+  stosw             # load ES:DI the BX value
+  inc cx            # inc "array size"
+  mov si, FAT_SEG   # pointing to N=0
+  add si, bx        # add N bytes
+  mov ax, bx
+  shr ax, 1         # div 2
+  add si, ax        # add N/2
+  # SI is pointing to the N cluster
+  lodsw             # move a word into AX
+  test bx, 1        # is odd?
+  jnz LoadFile_odd
+  and ax, 0xFFF
+  jmp LoadFile_AX
+LoadFile_odd:
+  shr ax, 4
+LoadFile_AX:
+  # AX has the FAT12 next cluster value
+  cmp ax, MAX_CLUSTERS
+  jge LoadFile_parsed
+  mov bx, ax # move to bx so we can loop again
+  jmp LoadFile_start
+LoadFile_parsed:
+  mov si, SP          # DS:SI has the clusters number in FORMAT
+                      # instead of using CX, here i could have looped until SI < DI
+                      # CX is guarantee to have at least 1 here
+  push bx             # restore Memory Segment
+LoadFile_readClusters:
+# in use SI, BX, AX, CX
+  stosw               # AX as a cluster value
+  # Convert Cluster to CHS
+  # LBA	=	(cluster - 2 ) * sectors per cluster
+  sub ax, 2
+  mov dx, _SecPerClus     # 
+  mul dx                  # the mul could be skipped as it is 1
+  call LBA2CHS
 
-## required to read the file:
-  # AL = num sectors to read
-  # DL = drive
-  # BX = buffer to load into
-  
+  mov al, dl              # copy _SecPerClus in AL
+  call DriveReadSectors
+  loop LoadFile_readClusters
+
+  ret
 .endfunc
 .endif

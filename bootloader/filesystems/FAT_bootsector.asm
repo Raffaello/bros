@@ -8,7 +8,7 @@ __BOOT_SECTOR__:
   _RsvdSecCnt = 2             # #of reserved sectors (2nd stage bootloader)
   _NumFATs    = 2             # #of FAT copies
   _RootEntCnt = 224           # size of root directory (512 FAT16)
-  # TotSec16:     .word  2880          # total # of sectors if over 32 MB
+  _TotSec16   = 2880          # total # of sectors if over 32 MB
   # media:        .byte  0xF0          # media Descriptor (F0=removible)
   _FATSz16    = 9             # size of each FAT
   _SecPerTrk  = 18            # sectors per track, 9 if 720KB Floppy
