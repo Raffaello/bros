@@ -1,5 +1,5 @@
-# FAT12/16 Boot Sector
-# Loading the FAT Reserved Sector (boot2.asm)
+# FAT12 Boot Sector
+# Loading the FAT 2nd Reserved Sector (boot2.asm)
 # and Execute it
 
 .code16
@@ -9,15 +9,15 @@
 
 .include "filesystems/FAT_bootsector.asm"
 
+# TODO needs to self-relocate to 0x600 and load BOOT2 into 0x7c00 replacing this one.
 BOOT2_SEG = 0x600 # load the boot loader to segment
 .global _start
 
 _start:
   jmp short main # jump to beginning of code
-  # nop
 
 # OEM Parameter Block
-.org 0x3			/* Ensure the BPB starts at the correct place */
+.org 0x3                            # Ensure the BPB starts at the correct place
 bootsector:
 OEM:          .ascii  "--BROS--"    # OEM String (starting at offset 3)
   BytsPerSec:   .word  _BytsPerSec  # bytes per sector
@@ -43,6 +43,8 @@ OEM:          .ascii  "--BROS--"    # OEM String (starting at offset 3)
   FilSysType:  .ascii "FAT     "    # file system type
 
 .include "bios/PrintString.asm"
+.include "bios/PrintStringDots.asm"
+.include "bios/PrintStringNewLine.asm"
 .include "bios/DriveReadSectors.asm"
 .include "utils/BootFailure.asm"
 .include "bios/GetMemorySize.asm"
@@ -61,16 +63,16 @@ main:
   # sti                # enable interrupts
 
 # Display "loading" message:
-  lea  si, loadmsg
+  lea  si, banner_msg
   call PrintString
 
-# Display Total Memory (it can be removed as it is a waste of instrunctions)
+# Display Total Memory (it can be removed as it is a waste of space)
   lea si, mem_msg
   call PrintString
   call GetMemorySize
   call PrintNumber
   lea si, kb_unit_msg
-  call PrintString
+  call PrintStringNewLine
 
 # Reset disk system. Jump to bootFailure on error.
   mov  dl, DrvNum # drive to reset
@@ -79,7 +81,7 @@ main:
 
 # Read Drive sectors, FAT Reserved Sector(s)
   lea si, read_rsv_sec_msg
-  call PrintString
+  call PrintStringDots
 
   mov dl, DrvNum
   mov bx, BOOT2_SEG  # where to load
@@ -89,7 +91,7 @@ main:
   mov cl, 2             # 2nd sector, 1 is boot sector (this one), next one is the 1st reserved sector
   call DriveReadSectors
   lea si, ok_msg
-  call PrintString
+  call PrintStringNewLine
 
   xor ax, ax
   mov al, DrvNum
@@ -103,11 +105,11 @@ bootFailure:
   call BootFailure
 
 # PROGRAM DATA
-loadmsg:      .asciz "\r\n       #### |-=*.*=-| BROS FAT Bootlader |-=*.*=-| ####\r\n\r\n"
-mem_msg:      .asciz "Real Mode Free Memory (BIOS): "
-kb_unit_msg: .asciz "KB\r\n"
-read_rsv_sec_msg: .asciz "Reading Reserved Sector(s)..."
-ok_msg: .asciz "OK\r\n"
+banner_msg:       .asciz "\r\n       #### |-=*.*=-| BROS FAT Bootlader |-=*.*=-| ####\r\n\r\n"
+mem_msg:          .asciz "Real Mode Free Memory (BIOS): "
+kb_unit_msg:      .asciz "KB"
+read_rsv_sec_msg: .asciz "Reading Reserved Sector(s)"
+ok_msg: .asciz "OK"
 
 .fill (510-(.-_start)), 1, 0  # Pad with nulls up to 510 bytes (excl. boot magic)
 BootMagic:  .word 0xAA55     # magic word for BIOS

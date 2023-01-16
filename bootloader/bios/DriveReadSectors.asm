@@ -26,7 +26,6 @@
 # *************************************
 .ifndef DriverReadSectors
 
-.include "bios/PrintString.asm"
 .include "bios/PrintNumber.asm"
 .include "utils/BootFailure.asm"
 
@@ -34,18 +33,18 @@
 DriveReadSectors:
   mov ah, 0x02
   push ax
-  int 0x13 #   read data to [es:bx] 
+  int 0x13 #   read data to [es:bx]
   jc DriveReadSectors_error
   pop dx
   cmp dl, al # if AL ( sectors read ) != DH ( sectors expected )
   jne DriveReadSectors_error
   ret
 DriveReadSectors_error:
-  shr AX, 8
+  shr ax, 8 # move AH into AL
   call PrintNumber
   lea si, diskerror_msg
   call BootFailure
 .endfunc
 
-diskerror_msg: .asciz "Disk read error\r\n"
+diskerror_msg: .asciz "Disk read error"
 .endif

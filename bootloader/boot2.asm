@@ -16,7 +16,8 @@ KERNEL_FILENAME:  .ascii "BROSKRNLSYS"
 DrvNum:      .byte  0
   # nop
 
-.include "bios/PrintString.asm"
+.include "bios/PrintStringNewLine.asm"
+.include "bios/PrintStringDots.asm"
 .include "GDT.asm"
 .include "utils/GateA20.asm"
 .include "filesystems/FAT12.asm"
@@ -25,14 +26,19 @@ DrvNum:      .byte  0
 main:
   # in AL has been passed the DrvNum, storing it
   mov DrvNum, al
-  # Preloading Kernel
-  lea si, preload_kernel_msg
-  call PrintString
-  # TODO
-  # 1. read FAT root dir
+  # Loading Kernel...
+  
+  # 1. read FAT Root Dir
+  lea si, root_dir_msg
+  call PrintStringDots
   mov dl, DrvNum
   call LoadRootDirectory
-  # 2. find file
+  lea si, ok_msg
+  call PrintStringNewLine
+  
+  # 2. find kernel file
+  lea si, find_kernel_file_msg
+  call PrintStringDots
   lea si, KERNEL_FILENAME
   mov dl, KERNEL_FILENAME_ATTRIB
   call RootDirFindFile
@@ -40,32 +46,59 @@ main:
   jne load_fat
   lea si, file_missing_msg
   call BootFailure
-  # 3. load file
-  # TODO
 load_fat:
   lea si, ok_msg
-  call PrintString
+  call PrintStringNewLine
+  
+  # 3. load FAT
+  push ax   # Store Kernel RootDir Index AL
+  push bx   # Store NumCluster
+  push cx   # Store Hi 16 bits FileSize
+  push dx   # Store lo 16 bits FileSize
+  # --- #
+  lea si, load_fat_msg
+  call PrintStringDots
+  call LoadFAT
+  # here we have FAT into FAT_SEG memory
+  lea si, ok_msg
+  call PrintStringNewLine
+
+
+  # 4. load file
+  pop dx
+  pop cx
+  pop bx
+  pop ax  # Restore Kernel RootDir Index
+  # -- #
+  lea si, load_kernel_file_msg
+  call PrintStringDots
+  # TODO
+
+
+  lea si, ok_msg
+  call PrintStringNewLine
+
   # Enable Gate A20
   lea si, a20_msg
-  call PrintString
+  call PrintStringDots
   call CheckGateA20
-  # cmp ax,0
   jne a20_enabled
   call EnableA20
 a20_enabled:
   lea si, ok_msg
-  call PrintString
+  call PrintStringNewLine
 
   # Load GDT
   lea si, gdt_msg
-  call PrintString
+  call PrintStringDots
   call LoadGDT
   lea si, ok_msg
-  call PrintString
+  call PrintStringNewLine
 
   # Enable Protected Mode
   lea si, pmode_msg
-  call PrintString
+  call PrintStringDots
+  # TODO copy X,Y coord of the screen
   cli
   mov eax, cr0
   or eax, 1    # enable bit 0
@@ -91,12 +124,17 @@ main32:
   hlt
 
 
-file_missing_msg:   .asciz "File Missing\r\n"
-preload_kernel_msg: .asciz "Preloading Kernel..."
-a20_msg:            .asciz "Enabling A20..."
-gdt_msg:            .asciz "Loading GDT..."
-ok_msg:             .asciz "OK\r\n"
-pmode_msg:          .asciz "Enabling Protected Mode and Loading Kernel..."
+root_dir_msg:         .asciz "Loading Root Dir"
+find_kernel_file_msg: .asciz "Searching Kernel"
+load_fat_msg:         .asciz "Loading FAT"
+load_kernel_file_msg: .asciz "Loading Kernel"
 
-.fill ((_BytsPerSec*_RsvdSecCnt) -(.-_start)), 1, 0
+file_missing_msg:   .asciz "File Missing"
+# preload_kernel_msg: .asciz "Preloading Kernel..."
+a20_msg:            .asciz "Enabling A20"
+gdt_msg:            .asciz "Loading GDT"
+ok_msg:             .asciz "OK"
+pmode_msg:          .asciz "Enabling Protected Mode and starting Kernel"
+
+.fill ((_BytsPerSec * _RsvdSecCnt) -(. - _start)), 1, 0
 

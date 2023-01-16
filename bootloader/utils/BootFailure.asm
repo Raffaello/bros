@@ -3,12 +3,12 @@
 
 .ifndef BootFailure
 
-.include "bios/PrintString.asm"
+.include "bios/PrintStringNewLine.asm"
 .include "utils/Reboot.asm"
 
 .func BootFailure
 BootFailure:
-  call PrintString
+  call PrintStringNewLine
   call Reboot
 .endfunc
 .endif

@@ -1,7 +1,6 @@
 .PHONY: all kernel
 
 all: floppy boot2 image kernel
-	cat bin/boot.bin bin/boot2.bin > bin/bootloader.bin
 
 floppy:
 	as -o build/boot.o bootloader/floppy.asm -I bootloader/
