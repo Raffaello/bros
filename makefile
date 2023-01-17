@@ -2,6 +2,7 @@
 
 # TODO to pass these values to ASM need to convert them to .S files and compiling them wih GCC
 #      at that point these can be defined as "defines" from CLI
+#      otherwise use NASM
 BIOS_BOOT_SEG=0x7C00
 BOOT_REL_SEG=0x600
 BOOT2_REL_SEG=${BIOS_BOOT_SEG}
@@ -10,6 +11,9 @@ KERNEL_SEG=0x1000
 # BOOT_RESERVED_SECTORS=3
 # FLOPPY_SIZE=1440
 # FLOPPY_IMAGE_NAME="br-dos.img"
+
+CFLAGS+=-o2 -m32 -ffreestanding -nostartfiles -nostdlib
+LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 
 all: floppy boot2 image kernel
 
@@ -24,14 +28,18 @@ boot2:
 	objcopy -O binary -j .text build/boot2.out bin/boot2.bin
 
 kernel:
-	gcc -o2 -ffreestanding -nostartfiles -nostdlib -c kernel/kernel.c -o build/kernel.o
-	ld -o build/kernel.out build/kernel.o -Ttext ${KERNEL_SEG}
-	objcopy -O binary -j .text build/kernel.out bin/kernel.sys
+	# gcc -o2 -ffreestanding -nostartfiles -nostdlib -c kernel/kernel.c -o build/kernel.o
+	#gcc -m32 -g -ffreestanding -nostartfiles -nostdlib -c kernel/kernel.c -o build/kernel.o
+	gcc $(CFLAGS) -c kernel/kernel.c -o build/kernel.o
 	
+	#ld -m elf_i386 -o build/kernel.out build/kernel.o #-Ttext ${KERNEL_SEG}
+	ld $(LFLAGS) -o build/kernel.out build/kernel.o #-Ttext ${KERNEL_SEG}
+	
+	objcopy -O binary -j .text build/kernel.out bin/kernel.sys
 
 
 image: floppy boot2 kernel
-	# Using 2 Reserved Sectors
+	# Using 2 extra Reserved Sectors
 	mformat -i br-dos.img -B bin/boot.bin -R 3 -f1440 -C
 	dd if=bin/boot2.bin of=br-dos.img conv=notrunc seek=1
 	mcopy -i br-dos.img bin/kernel.sys ::/BROSKRNL.SYS
