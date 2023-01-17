@@ -36,7 +36,7 @@ void main()
     // writeVGAChar(0,1, 'Z', 15);
     // writeVGAChar(10,10, 'W', 15);
 
-    // clearVGA();
+    clearVGA();
 
     for (int i=0; i<sizeof(hello_msg); i++)
     {

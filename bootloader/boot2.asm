@@ -101,7 +101,10 @@ a20_enabled:
   # Enable Protected Mode
   lea si, pmode_msg
   call PrintStringDots
-  # TODO copy X,Y coord of the screen
+  call PrintNewLine
+  lea si, press_a_key_msg
+  call PrintStringNewLine
+  call WaitKey
   cli
   mov eax, cr0
   or eax, 1    # enable bit 0
@@ -115,12 +118,8 @@ main32:
   mov ds, ax
   mov ss, ax
   mov es, ax
-  mov esp, 0x9000 # stack start at 9000h
-  # sti
- 
- # *** test *** TODO: remove 
-  mov dword PTR [0xB8000], 0x154B154F
-  # jmp KERNEL_SEG
+  mov esp, 0x9000       # stack start at 9000h
+  # sti                 # should it be enabled by the kernel?
   jmp GDT_CODE_SEG:KERNEL_SEG
 
 # stop
@@ -139,6 +138,7 @@ a20_msg:            .asciz "Enabling A20"
 gdt_msg:            .asciz "Loading GDT"
 ok_msg:             .asciz "OK"
 pmode_msg:          .asciz "Enabling Protected Mode and starting Kernel"
+press_a_key_msg:    .asciz "Press any key." # this is partially duplicate with Reboot section
 
 .fill ((_BytsPerSec * _RsvdSecCnt) -(. - _start)), 1, 0
 
