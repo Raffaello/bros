@@ -18,18 +18,18 @@ LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 all: floppy boot2 image kernel
 
 floppy:
-	as -k -o build/boot.o bootloader/floppy.asm -I bootloader/
+	as -k -o build/boot.o src/bootloader/floppy.asm -I bootloader/
 	ld -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG} #-Ttext 0x7c00
 	objcopy -O binary -j .text build/boot.out bin/boot.bin
 
 boot2:
-	as -k -o build/boot2.o bootloader/boot2.asm -I bootloader/
+	as -k -o build/boot2.o src/bootloader/boot2.asm -I bootloader/
 	ld -o build/boot2.out build/boot2.o -Ttext ${BOOT2_REL_SEG} #-Ttext 0x600
 	objcopy -O binary -j .text build/boot2.out bin/boot2.bin
 
 kernel:
 	# gcc -o2 -ffreestanding -nostartfiles -nostdlib -c kernel/kernel.c -o build/kernel.o
-	#gcc -m32 -g -ffreestanding -nostartfiles -nostdlib -c kernel/kernel.c -o build/kernel.o
+	#gcc -m32 -g -ffreestanding -nostartfiles -nostdlib -c src/kernel/kernel.c -o build/kernel.o
 	gcc $(CFLAGS) -c kernel/kernel.c -o build/kernel.o
 	
 	#ld -m elf_i386 -o build/kernel.out build/kernel.o #-Ttext ${KERNEL_SEG}
