@@ -1,15 +1,19 @@
 .PHONY: all kernel
 
+BIOS_BOOT_SEG=0x7C00
+BOOT_REL_SEG=0x600
+KERNEL_SEG=0x1000
+
 all: floppy boot2 image kernel
 
 floppy:
-	as -o build/boot.o bootloader/floppy.asm -I bootloader/
-	ld -o build/boot.out build/boot.o -Ttext 0x7c00
+	as -k -o build/boot.o bootloader/floppy.asm -I bootloader/
+	ld -o build/boot.out build/boot.o -Ttext 0x600 #-Ttext 0x7c00
 	objcopy -O binary -j .text build/boot.out bin/boot.bin
 
 boot2:
-	as -o build/boot2.o bootloader/boot2.asm -I bootloader/
-	ld -o build/boot2.out build/boot2.o -Ttext 0x600
+	as -k -o build/boot2.o bootloader/boot2.asm -I bootloader/
+	ld -o build/boot2.out build/boot2.o -Ttext 0x7c00 #-Ttext 0x600
 	objcopy -O binary -j .text build/boot2.out bin/boot2.bin
 
 kernel:
