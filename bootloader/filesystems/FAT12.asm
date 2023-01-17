@@ -202,10 +202,13 @@ LoadFile_readClusters:
   mul dx                  # the mul could be skipped as it is 1
   call LBA2CHS
 
-  pop cx              # restore loop counter
+  pop ax              # restore loop counter in ax
   pop bx              # restore Memory Segment
+  push ax             # store loop counter
   mov al, _SecPerClus     # copy _SecPerClus in AL, sector to read
   call DriveReadSectors
+  pop cx              # restore loop counter
+  push bx             # store again memory segment
   loop LoadFile_readClusters
 
   ret
