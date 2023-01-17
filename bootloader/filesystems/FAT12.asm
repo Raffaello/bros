@@ -7,7 +7,7 @@ __FAT12__:
 
 # Variables FAT Section
 FAT_TOTAL_SECTORS = _FATSz16
-FAT_SEC_OFFSET = _RsvdSecCnt
+FAT_SEC_OFFSET = _RsvdSecCnt + 1
 FAT_SEG = KERNEL_SEG  # temporary loading here, replacing ROOT_DIR
 
 # Variables Root Directory Section
@@ -125,16 +125,16 @@ RootDirFindFile_found:
 # Requirements:                                   #
 #  FAT loaded in FAT_SEG                          #
 # Paramters:                                      #
+#  AX = NumCluster                                #
 #  BX = Memory Offset                             #
-#  CX = NumCluster                                #
 #  DL = Num Drive                                 #
 # Returns:                                        #
 #                                                 #
 # *********************************************** #
 .func LoadFile
 LoadFile:
-  push bx # store for later
-  mov bx, cx # using BX for NumCluster
+  push bx     # store it for later
+  # mov ax, cx  # using AX for NumCluster
 
   # Each FAT entry is 12 bits:
   # a WORD is 1.5 FAT12 entries
@@ -159,16 +159,17 @@ LoadFile:
   mov DI, SP
   xor cx, cx        # counting the NumCluster of the file
 LoadFile_start:
-  stosw             # load ES:DI the BX value
+  stosw             # load ES:DI the AX value
+  mov bx, ax        # backup AX, used later
   inc cx            # inc "array size"
+
   mov si, FAT_SEG   # pointing to N=0
-  add si, bx        # add N bytes
-  mov ax, bx
+  add si, ax        # add N bytes
   shr ax, 1         # div 2
   add si, ax        # add N/2
   # SI is pointing to the N cluster
-  lodsw             # move a word into AX
-  test bx, 1        # is odd?
+  lodsw             # move a word into AX (next 2 FAT entries)
+  test bx, 1        # current cluster N is odd?
   jnz LoadFile_odd
   and ax, 0xFFF
   jmp LoadFile_AX
@@ -178,16 +179,15 @@ LoadFile_AX:
   # AX has the FAT12 next cluster value
   cmp ax, MAX_CLUSTERS
   jge LoadFile_parsed
-  mov bx, ax # move to bx so we can loop again
   jmp LoadFile_start
 LoadFile_parsed:
-  mov si, SP          # DS:SI has the clusters number in FORMAT
+  mov si, sp          # DS:SI has the clusters number in FORMAT
                       # instead of using CX, here i could have looped until SI < DI
                       # CX is guarantee to have at least 1 here
-  push bx             # restore Memory Segment
+  pop bx              # restore Memory Segment
 LoadFile_readClusters:
 # in use SI, BX, AX, CX
-  stosw               # AX as a cluster value
+  lodsw               # AX as a cluster value
   # Convert Cluster to CHS
   # LBA	=	(cluster - 2 ) * sectors per cluster
   sub ax, 2

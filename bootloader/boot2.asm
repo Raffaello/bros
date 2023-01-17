@@ -47,15 +47,15 @@ main:
   lea si, file_missing_msg
   call BootFailure
 load_fat:
-  lea si, ok_msg
-  call PrintStringNewLine
-  
-  # 3. load FAT
   # push ax   # Store Kernel RootDir Index AL
   push bx   # Store NumCluster
   # push cx   # Store Hi 16 bits FileSize
   # push dx   # Store lo 16 bits FileSize
   # --- #
+  lea si, ok_msg
+  call PrintStringNewLine
+  
+  # 3. load FAT
   lea si, load_fat_msg
   call PrintStringDots
   call LoadFAT
@@ -63,14 +63,13 @@ load_fat:
   lea si, ok_msg
   call PrintStringNewLine
 
-
   # 4. load file
   lea si, load_kernel_file_msg
   call PrintStringDots
 
   # pop dx  # dx
   # pop cx  # cx
-  pop cx  # bx (Numluster)
+  pop ax  # bx (Numluster)
   # pop ax  # ax Restore Kernel RootDir Index
   # -- #
   mov bx, KERNEL_SEG
