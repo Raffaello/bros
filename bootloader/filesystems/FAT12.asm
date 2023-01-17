@@ -210,7 +210,8 @@ LoadFile_readClusters:
   pop cx              # restore loop counter
   push bx             # store again memory segment
   loop LoadFile_readClusters
-
+  pop bx              # restore/revert pushed bx if not looping
+  
   ret
 .endfunc
 .endif
