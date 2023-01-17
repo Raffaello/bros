@@ -25,7 +25,7 @@ GDT_DATA:
 GDT_END:
 GDT_TOC:
   .word GDT_END - GDT - 1   # limit (Size of GDT)
-  .long GDT               # base of GDT
+  .long GDT                 # base of GDT
 
 # Constants for the GDT segment descriptor offsets.
 # For example:

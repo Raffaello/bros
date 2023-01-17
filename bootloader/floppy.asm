@@ -9,10 +9,10 @@
 
 .include "filesystems/FAT_bootsector.asm"
 
-# TODO needs to self-relocate to 0x600 and load BOOT2 into 0x7c00 replacing this one.
-BOOT_RELOCATE_SEG = 0x600
 BIOS_BOOT_SEG  = 0x7c00
+BOOT_RELOCATE_SEG = 0x600
 BOOT2_SEG = BIOS_BOOT_SEG # load the boot loader to segment
+
 .global _start
 
 _start:
@@ -77,9 +77,7 @@ main_relocated:
 # Display "loading" message:
   lea  si, banner_msg
   call PrintString
-# Display "boot relocated"
-  lea si, relocated_msg
-  call PrintStringNewLine
+
 # Display Total Memory (it can be removed as it is a waste of space)
   lea si, mem_msg
   call PrintString
@@ -119,7 +117,6 @@ bootFailure:
   call BootFailure
 
 # PROGRAM DATA
-relocated_msg:    .asciz "Self Relocated"
 banner_msg:       .asciz "\r\n     #### |-=*.*=-| BROS FAT Bootlader |-=*.*=-| ####\r\n\r\n"
 mem_msg:          .asciz "Real Mode Free Memory (BIOS): "
 kb_unit_msg:      .asciz "KB"

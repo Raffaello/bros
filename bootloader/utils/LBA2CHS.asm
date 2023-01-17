@@ -12,6 +12,8 @@
 #   CH = cylinder (low 8 bits)                                                #
 #   CL = sector (low 6 bits)                                                  #
 #   DH = head number                                                          #
+# Destroys:                                                                   #
+#   BX, DL, AX                                                                #
 # *************************************************************************** #
 .ifndef LBA2CHS
 .include "filesystems/FAT_bootsector.asm"
