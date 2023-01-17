@@ -1,6 +1,5 @@
 # BIOS Print a New Line: CR LF
 .ifndef PrintNewLine
-# .include "bootloader/bios/PrintChar.asm"
 .func PrintNewLine
 PrintNewLine:
     mov al, '\r'

@@ -12,25 +12,28 @@ KERNEL_SEG=0x1000
 # FLOPPY_SIZE=1440
 # FLOPPY_IMAGE_NAME="br-dos.img"
 
+CC=gcc
 CFLAGS+=-o2 -m32 -ffreestanding -nostartfiles -nostdlib
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
+SRC=$(wildcard src/**/*.c)
+# OBJ = ${SRC:%.c=build/${*F}.o}
 
 all: floppy boot2 image kernel
 
 floppy:
-	as -k -o build/boot.o src/bootloader/floppy.asm -I bootloader/
+	as -k -o build/boot.o src/bootloader/floppy.asm -I src/bootloader
 	ld -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG} #-Ttext 0x7c00
 	objcopy -O binary -j .text build/boot.out bin/boot.bin
 
 boot2:
-	as -k -o build/boot2.o src/bootloader/boot2.asm -I bootloader/
+	as -k -o build/boot2.o src/bootloader/boot2.asm -I src/bootloader
 	ld -o build/boot2.out build/boot2.o -Ttext ${BOOT2_REL_SEG} #-Ttext 0x600
 	objcopy -O binary -j .text build/boot2.out bin/boot2.bin
 
 kernel:
 	# gcc -o2 -ffreestanding -nostartfiles -nostdlib -c kernel/kernel.c -o build/kernel.o
-	#gcc -m32 -g -ffreestanding -nostartfiles -nostdlib -c src/kernel/kernel.c -o build/kernel.o
-	gcc $(CFLAGS) -c kernel/kernel.c -o build/kernel.o
+	#gcc -m32 -g -ffreestanding -nostartfiles -nostdlib -c kernel/kernel.c -o build/kernel.o
+	${CC} $(CFLAGS) -c ${SRC} -o build/$(@F).o
 	
 	#ld -m elf_i386 -o build/kernel.out build/kernel.o #-Ttext ${KERNEL_SEG}
 	ld $(LFLAGS) -o build/kernel.out build/kernel.o #-Ttext ${KERNEL_SEG}

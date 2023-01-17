@@ -3,7 +3,7 @@
 
 .ifndef PrintStringDots
 
-.include "bootloader/bios/PrintString.asm"
+.include "bios/PrintString.asm"
 
 .func PrintStringDots
 PrintStringDots:
