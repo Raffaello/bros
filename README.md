@@ -90,7 +90,13 @@ The actual memory mapping is:
 
 ### Compiling
 
-- to compile: `make all`
-- to run using qemu: `qemu-system-i386 -fda br-dos.img` or similar.
+- To compile: `make all`
+- To just create the Floppy image instead: `make image`
 
-To just create the Floppy image instead: `make image`
+### Running
+
+- to run using `qemu`: `qemu-system-i386 -fda br-dos.img` or similar.
+- to run with  `bochs`: `bochs -q -f bochs.rs` or similar.
+- to run with `bochs` debbugger: `bochs-debugger -q -f bochs.rs` or similar
+
+To debug can be used `gdb`: `target remote localhost:1234`

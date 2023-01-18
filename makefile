@@ -2,7 +2,7 @@
 
 # TODO to pass these values to ASM need to convert them to .S files and compiling them wih GCC
 #      at that point these can be defined as "defines" from CLI
-#      otherwise use NASM
+#      otherwise use NASM/FASM
 BIOS_BOOT_SEG=0x7C00
 BOOT_REL_SEG=0x600
 BOOT2_REL_SEG=${BIOS_BOOT_SEG}

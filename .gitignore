@@ -2,3 +2,7 @@ bin/*
 !bin/.gitkeep
 br-dos.img
 build/*
+
+# Bochs Debugger ini file
+bx_enh_dbg.ini
+
