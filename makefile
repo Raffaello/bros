@@ -43,7 +43,7 @@ kernel:
 
 image: floppy boot2 kernel
 	# Using 2 extra Reserved Sectors
-	mformat -i br-dos.img -B bin/boot.bin -R 3 -f1440 -C
+	mformat -i br-dos.img -v BROS -B bin/boot.bin -R 3 -f1440 -C
 	dd if=bin/boot2.bin of=br-dos.img conv=notrunc seek=1
 	mcopy -i br-dos.img bin/kernel.sys ::/BROSKRNL.SYS
 	mattrib -i br-dos.img +r +h +s -a /BROSKRNL.SYS
