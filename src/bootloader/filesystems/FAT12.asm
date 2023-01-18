@@ -207,6 +207,11 @@ LoadFile_readClusters:
   push ax             # store loop counter
   mov al, _SecPerClus     # copy _SecPerClus in AL, sector to read
   call DriveReadSectors
+  # AL sector counts
+  xor ah,ah
+  mov dx, _BytsPerSec
+  mul dx              # result in DX:AX
+  add bx, ax          # update buffer offset (+512)
   pop cx              # restore loop counter
   push bx             # store again memory segment
   loop LoadFile_readClusters

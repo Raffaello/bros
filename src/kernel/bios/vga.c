@@ -31,10 +31,10 @@ void writeVGAChar(const int x, const int y, const char ch, uint8_t col)
 
 void enable_cursor(const uint8_t cursor_start, const uint8_t cursor_end)
 {
-    // outb(VGA_REG_CTRL, 0x0A);
-    // outb(VGA_REG_DATA, (inb(VGA_REG_DATA) & 0xC0) | cursor_start);
-    // outb(VGA_REG_CTRL, 0x0B);
-    // outb(VGA_REG_DATA, (inb(VGA_REG_DATA) & 0xE0) | cursor_end);
+    outb(VGA_REG_CTRL, 0x0A);
+    outb(VGA_REG_DATA, (inb(VGA_REG_DATA) & 0xC0) | cursor_start);
+    outb(VGA_REG_CTRL, 0x0B);
+    outb(VGA_REG_DATA, (inb(VGA_REG_DATA) & 0xE0) | cursor_end);
 }
 
 void disable_cursor()
@@ -45,10 +45,10 @@ void disable_cursor()
 
 void update_cursor(const int x, const int y)
 {
-    // const uint16_t pos = y * VGA_TEXT_WIDTH + x;
+    const uint16_t pos = y * VGA_TEXT_WIDTH + x;
 
-    // outb(VGA_REG_CTRL, 0x0F);
-    // outb(VGA_REG_DATA, (uint8_t) (pos & 0xFF));
-    // outb(VGA_REG_CTRL, 0x0E);
-    // outb(VGA_REG_DATA, (uint8_t) ((pos >> 8) & 0xFF));
+    outb(VGA_REG_CTRL, 0x0F);
+    outb(VGA_REG_DATA, (uint8_t) (pos & 0xFF));
+    outb(VGA_REG_CTRL, 0x0E);
+    outb(VGA_REG_DATA, (uint8_t) ((pos >> 8) & 0xFF));
 }
