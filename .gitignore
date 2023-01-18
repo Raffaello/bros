@@ -6,3 +6,5 @@ build/*
 # Bochs Debugger ini file
 bx_enh_dbg.ini
 
+# VSCode
+.vscode/*

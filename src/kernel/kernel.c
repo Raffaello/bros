@@ -21,11 +21,11 @@ void main()
 
     for (int i=0; i<sizeof(hello_msg); i++)
     {
-        writeVGAChar(20+i, 10, hello_msg[i], 15);
+        writeVGAChar(20 + i, 10, hello_msg[i], 15);
     }
 
-    enable_cursor(0, 1);
-    update_cursor(1, 1);
+    enable_cursor(0, 0);
+    update_cursor(0, 24);
 
     while(1);
 }

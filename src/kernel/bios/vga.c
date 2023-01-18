@@ -1,3 +1,7 @@
+/**
+ * @link http://web.stanford.edu/class/cs140/projects/pintos/specs/freevga/vga/vga.htm 
+**/
+
 #include <bios/vga.h>
 #include <drivers/io.h>
 
@@ -8,15 +12,14 @@
 #define VGA_TEXT_WIDTH 80
 #define VGA_TEXT_HEIGHT 25
 
-
-
 void clearVGA()
 {
     uint8_t *video_mem = (uint8_t*) 0xb8000;
     // TODO: using with eax=0 and rep movsd, shouldn't be faster?
     // TODO: besides this imply vga mode 3 :) ok for now
-    for(int i = 0; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2; i++) {
-        video_mem[i]=0;
+    for(int i = 0; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;) {
+        video_mem[i++]=0;
+        video_mem[i++]=7;
     }
 }
 
@@ -35,6 +38,7 @@ void enable_cursor(const uint8_t cursor_start, const uint8_t cursor_end)
     outb(VGA_REG_DATA, (inb(VGA_REG_DATA) & 0xC0) | cursor_start);
     outb(VGA_REG_CTRL, 0x0B);
     outb(VGA_REG_DATA, (inb(VGA_REG_DATA) & 0xE0) | cursor_end);
+    outb(VGA_REG_DATA, 0xF);
 }
 
 void disable_cursor()

@@ -100,3 +100,9 @@ The actual memory mapping is:
 - to run with `bochs` debbugger: `bochs-debugger -q -f bochs.rs` or similar
 
 To debug can be used `gdb`: `target remote localhost:1234`
+
+## Note
+
+- GCC ASM inline syntax is horrible. Better MSVC.
+- GCC GAS is not really thought to be used by "humans", but more for GCC itself. Better NASM at this point.
+- I still have to try the `.S` way...

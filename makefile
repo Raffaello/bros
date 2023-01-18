@@ -20,7 +20,8 @@ OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
 INCLUDE_DIR=${SRC_DIR}
 
 CFLAGS+=-Wall -Werror #-Wmissing-prototypes
-CFLAGS+=-masm=intel -o2 -m32 -ffreestanding -nostartfiles -nostdlib -I ${INCLUDE_DIR}
+CFLAGS+=-masm=intel
+CFLAGS+=-o2 -m32 -ffreestanding -nostartfiles -nostdlib -I ${INCLUDE_DIR}
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 
 .PHONY: kernel $(OBJS)
