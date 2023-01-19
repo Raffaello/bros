@@ -13,6 +13,9 @@ void _start()
 {
     __asm__ ("cli");
     // __asm__ ("sti");
+    DT_register_t gdt;
+    // __asm__("sgdt %0": : "m"(gdt));
+    // __asm__("lgdt %0": : "m"(gdt));
 
     main();
 }
