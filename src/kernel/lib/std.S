@@ -10,22 +10,25 @@ itoa10:
   push ebp
   push ebx
   mov ebp, esp
-  # 8, because 4 for ebp and other for 4 EIP due to the call/ret
-  mov eax, [ebp + 8]    # value
+  # 12, because 4 for ebp, 4 ebx and other 4 for EIP due to the call/ret
+  mov eax, [ebp + 12]   # value
   xor ecx,ecx           # string size
   mov ebx, 10           # base
-itoa10_div_loop:
   xor edx,edx
+itoa10_div_loop:
   div bl                # AL := Quotient, AH := Remainder
   push ax               # the remainder is the digit
   inc ecx
-  or ax, ax
+  and ax, 0xFF
   jnz itoa10_div_loop
-  mov esi, [ebp + 12]   # str ptr
+
+  mov ebx, [ebp + 12+4]   # str ptr
+  mov edi, ebx
 
 itoa10_store_loop:
   # 1 digits is always guaranteed: 0
   pop ax
+  mov al, ah
   add al, '0'
   stosb
   loop itoa10_store_loop
