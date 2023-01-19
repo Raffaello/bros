@@ -5,7 +5,7 @@ __BOOT_SECTOR__:
   # bsOEM = "--BROS--"    # OEM String (starting at offset 3)
   _BytsPerSec = 512           # bytes per sector
   _SecPerClus = 1             # sectors per cluster
-  _RsvdSecCnt = 3             # #of reserved sectors (2nd stage bootloader)
+  _RsvdSecCnt = 2             # #of reserved sectors (2nd stage bootloader)
   _NumFATs    = 2             # #of FAT copies
   _RootEntCnt = 224           # size of root directory (512 FAT16)
   _TotSec16   = 2880          # total # of sectors if over 32 MB

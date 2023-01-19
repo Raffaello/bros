@@ -16,10 +16,10 @@ CC=gcc
 SRC_DIR=src/kernel
 BUILD_DIR=build
 # kernel.c must be the 1st in the list
-SRC  = ${SRC_DIR}/kernel.c $(wildcard ${SRC_DIR}/common/*.c ${SRC_DIR}/bios/*.c wildcard ${SRC_DIR}/drivers/*.c)
+SRC  = ${SRC_DIR}/kernel.c $(wildcard ${SRC_DIR}/lib/*.c ${SRC_DIR}/cpu/*.c ${SRC_DIR}/bios/*.c wildcard ${SRC_DIR}/drivers/*.c)
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
 
-SRC_S  = $(wildcard ${SRC_DIR}/common/*.S)
+SRC_S  = $(wildcard ${SRC_DIR}/lib/*.S)
 OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)
 
 INCLUDE_DIR=${SRC_DIR}

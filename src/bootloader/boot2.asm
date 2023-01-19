@@ -134,5 +134,5 @@ ok_msg:             .asciz "OK"
 pmode_msg:          .asciz "Enabling Protected Mode and starting Kernel"
 press_a_key_msg:    .asciz "Press any key." # this is partially duplicate with Reboot section
 
-.fill ((_BytsPerSec * (_RsvdSecCnt - 1)) -(. - _start)), 1, 0
+.fill ((_BytsPerSec * (_RsvdSecCnt)) -(. - _start)), 1, 0
 

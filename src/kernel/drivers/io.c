@@ -6,7 +6,7 @@
 
 uint8_t inb(const uint16_t port)
 {
-    uint8_t ret;
+    register uint8_t ret;
     __asm__("in %0,%1" : "=a"(ret) : "Nd"(port));
 
     return ret;
@@ -19,10 +19,10 @@ void outb(const uint16_t port ,const uint8_t data)
 
 uint16_t inw(const uint16_t port)
 {
-    uint16_t result=0;
-    __asm__("in %0,%1" : "=a" (result) : "Nd"(port));
+    register uint16_t ret;
+    __asm__("in %0,%1" : "=a" (ret) : "Nd"(port));
 
-    return result;
+    return ret;
 }
 
 void outw(const uint16_t port, const uint16_t data )
