@@ -122,23 +122,17 @@ main32:
   # sti                 # should it be enabled by the kernel?
   jmp GDT_CODE_SEG:KERNEL_SEG
 
-# stop
-  cli
-  hlt
-
 
 root_dir_msg:         .asciz "Loading Root Dir"
 find_kernel_file_msg: .asciz "Searching Kernel"
 load_fat_msg:         .asciz "Loading FAT"
 load_kernel_file_msg: .asciz "Loading Kernel"
-
 file_missing_msg:   .asciz "File Missing"
-# preload_kernel_msg: .asciz "Preloading Kernel..."
 a20_msg:            .asciz "Enabling A20"
 gdt_msg:            .asciz "Loading GDT"
 ok_msg:             .asciz "OK"
 pmode_msg:          .asciz "Enabling Protected Mode and starting Kernel"
 press_a_key_msg:    .asciz "Press any key." # this is partially duplicate with Reboot section
 
-.fill ((_BytsPerSec * _RsvdSecCnt) -(. - _start)), 1, 0
+.fill ((_BytsPerSec * (_RsvdSecCnt - 1)) -(. - _start)), 1, 0
 

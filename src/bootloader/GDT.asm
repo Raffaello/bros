@@ -7,24 +7,24 @@ GDT:
 
 # Code Descriptor
 GDT_CODE:
-  .word 0xFFFF     # limit low
+  .word 0xFFFF     # size
   .word 0          # base low
   .byte 0          # base middle
   .byte 0b10011010 # access
-  .byte 0b11001111 # granularity
+  .byte 0b11001111 # limit / granularity
   .byte 0          # base high
 
 # Data Descriptor
 GDT_DATA:
-  .word 0x0FFFF     # limit low (Same as code)
+  .word 0xFFFF      # size (Same as code)
   .word 0           # base low
   .byte 0           # base middle
   .byte 0b10010010  # access
-  .byte 0b11001111  # granularity
+  .byte 0b11001111  # limit / granularity
   .byte 0           # base high
 GDT_END:
 GDT_TOC:
-  .word GDT_END - GDT - 1   # limit (Size of GDT)
+  .word GDT_END - GDT - 1   # Size of GDT
   .long GDT                 # base of GDT
 
 # Constants for the GDT segment descriptor offsets.
