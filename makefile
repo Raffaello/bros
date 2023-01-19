@@ -15,20 +15,29 @@ KERNEL_SEG=0x1000
 CC=gcc
 SRC_DIR=src/kernel
 BUILD_DIR=build
-SRC=${SRC_DIR}/kernel.c $(wildcard ${SRC_DIR}/bios/*.c wildcard ${SRC_DIR}/drivers/*.c)
+# kernel.c must be the 1st in the list
+SRC  = ${SRC_DIR}/kernel.c $(wildcard ${SRC_DIR}/common/*.c ${SRC_DIR}/bios/*.c wildcard ${SRC_DIR}/drivers/*.c)
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
+
+SRC_S  = $(wildcard ${SRC_DIR}/common/*.S)
+OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)
+
 INCLUDE_DIR=${SRC_DIR}
 
-CFLAGS+=-Wall -Werror #-Wmissing-prototypes
+#CFLAGS+=-Wall -Werror #-Wmissing-prototypes
 CFLAGS+=-masm=intel
-CFLAGS+=-o2 -m32 -ffreestanding -nostartfiles -nostdlib -I ${INCLUDE_DIR}
+# CFLAGS+=-o2
+CFLAGS+=-std=c17
+CFLAGS+=-m32 -ffreestanding -nostartfiles -nostdlib -I ${INCLUDE_DIR}
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 
 .PHONY: kernel $(OBJS)
 
-# t:
-# 	echo ${SRC}
-# 	echo ${OBJS}
+t:
+	echo ${SRC}
+	echo ${OBJS}
+	echo ${SRC_S}
+	echo ${OBJS_S}
 
 all: floppy boot2 image kernel
 
@@ -49,18 +58,22 @@ $(OBJS): $$(patsubst $(BUILD_DIR)/%.o,$(SRC_DIR)/%.c,$$@)
 	@mkdir -p ${@D}
 	${CC} $(CFLAGS) -c $^ -o $@
 
+$(OBJS_S): $$(patsubst $(BUILD_DIR)/%.oS,$(SRC_DIR)/%.S,$$@)
+	@mkdir -p ${@D}
+	${CC} $(CFLAGS) -c $^ -o $@
+
 
 # bios/vga.c:
 # 	${CC} $(CFLAGS) -c  ${SRC_DIR}/$@ -o ${BUILD_DIR}/bios/vga.o
 
 # Monolithic for now
-kernel: $(OBJS)
+kernel: $(OBJS) ${OBJS_S}
 	# gcc -o2 -ffreestanding -nostartfiles -nostdlib -c kernel/kernel.c -o build/kernel.o
 	# gcc -m32 -g -ffreestanding -nostartfiles -nostdlib -c src/kernel/kernel.c -o build/kernel.o
 	# ${CC} $(CFLAGS) -c ${SRC} -o build/$(@F).o
 	
 	# ld -m elf_i386 -o build/kernel.out build/kernel.o #-Ttext ${KERNEL_SEG}
-	ld $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} #-Ttext ${KERNEL_SEG}
+	ld $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S} #-Ttext ${KERNEL_SEG}
 	
 	objcopy -O binary -j .text build/kernel.out bin/kernel.sys
 

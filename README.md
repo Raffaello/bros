@@ -106,3 +106,11 @@ To debug can be used `gdb`: `target remote localhost:1234`
 - GCC ASM inline syntax is horrible. Better MSVC.
 - GCC GAS is not really thought to be used by "humans", but more for GCC itself. Better NASM at this point.
 - I still have to try the `.S` way...
+
+---
+
+- consider switching from GCC to MSVC
+- consider switching from GAS to NASM
+- consider doing C++ along side C kernel
+- consider using Rust instead of C kernel as well..
+- finally, instead of develop in linux, better moving to windows, better tools, more fun.
