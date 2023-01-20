@@ -30,8 +30,9 @@ CFLAGS+=-masm=intel
 CFLAGS+=-g
 CFLAGS+=-std=c17
 CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR}
-CFLAGS+=-nostartfiles -nostdlib 
+CFLAGS+=-nostartfiles -nostdlib
 CFLAGS+=-lgcc
+
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
 # LFLAGS+=-Tlinker.ld # linker option definition file
@@ -39,24 +40,24 @@ LFLAGS+=-Ttext ${KERNEL_SEG}
 
 .PHONY: kernel $(OBJS)
 
-t:
-	echo ${SRC}
-	echo ${OBJS}
-	echo ${SRC_S}
-	echo ${OBJS_S}
+# t:
+# 	echo ${SRC}
+# 	echo ${OBJS}
+# 	echo ${SRC_S}
+# 	echo ${OBJS_S}
 
 all: floppy boot2 image kernel
 
 floppy:
 	@mkdir -p build
 	as -k -o build/boot.o src/bootloader/floppy.asm -I src/bootloader
-	ld -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG} #-Ttext 0x7c00
+	ld -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG}
 	objcopy -O binary -j .text build/boot.out bin/boot.bin
 
 boot2:
 	@mkdir -p build
 	as -k -o build/boot2.o src/bootloader/boot2.asm -I src/bootloader
-	ld -o build/boot2.out build/boot2.o -Ttext ${BOOT2_REL_SEG} #-Ttext 0x600
+	ld -o build/boot2.out build/boot2.o -Ttext ${BOOT2_REL_SEG}
 	objcopy -O binary -j .text build/boot2.out bin/boot2.bin
 
 .SECONDEXPANSION:
@@ -68,10 +69,6 @@ $(OBJS_S): $$(patsubst $(BUILD_DIR)/%.oS,$(SRC_DIR)/%.S,$$@)
 	@mkdir -p ${@D}
 	${CC} $(CFLAGS) $^ -o $@
 
-
-# bios/vga.c:
-# 	${CC} $(CFLAGS) -c  ${SRC_DIR}/$@ -o ${BUILD_DIR}/bios/vga.o
-
 # Monolithic for now
 kernel: $(OBJS) ${OBJS_S}
 	# gcc -o2 -ffreestanding -nostartfiles -nostdlib kernel/kernel.c -o build/kernel.o
@@ -79,7 +76,7 @@ kernel: $(OBJS) ${OBJS_S}
 	# ${CC} $(CFLAGS) ${SRC} -o build/$(@F).o
 	
 	# ld -m elf_i386 -o build/kernel.out build/kernel.o #-Ttext ${KERNEL_SEG}
-	ld $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S} #-Ttext ${KERNEL_SEG}
+	ld $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
 	
 	objcopy -O binary -j .text build/kernel.out bin/kernel.sys
 
@@ -100,7 +97,6 @@ gdb-kernel-debug: image
         -ex 'layout reg' \
         -ex 'break _start' \
         -ex 'continue'
-
 
 clean:
 	rm bin/* -fv

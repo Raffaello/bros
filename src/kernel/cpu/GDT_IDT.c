@@ -16,7 +16,17 @@
 #define GDT_FLAGS_DB            0x4 // Size
 #define GDT_FLAGS_G             0x8 // Granularity
 
+// NOTE: I had issue reloading a GDT from C, so i have done it trhough ASM
+//       Not sure why the gdtd[] isn't initialized, but just zeros
+//       forced to call some code to set up and i don't want it.
+//       there were some other errors with memory address etc.
+//       ASM quite straightforward how to do it.
+// CONS: I don't have the CODE_SEG from ASM accessible here.
+//       it might force to do IDT into ASM as well.
+//       prefer ASM anyway..
 extern void GDT_load_asm();
+
+
 // extern void GDT_reload_segment(uint16_t codeSeg, uint16_t dataSeg); // defined in cpu/GDT_reload_segment.S
 
 // /*__attribute__((aligned(16)))*/ static GDT_descriptor_t gdtd[GDT_MAX_DESCRIPTORS] = {
@@ -111,6 +121,10 @@ void GDT_initialize()
 }
 
 
+// ----------------------------------------------------------
+// ***                  IDT section                       ***
+// ----------------------------------------------------------
+
 #define X86_MAX_INTERRUPTS  256
 
 #define IDT_GATE_TASK       0x5 // 
@@ -133,7 +147,6 @@ void IDT_load(const DT_register_t* dtr)
 {
     __asm__("cli");
     __asm__ volatile("lidt %0" : : "m"(idtr));
-    // __asm__("sti");
 }
 
 // install a new interrupt handler
@@ -148,16 +161,20 @@ static void IDT_install_irq_handler(IDT_descriptor_t* idtd, uint8_t gate_type, u
     idtd->selector  = sel;
 }
 
-/*static*/ void IDT_default_handler()
+static void IDT_default_handler()
 {
     clearVGA();
     writeVGAChar(0, 0, 'X', 15);
     while(1);
 }
 
+
 void IDT_initialize(/*uint16_t codeSel*/)
 {
-    int code_sel = 0x8;//&gdtd[1] - &gdtd[0];
+    // TODO: not sure now how to segment memory and install interrupt handler..
+    //       so for now just basic settings for the function to almost work.
+
+    int code_sel = 0x8;
     // writeVGAChar(20,0,)
     // set up idtr for processor
     idtr.size = sizeof(IDT_descriptor_t) * X86_MAX_INTERRUPTS - 1;
