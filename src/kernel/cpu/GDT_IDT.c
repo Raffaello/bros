@@ -161,7 +161,7 @@ static void IDT_install_irq_handler(IDT_descriptor_t* idtd, uint8_t gate_type, u
     idtd->selector  = sel;
 }
 
-static void IDT_default_handler()
+void IDT_default_handler()
 {
     clearVGA();
     writeVGAChar(0, 0, 'X', 15);
