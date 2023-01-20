@@ -4,8 +4,10 @@
 #include <cpu/GDT_IDT.h>
 #include <lib/std.h>
 
-
-#define KERNEL_ADDR ((uint32_t*)(0x1000))
+#ifndef KERNEL_SEG
+    #error KERNEL_SEG define missing
+#endif
+#define KERNEL_ADDR ((uint32_t*)(KERNEL_SEG))
 
 void main();
 
