@@ -3,7 +3,7 @@
 **/
 
 #include <bios/vga.h>
-#include <drivers/io.h>
+#include <lib/io.h>
 
 #define VGA_MEM_TEXT 0xb8000
 #define VGA_REG_CTRL 0x3D4

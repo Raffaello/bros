@@ -1,7 +1,7 @@
 // NOTE: the generated assembly seems sub-optimal..
 //       looks better just implement them directly in asm
 
-#include <drivers/io.h>
+#include <lib/io.h>
 
 
 uint8_t inb(const uint16_t port)
