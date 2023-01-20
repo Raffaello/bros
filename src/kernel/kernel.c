@@ -4,6 +4,9 @@
 #include <cpu/GDT_IDT.h>
 #include <lib/std.h>
 
+
+#define KERNEL_ADDR ((uint32_t*)(0x1000))
+
 void main();
 
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
@@ -11,6 +14,15 @@ void main();
 void _start()
 {
     __asm__ ("cli");
+    const uint32_t* _startPtr = (uint32_t*)&_start;
+    // if not in the Kernel aspected address...
+    if(_startPtr != KERNEL_ADDR)
+     {
+         // TODO display an error message
+        writeVGAChar(20,20,'Z',15);
+        __asm__("hlt");
+    }
+
     GDT_initialize();
     IDT_initialize();
     // __asm__("sti"); // something must be set up before enabling it
