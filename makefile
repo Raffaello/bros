@@ -34,7 +34,8 @@ CFLAGS+=-nostartfiles -nostdlib
 CFLAGS+=-lgcc
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
-LFLAGS+=-Tlinker.ld # linker option definition file
+# LFLAGS+=-Tlinker.ld # linker option definition file
+LFLAGS+=-Ttext ${KERNEL_SEG}
 
 .PHONY: kernel $(OBJS)
 
