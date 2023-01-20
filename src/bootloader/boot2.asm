@@ -120,7 +120,12 @@ main32:
   mov es, ax
   mov esp, 0x9000       # stack start at 9000h
   # sti                 # should it be enabled by the kernel?
-  jmp GDT_CODE_SEG:KERNEL_SEG
+  call GDT_CODE_SEG:KERNEL_SEG
+
+main32_stop:
+  cli
+  hlt
+  jmp main32_stop
 
 
 root_dir_msg:         .asciz "Loading Root Dir"
