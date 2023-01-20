@@ -16,6 +16,8 @@
 #define GDT_FLAGS_DB            0x4 // Size
 #define GDT_FLAGS_G             0x8 // Granularity
 
+extern void gdt_asm_load(); // defined in cpu/GDT.S
+
 // static GDT_descriptor_t gdtd[GDT_MAX_DESCRIPTORS] __attribute__((aligned(16))) = {
 //     {
 //         .limit          = 0,
@@ -48,7 +50,7 @@
 void gdt_load(const DT_register_t* dtr)
 {
     __asm__("cli");
-    __asm__("lgdt %0" : : "m"(*dtr));
+    __asm__ volatile("lgdt %0" : : "m"(*dtr));
     // __asm__("sti");
 }
 
@@ -94,23 +96,8 @@ void gdt_initialize()
     //    GDT_FLAGS_DB | GDT_FLAGS_G
     // );
 
-    //gdt_load(&gdtr);
-    __asm__("cli");
-    __asm__ volatile("lgdt %0" : : "m" (gdtr));
-    __asm__(
-        "reloadSegments:
-   ; Reload CS register containing code selector:
-   JMP   0x08:.reload_CS ; 0x08 is a stand-in for your code segment
-.reload_CS:
-   ; Reload data segment registers:
-   MOV   AX, 0x10 ; 0x10 is a stand-in for your data segment
-   MOV   DS, AX
-   MOV   ES, AX
-   MOV   FS, AX
-   MOV   GS, AX
-   MOV   SS, AX
-   RET"
-    )
+    // gdt_load(&gdtr);
+    gdt_asm_load();
 }
 
 
@@ -135,7 +122,7 @@ typedef void ((*irq_handler)(void));
 void idt_load(const DT_register_t* dtr)
 {
     __asm__("cli");
-    __asm__("lidt %0" : : "m"(idtr));
+    __asm__ volatile("lidt %0" : : "m"(idtr));
     // __asm__("sti");
 }
 
