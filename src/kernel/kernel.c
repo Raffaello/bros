@@ -4,6 +4,7 @@
 #include <cpu/GDT_IDT.h>
 #include <lib/std.h>
 #include <drivers/PIC.h>
+#include <drivers/PIT.h>
 
 #ifndef KERNEL_SEG
     #error KERNEL_SEG define missing
@@ -29,7 +30,12 @@ void _start()
     GDT_init();
     IDT_init();
     PIC_init();
-    // __asm__("sti"); // something must be set up before enabling it
+    PIT_init();
+
+
+    // TODO set up other interrupt handlers (divBy0 etc... )
+
+    __asm__("sti");
     main();
 }
 

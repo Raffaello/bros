@@ -2,8 +2,6 @@
 #include <stdint.h>
 #include <lib/io.h>
 
-#define PIC1_BASE_INT 0x20  // mapping interrupt at 0x20
-#define PIC2_BASE_INT 0x28
 
 //=========================================================
 //***              Controller Registers                 ***
@@ -65,15 +63,15 @@
 // }
 
 
-static inline void PIC_send_data(const uint8_t pic_reg_data, const uint8_t data)
-{
-    outb(pic_reg_data, data);
-}
+// static inline void PIC_send_data(const uint8_t pic_reg_data, const uint8_t data)
+// {
+//     outb(pic_reg_data, data);
+// }
  
-static inline uint8_t PIC_read_data(const uint8_t pic_reg_data)
-{
-    return inb(pic_reg_data);
-}
+// static inline uint8_t PIC_read_data(const uint8_t pic_reg_data)
+// {
+//     return inb(pic_reg_data);
+// }
 
 void PIC_init()
 {

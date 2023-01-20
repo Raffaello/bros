@@ -19,7 +19,7 @@ BUILD_DIR=build
 SRC  = ${SRC_DIR}/kernel.c $(wildcard ${SRC_DIR}/lib/*.c ${SRC_DIR}/cpu/*.c ${SRC_DIR}/bios/*.c wildcard ${SRC_DIR}/drivers/*.c)
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
 
-SRC_S  = $(wildcard ${SRC_DIR}/lib/*.S ${SRC_DIR}/cpu/*.S)
+SRC_S  = $(wildcard ${SRC_DIR}/lib/*.S ${SRC_DIR}/cpu/*.S ${SRC_DIR}/drivers/*.S)
 OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)
 
 INCLUDE_DIR=${SRC_DIR}
@@ -43,11 +43,11 @@ LFLAGS+=-Ttext ${KERNEL_SEG}
 
 .PHONY: kernel $(OBJS)
 
-# t:
-# 	echo ${SRC}
-# 	echo ${OBJS}
-# 	echo ${SRC_S}
-# 	echo ${OBJS_S}
+t:
+	echo ${SRC}
+	echo ${OBJS}
+	echo ${SRC_S}
+	echo ${OBJS_S}
 
 all: floppy boot2 image kernel
 

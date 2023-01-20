@@ -39,6 +39,9 @@ _Static_assert(sizeof(IDT_descriptor_t) == 8);
 
 #pragma pack(pop)
 
+// Interrupt handler function type definition
+typedef void ((*irq_handler)(void));
+
 void GDT_load(const DT_register_t* dtr);
 void IDT_load(const DT_register_t* dtr);
 
@@ -46,3 +49,5 @@ void GDT_init();
 void IDT_init(/*uint16_t codeSel*/);
 
 void IDT_default_handler();
+
+void IDT_set_IRQ(const uint8_t numInt, irq_handler irq_func);

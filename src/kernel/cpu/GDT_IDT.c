@@ -133,15 +133,20 @@ void GDT_init()
 #define IDT_GATE_INT32      0xE // 32-bit
 #define IDT_GATE_TRAP32     0xF // 32-bit
 
+#define IDT_DPL_RING0       0   // no bits
+#define IDT_DPL_RING1       2   // bit 1
+#define IDT_DPL_RING2       1   // bit 0
+#define IDT_DPL_RING3       3   // both bits
+
+
+#define CODE_SEL            0x8 // hardcoded, it depends on the GDT selector. for now keep it simple
 
 //interrupt descriptor table
 static struct IDT_descriptor_t  idtd[X86_MAX_INTERRUPTS];
 
-//! idtr structure used to help define the cpu's idtr register
 static struct DT_register_t     idtr;
 
-//! interrupt handler function type definition
-typedef void ((*irq_handler)(void));
+
 
 void IDT_load(const DT_register_t* dtr)
 {
@@ -168,14 +173,17 @@ void IDT_default_handler()
     while(1);
 }
 
+void IDT_set_IRQ(const uint8_t numInt, irq_handler irq_func)
+{
+    IDT_install_irq_handler(&idtd[numInt], IDT_GATE_INT32, IDT_DPL_RING0, CODE_SEL, irq_func);
+}
 
 void IDT_init(/*uint16_t codeSel*/)
 {
     // TODO: not sure now how to segment memory and install interrupt handler..
     //       so for now just basic settings for the function to almost work.
+    // int code_sel = 0x8;
 
-    int code_sel = 0x8;
-    // writeVGAChar(20,0,)
     // set up idtr for processor
     idtr.size = sizeof(IDT_descriptor_t) * X86_MAX_INTERRUPTS - 1;
     idtr.offset	= (uint32_t)&idtd[0];
@@ -186,8 +194,8 @@ void IDT_init(/*uint16_t codeSel*/)
         IDT_install_irq_handler(
             &idtd[i],
             IDT_GATE_INT32,
-            0,
-            code_sel,
+            IDT_DPL_RING0,
+            CODE_SEL,
             IDT_default_handler
         );
     }
