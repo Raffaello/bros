@@ -37,14 +37,11 @@ GDT_TOC:
 .equ GDT_CODE_SEG, GDT_CODE - GDT
 .equ GDT_DATA_SEG, GDT_DATA - GDT
 
-.globl gdt_asm_load
-gdt_asm_load:
-  # return value in eax
+.globl GDT_load_asm
+GDT_load_asm:
   cli
-  pusha
   sgdt [GDT_TOC]
   lgdt [GDT_TOC]
-  popa
 reloadSegments:
    # Reload CS register containing code selector:
    JMP   GDT_CODE_SEG:reload_CS # 0x08 is a stand-in for your code segment
@@ -57,5 +54,5 @@ reload_CS:
    MOV   GS, AX
    MOV   SS, AX
   ret
-.type gdt_asm_load, @function
-.size gdt_asm_load, .-gdt_asm_load
+.type GDT_load_asm, @function
+.size GDT_load_asm, .-GDT_load_asm

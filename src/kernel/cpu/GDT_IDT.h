@@ -39,10 +39,10 @@ _Static_assert(sizeof(IDT_descriptor_t) == 8);
 
 #pragma pack(pop)
 
-void gdt_load(const DT_register_t* dtr);
-void idt_load(const DT_register_t* dtr);
+void GDT_load(const DT_register_t* dtr);
+void IDT_load(const DT_register_t* dtr);
 
-void gdt_initialize();
-void idt_initialize(/*uint16_t codeSel*/);
+void GDT_initialize();
+void IDT_initialize(/*uint16_t codeSel*/);
 
-void idt_default_handler();
+void IDT_default_handler();

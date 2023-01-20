@@ -16,9 +16,10 @@
 #define GDT_FLAGS_DB            0x4 // Size
 #define GDT_FLAGS_G             0x8 // Granularity
 
-extern void gdt_asm_load(); // defined in cpu/GDT.S
+extern void GDT_load_asm();
+// extern void GDT_reload_segment(uint16_t codeSeg, uint16_t dataSeg); // defined in cpu/GDT_reload_segment.S
 
-// static GDT_descriptor_t gdtd[GDT_MAX_DESCRIPTORS] __attribute__((aligned(16))) = {
+// /*__attribute__((aligned(16)))*/ static GDT_descriptor_t gdtd[GDT_MAX_DESCRIPTORS] = {
 //     {
 //         .limit          = 0,
 //         .base_lo        = 0,
@@ -47,40 +48,46 @@ extern void gdt_asm_load(); // defined in cpu/GDT.S
 
 // static DT_register_t gdtr;
 
-void gdt_load(const DT_register_t* dtr)
-{
-    __asm__("cli");
-    __asm__ volatile("lgdt %0" : : "m"(*dtr));
-    // __asm__("sti");
-}
+// void GDT_load(const DT_register_t* dtr)
+// {
+//     __asm__("cli");
+//     __asm__ volatile("lgdt %0" : : "m"(*dtr));
+//     // __asm__("sti");
+// }
 
-static void gdt_set_descriptor(GDT_descriptor_t* gdtd, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags)
-{
-    gdtd->base_lo = base & 0xFFFF;
-    gdtd->base_mi = (base >> 16) & 0xFF;
-    gdtd->base_hi = (base >> 24) & 0xFF;
+// static void GDT_set_descriptor(GDT_descriptor_t* gdtd, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags)
+// {
+//     gdtd->base_lo = base & 0xFFFF;
+//     gdtd->base_mi = (base >> 16) & 0xFF;
+//     gdtd->base_hi = (base >> 24) & 0xFF;
 
-    gdtd->limit         = limit & 0xFFFF;
+//     gdtd->limit         = limit & 0xFFFF;
 
-    gdtd->limit_flags   = 0;
-    gdtd->limit_flags   = (limit >> 16) & 0x0F;
-    gdtd->limit_flags  |= (flags << 4); 
+//     gdtd->limit_flags   = 0;
+//     gdtd->limit_flags   = (limit >> 16) & 0x0F;
+//     gdtd->limit_flags  |= (flags << 4); 
 
-    gdtd->access = access;
-}
+//     gdtd->access = access;
+// }
 
 // initialize gdt
-void gdt_initialize()
+void GDT_initialize()
 {
-    static uint64_t gdtd[3] = {0, 0x00CF9A000000FFFF, 0x00CF9A000000FFFF};
-    static DT_register_t gdtr;
+    // static uint64_t gdtd[3] = {0, 0x00CF9A000000FFFF, 0x00CF9A000000FFFF};
+    // static DT_register_t gdtr;
+
+    // GDT_CODE_SEG = GDT_CODE - GDT
+    // GDT_DATA_SEG = GDT_DATA - GDT
+    // const uint16_t codeSeg = (uint16_t)((uint32_t) &gdtd[1]) - ((uint32_t) &gdtd[0]);
+    // const uint16_t dataSeg = (uint16_t)((uint32_t) &gdtd[2]) - ((uint32_t) &gdtd[0]);
+
     // set up gdtr
-    gdtr.size = (sizeof(GDT_descriptor_t) * GDT_MAX_DESCRIPTORS) - 1; // 8 * 3 - 1 = 23
-    gdtr.offset = (uint32_t)&gdtd + (0x10);
+    // gdtr.size = (sizeof(GDT_descriptor_t) * GDT_MAX_DESCRIPTORS) - 1; // 8 * 3 - 1 = 23
+    // gdtr.offset = ((uint32_t)(&gdtd[0]));
     //null descriptor
-    // gdt_set_descriptor(&gdtd[0], 0, 0, 0, 0);
+    // GDT_set_descriptor(&gdtd[0], 0, 0, 0, 0);
     //default code descriptor
-    // gdt_set_descriptor(
+    // GDT_set_descriptor(
     //     &gdtd[1],
     //     0,
     //     0xFFFFF,
@@ -88,7 +95,7 @@ void gdt_initialize()
     //     GDT_FLAGS_DB | GDT_FLAGS_G
     // );
     //default data descriptor
-    // gdt_set_descriptor(
+    // GDT_set_descriptor(
     //     &gdtd[2],
     //     0,
     //     0xFFFFF,
@@ -96,8 +103,11 @@ void gdt_initialize()
     //    GDT_FLAGS_DB | GDT_FLAGS_G
     // );
 
-    // gdt_load(&gdtr);
-    gdt_asm_load();
+    // GDT_load(&gdtr);
+    
+    // GDT_reload_segment(codeSeg, dataSeg);
+
+    GDT_load_asm();
 }
 
 
@@ -119,7 +129,7 @@ static struct DT_register_t     idtr;
 //! interrupt handler function type definition
 typedef void ((*irq_handler)(void));
 
-void idt_load(const DT_register_t* dtr)
+void IDT_load(const DT_register_t* dtr)
 {
     __asm__("cli");
     __asm__ volatile("lidt %0" : : "m"(idtr));
@@ -127,7 +137,7 @@ void idt_load(const DT_register_t* dtr)
 }
 
 // install a new interrupt handler
-static void idt_install_irq_handler(IDT_descriptor_t* idtd, uint8_t gate_type, uint8_t dpl, uint16_t sel, irq_handler irq)
+static void IDT_install_irq_handler(IDT_descriptor_t* idtd, uint8_t gate_type, uint8_t dpl, uint16_t sel, irq_handler irq)
 {
     register uint32_t base = ((uint32_t)&(*irq));
 
@@ -138,14 +148,14 @@ static void idt_install_irq_handler(IDT_descriptor_t* idtd, uint8_t gate_type, u
     idtd->selector  = sel;
 }
 
-/*static*/ void idt_default_handler()
+/*static*/ void IDT_default_handler()
 {
     clearVGA();
     writeVGAChar(0, 0, 'X', 15);
     while(1);
 }
 
-void idt_initialize(/*uint16_t codeSel*/)
+void IDT_initialize(/*uint16_t codeSel*/)
 {
     int code_sel = 0x8;//&gdtd[1] - &gdtd[0];
     // writeVGAChar(20,0,)
@@ -156,14 +166,14 @@ void idt_initialize(/*uint16_t codeSel*/)
     //register default handlers
     for (int i=0; i<X86_MAX_INTERRUPTS; i++)
     {
-        idt_install_irq_handler(
+        IDT_install_irq_handler(
             &idtd[i],
             IDT_GATE_INT32,
             0,
             code_sel,
-            idt_default_handler
+            IDT_default_handler
         );
     }
 
-    idt_load(&idtr);
+    IDT_load(&idtr);
 }
