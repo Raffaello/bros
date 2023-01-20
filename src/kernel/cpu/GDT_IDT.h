@@ -42,7 +42,7 @@ _Static_assert(sizeof(IDT_descriptor_t) == 8);
 void GDT_load(const DT_register_t* dtr);
 void IDT_load(const DT_register_t* dtr);
 
-void GDT_initialize();
-void IDT_initialize(/*uint16_t codeSel*/);
+void GDT_init();
+void IDT_init(/*uint16_t codeSel*/);
 
 void IDT_default_handler();

@@ -26,7 +26,7 @@ INCLUDE_DIR=${SRC_DIR}
 
 ASFLAGS+=-k -I src/bootloader
 
-#CFLAGS+=-Wall -Werror #-Wmissing-prototypes
+CFLAGS+=-Wall -Werror #-Wmissing-prototypes
 CFLAGS+=-masm=intel
 # CFLAGS+=-o2
 CFLAGS+=-g

@@ -3,6 +3,7 @@
 #include <lib/mem.h>
 #include <cpu/GDT_IDT.h>
 #include <lib/std.h>
+#include <drivers/PIC.h>
 
 #ifndef KERNEL_SEG
     #error KERNEL_SEG define missing
@@ -25,8 +26,9 @@ void _start()
         __asm__("hlt");
     }
 
-    GDT_initialize();
-    IDT_initialize();
+    GDT_init();
+    IDT_init();
+    PIC_init();
     // __asm__("sti"); // something must be set up before enabling it
     main();
 }

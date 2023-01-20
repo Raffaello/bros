@@ -81,7 +81,7 @@ extern void GDT_load_asm();
 // }
 
 // initialize gdt
-void GDT_initialize()
+void GDT_init()
 {
     // static uint64_t gdtd[3] = {0, 0x00CF9A000000FFFF, 0x00CF9A000000FFFF};
     // static DT_register_t gdtr;
@@ -169,7 +169,7 @@ void IDT_default_handler()
 }
 
 
-void IDT_initialize(/*uint16_t codeSel*/)
+void IDT_init(/*uint16_t codeSel*/)
 {
     // TODO: not sure now how to segment memory and install interrupt handler..
     //       so for now just basic settings for the function to almost work.
