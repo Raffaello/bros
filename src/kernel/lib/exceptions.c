@@ -13,7 +13,6 @@ static void printError(const char* str)
 __attribute__((naked)) void divide_error()
 {
     printError("Division by Zero");
-    PIC_EOI(INT_Divide_Error); // Not sure this is required...
     __asm__("iretd");
 }
 
