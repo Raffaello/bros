@@ -1,15 +1,15 @@
 #pragma once
 
-#define INT_Divide_Error                    00 
-#define INT_Debug_Exception                 01
-#define INT_NMI_Interrupt                   02 // Non-Maskable-Interrupt
-#define INT_Breakpoint                      03
-#define INT_Overflow                        04
-#define INT_Bbounds_Range_Exceeded          05
-#define INT_Invalid_Opcode                  06
-#define INT_Device_Not_Available            07 // (No Math CoProcessor)
-#define INT_Double_Falt                     08
-#define INT_Coprocessor_Segment_Overrun     09 // (Reserved)
+#define INT_Divide_Error                    0
+#define INT_Debug_Exception                 1
+#define INT_NMI_Interrupt                   2  // Non-Maskable-Interrupt
+#define INT_Breakpoint                      3
+#define INT_Overflow                        4
+#define INT_Bbounds_Range_Exceeded          5
+#define INT_Invalid_Opcode                  6
+#define INT_Device_Not_Available            7  // (No Math CoProcessor)
+#define INT_Double_Falt                     8
+#define INT_Coprocessor_Segment_Overrun     9  // (Reserved)
 #define INT_Invalid_TSS                     10 // Task Switch or TSS Access
 #define INT_Segment_Not_Present             11
 #define INT_Stack_Segment_Fault             12

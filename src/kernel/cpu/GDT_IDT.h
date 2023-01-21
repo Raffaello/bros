@@ -47,6 +47,7 @@ void IDT_load(const DT_register_t* dtr);
 
 void GDT_init();
 void IDT_init(/*uint16_t codeSel*/);
+void init_descriptor_tables();
 
 void IDT_default_handler();
 

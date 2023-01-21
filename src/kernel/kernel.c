@@ -31,8 +31,7 @@ void _start()
         __asm__("hlt");
     }
 
-    GDT_init();
-    IDT_init();
+    init_descriptor_tables();
     PIC_init();
     PIT_init();
     init_exception_handlers();

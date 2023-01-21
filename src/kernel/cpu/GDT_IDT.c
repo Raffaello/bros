@@ -202,3 +202,9 @@ void IDT_init(/*uint16_t codeSel*/)
 
     IDT_load(&idtr);
 }
+
+void init_descriptor_tables()
+{
+    GDT_init();
+    IDT_init();
+}
