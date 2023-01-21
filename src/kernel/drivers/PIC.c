@@ -45,6 +45,20 @@
 #define PIC_ICW1_INIT_YES               0x10    // Initialization bit. Set 1 if PIC is to be initialized
 #define PIC_ICW1_INIT_NO                0
 
+#define PIC_OCW2_MASK_L1        1
+#define PIC_OCW2_MASK_L2        2
+#define PIC_OCW2_MASK_L3        4
+#define PIC_OCW2_MASK_EOI       0x20
+#define PIC_OCW2_MASK_SL        0x40
+#define PIC_OCW2_MASK_ROTATE    0x80
+
+#define PIC_OCW3_MASK_RIS       1
+#define PIC_OCW3_MASK_RIR       2
+#define PIC_OCW3_MASK_MODE      4
+#define PIC_OCW3_MASK_SMM       0x20
+#define PIC_OCW3_MASK_ESMM      0x40
+#define PIC_OCW3_MASK_D7        0x80
+
 #define PIC_ICW4_UPM_86MODE             1       // set 1 for 80x86 mode
 #define PIC_ICW4_UPM_MCSMODE            0
 #define PIC_ICW4_AEOI_AUTOEOI           2       // When 1, on the last interrupt ack, controller automatically performs End of Interrupt (EOI) operation
@@ -98,3 +112,13 @@ void PIC_init()
     outb(PIC1_REG_DATA, icw);
     outb(PIC2_REG_DATA, icw);
 }
+
+void PIC_EOI(const uint8_t num_int)
+{
+    if(num_int>7) {
+        outb(PIC_OCW2_MASK_EOI, 1);
+    }
+
+    outb(PIC_OCW2_MASK_EOI, 0);
+}
+

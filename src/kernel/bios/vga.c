@@ -12,7 +12,7 @@
 #define VGA_TEXT_WIDTH 80
 #define VGA_TEXT_HEIGHT 25
 
-void clearVGA()
+void VGA_clear()
 {
     uint8_t *video_mem = (uint8_t*) 0xb8000;
     // TODO: using with eax=0 and rep movsd, shouldn't be faster?
@@ -23,7 +23,7 @@ void clearVGA()
     }
 }
 
-void writeVGAChar(const int x, const int y, const char ch, uint8_t col)
+void VGA_WriteChar(const int x, const int y, const char ch, uint8_t col)
 {
     uint8_t *video_mem = (uint8_t*) VGA_MEM_TEXT;
     const int off = (y * VGA_TEXT_WIDTH + x) * 2;
@@ -31,8 +31,17 @@ void writeVGAChar(const int x, const int y, const char ch, uint8_t col)
     video_mem[off + 1] = col;
 }
 
+void VGA_WriteString(const int x, const int y, const char str[], uint8_t col)
+{
+    for(int i = 0;str[i] != 0; ++i)
+    {
+        // TODO: does it work if end of line? or end of screen? etc...
+        VGA_WriteChar(x+i, y, str[i], col);
+    }
+}
 
-void enable_cursor(const uint8_t cursor_start, const uint8_t cursor_end)
+
+void VGA_enable_cursor(const uint8_t cursor_start, const uint8_t cursor_end)
 {
     outb(VGA_REG_CTRL, 0x0A);
     outb(VGA_REG_DATA, (inb(VGA_REG_DATA) & 0xC0) | cursor_start);
@@ -41,13 +50,13 @@ void enable_cursor(const uint8_t cursor_start, const uint8_t cursor_end)
     outb(VGA_REG_DATA, 0xF);
 }
 
-void disable_cursor()
+void VGA_disable_cursor()
 {
     outb(VGA_REG_CTRL, 0x0A);
     outb(VGA_REG_DATA, 0x20);
 }
 
-void update_cursor(const int x, const int y)
+void VGA_update_cursor(const int x, const int y)
 {
     const uint16_t pos = y * VGA_TEXT_WIDTH + x;
 

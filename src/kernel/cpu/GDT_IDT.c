@@ -155,7 +155,7 @@ void IDT_load(const DT_register_t* dtr)
 }
 
 // install a new interrupt handler
-static void IDT_install_irq_handler(IDT_descriptor_t* idtd, uint8_t gate_type, uint8_t dpl, uint16_t sel, irq_handler irq)
+static void IDT_set_IRQ_handler(IDT_descriptor_t* idtd, uint8_t gate_type, uint8_t dpl, uint16_t sel, IRQ_Handler irq)
 {
     register uint32_t base = ((uint32_t)&(*irq));
 
@@ -168,14 +168,14 @@ static void IDT_install_irq_handler(IDT_descriptor_t* idtd, uint8_t gate_type, u
 
 void IDT_default_handler()
 {
-    clearVGA();
-    writeVGAChar(0, 0, 'X', 15);
+    VGA_clear();
+    VGA_WriteChar(0, 0, 'X', 15);
     while(1);
 }
 
-void IDT_set_IRQ(const uint8_t numInt, irq_handler irq_func)
+void IDT_set_gate(const uint8_t numInt, IRQ_Handler irq_func)
 {
-    IDT_install_irq_handler(&idtd[numInt], IDT_GATE_INT32, IDT_DPL_RING0, CODE_SEL, irq_func);
+    IDT_set_IRQ_handler(&idtd[numInt], IDT_GATE_INT32, IDT_DPL_RING0, CODE_SEL, irq_func);
 }
 
 void IDT_init(/*uint16_t codeSel*/)
@@ -191,7 +191,7 @@ void IDT_init(/*uint16_t codeSel*/)
     //register default handlers
     for (int i=0; i<X86_MAX_INTERRUPTS; i++)
     {
-        IDT_install_irq_handler(
+        IDT_set_IRQ_handler(
             &idtd[i],
             IDT_GATE_INT32,
             IDT_DPL_RING0,

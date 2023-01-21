@@ -6,5 +6,3 @@
 void* memset(void *buf, int val, size_t n);
 // void memcpy();
 // void memcmp();
-
-int add(int32_t a, int32_t b);
