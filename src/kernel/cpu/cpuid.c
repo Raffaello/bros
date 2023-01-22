@@ -1,5 +1,5 @@
 #include <cpu/cpuid.h>
-#include <lib/def.h>
+#include <defs.h>
 
 void cpuid(CPU_Info_t *cpuid)
 {

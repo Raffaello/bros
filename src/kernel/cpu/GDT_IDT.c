@@ -84,7 +84,7 @@ extern void GDT_load_asm();
 // }
 
 // initialize gdt
-void GDT_init()
+static void GDT_init()
 {
     // static uint64_t gdtd[3] = {0, 0x00CF9A000000FFFF, 0x00CF9A000000FFFF};
     // static DT_register_t gdtr;
@@ -127,7 +127,6 @@ void GDT_init()
 // ----------------------------------------------------------
 // ***                  IDT section                       ***
 // ----------------------------------------------------------
-
 #define MAX_INTERRUPTS  256
 
 #define IDT_GATE_TASK       0x5 // 
@@ -141,15 +140,11 @@ void GDT_init()
 #define IDT_DPL_RING2       1   // bit 0
 #define IDT_DPL_RING3       3   // both bits
 
-
 //interrupt descriptor table
 static struct IDT_descriptor_t  idtd[MAX_INTERRUPTS];
-
 static struct DT_register_t     idtr;
 
-
-
-void IDT_load(const DT_register_t* dtr)
+static void IDT_load(const DT_register_t* dtr)
 {
     __asm__("cli");
     __asm__ volatile("lidt %0" : : "m"(idtr));
@@ -179,7 +174,7 @@ void IDT_set_gate(const uint8_t numInt, IRQ_Handler irq_func)
     IDT_set_IRQ_handler(&idtd[numInt], IDT_GATE_INT32, IDT_DPL_RING0, CODE_SEL, irq_func);
 }
 
-void IDT_init(/*uint16_t codeSel*/)
+static void IDT_init(/*uint16_t codeSel*/)
 {
     // TODO: not sure now how to segment memory and install interrupt handler..
     //       so for now just basic settings for the function to almost work.

@@ -1,5 +1,7 @@
 /********************************
  * Programmable Interrupt Timer *
+ * ---------------------------- *
+ * Installs Timer IRQ handler   *
  *******************************/
 #pragma once
 

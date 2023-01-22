@@ -1,8 +1,8 @@
 #include <lib/ISR.h>
+#include <defs/interrupts.h>
 #include <cpu/GDT_IDT.h>
-#include <lib/interrupts.h>
+
 #include <bios/vga.h>
-#include <drivers/PIC.h>
 #include <lib/std.h>
 
 #pragma pack(push, 1)
@@ -82,3 +82,5 @@ void ISR_init()
     IDT_set_gate(INT_Virtualization_Exception, ISR_INT_20);
     IDT_set_gate(INT_Control_Protection_Exception, ISR_INT_21);
 }
+
+

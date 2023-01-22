@@ -6,6 +6,7 @@
 #include <drivers/PIC.h>
 #include <drivers/PIT.h>
 #include <lib/ISR.h>
+#include <lib/IRQ.h>
 
 #ifndef KERNEL_SEG
     #error KERNEL_SEG define missing
@@ -32,9 +33,12 @@ void _start()
     }
 
     init_descriptor_tables();
+
     PIC_init();
     PIT_init();
     ISR_init();
+    IRQ_init();
+
     __asm__("sti");
     main();
 }
@@ -51,7 +55,7 @@ void main()
 
 // TEST int handler
     //  __asm__("int 5");
-     __asm__("int 4");
+    //  __asm__("int 4");
 
     while(1);
 }

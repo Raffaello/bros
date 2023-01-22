@@ -1,8 +1,8 @@
 /* -*-Asm-*- */
 
 # Interrupt Service Routines
-# Interrupts are defined in lib/interrupts.h
-# #include <lib/interrupts.h>
+# Interrupts are defined in
+# #include <defs/interrupts.h>
 
 .code32
 .intel_syntax noprefix
@@ -78,6 +78,6 @@ ISR_universal_handler_caller:
   popad          # Pops edi,esi,ebp...
   add esp, 8     # Cleans up the pushed error code and pushed ISR number
   sti
-  iret
+  iretd
 .type ISR_universal_handler_caller, @function
 .size ISR_universal_handler_caller, .-ISR_universal_handler_caller

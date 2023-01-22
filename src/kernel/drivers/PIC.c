@@ -1,7 +1,8 @@
 #include <drivers/PIC.h>
+#include <defs.h>
 #include <stdint.h>
 #include <lib/io.h>
-
+#include <defs/PIC.h>
 
 //=========================================================
 //***              Controller Registers                 ***
@@ -59,7 +60,7 @@
 #define PIC_OCW3_MASK_ESMM      0x40
 #define PIC_OCW3_MASK_D7        0x80
 
-#define PIC_ICW4_UPM_86MODE             1       // set 1 for 80x86 mode
+#define PIC_ICW4_UPM_86MODE             1       // set 1 for 8086 mode
 #define PIC_ICW4_UPM_MCSMODE            0
 #define PIC_ICW4_AEOI_AUTOEOI           2       // When 1, on the last interrupt ack, controller automatically performs End of Interrupt (EOI) operation
 #define PIC_ICW4_AEOI_NOAUTOEOI         0
@@ -87,38 +88,55 @@
 //     return inb(pic_reg_data);
 // }
 
+/**
+ * Interrupt remapping to 32 to 47
+ **/
 void PIC_init()
 {
-    uint8_t icw	= 0;
-
     // Begin initialization of PIC
-    icw = (icw & ~PIC_ICW1_MASK_INIT) | PIC_ICW1_INIT_YES;
-    icw = (icw & ~PIC_ICW1_MASK_IC4) | PIC_ICW1_IC4_EXPECT;
-    outb(PIC1_REG_CMD, icw);
-    outb(PIC2_REG_CMD, icw);
-
+    outb(PIC1_REG_CMD, PIC_ICW1_INIT_YES | PIC_ICW1_IC4_EXPECT);
+    outb(PIC2_REG_CMD, PIC_ICW1_INIT_YES | PIC_ICW1_IC4_EXPECT);
     // Send initialization control word 2. This is the base addresses of the irq's
     outb(PIC1_REG_DATA, PIC1_BASE_INT);
     outb(PIC2_REG_DATA, PIC2_BASE_INT);
-
     // Send initialization control word 3. This is the connection between master and slave.
     // ICW3 for master PIC is the IR that connects to secondary pic in binary format
     // ICW3 for secondary PIC is the IR that connects to master pic in decimal format
     outb(PIC1_REG_DATA, 0x04);
     outb(PIC2_REG_DATA, 0x02);
-
     // Send Initialization control word 4. Enables x86 mode
-    icw = (icw & ~PIC_ICW4_MASK_UPM) | PIC_ICW4_UPM_86MODE;
-    outb(PIC1_REG_DATA, icw);
-    outb(PIC2_REG_DATA, icw);
+    outb(PIC1_REG_DATA, PIC_ICW4_UPM_86MODE);
+    outb(PIC2_REG_DATA, PIC_ICW4_UPM_86MODE);
 }
 
 void PIC_EOI(const uint8_t num_int)
 {
-    if(num_int>7) {
-        outb(PIC_OCW2_MASK_EOI, 1);
+    if(num_int > 7) {
+        outb(PIC2_REG_STATUS, PIC_OCW2_MASK_EOI);
     }
 
-    outb(PIC_OCW2_MASK_EOI, 0);
+    outb(PIC2_REG_STATUS, PIC_OCW2_MASK_EOI);
 }
 
+
+/* Helper func */
+static uint16_t __pic_get_irq_reg(const int ocw3)
+{
+    /* OCW3 to PIC CMD to get the register values.  PIC2 is chained, and
+     * represents IRQs 8-15.  PIC1 is IRQs 0-7, with 2 being the chain */
+    outb(PIC1_REG_CMD, ocw3);
+    outb(PIC2_REG_CMD, ocw3);
+    return (inb(PIC2_REG_STATUS) << 8) | inb(PIC1_REG_STATUS);
+}
+ 
+/* Returns the combined value of the cascaded PICs irq request register */
+uint16_t pic_get_irr()
+{
+    return __pic_get_irq_reg(0x0A);
+}
+ 
+/* Returns the combined value of the cascaded PICs in-service register */
+uint16_t pic_get_isr()
+{
+    return __pic_get_irq_reg(0x0B);
+}

@@ -1,6 +1,8 @@
 
 #pragma once
 
-#define NULL         0
+#include <stdint.h>
+
+#define NULL    0
 
 typedef unsigned int size_t;

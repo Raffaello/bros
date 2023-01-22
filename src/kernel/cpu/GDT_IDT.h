@@ -1,6 +1,7 @@
 #pragma once
 
-#include <stdint.h>
+#include <defs.h>
+#include <defs/IRQ.h>
 
 #pragma pack(push, 1)
 
@@ -39,16 +40,13 @@ _Static_assert(sizeof(IDT_descriptor_t) == 8);
 
 #pragma pack(pop)
 
-// Interrupt handler function type definition
-typedef void ((*IRQ_Handler)(void));
+// void GDT_load(const DT_register_t* dtr);
+// void IDT_load(const DT_register_t* dtr);
 
-void GDT_load(const DT_register_t* dtr);
-void IDT_load(const DT_register_t* dtr);
-
-void GDT_init();
-void IDT_init(/*uint16_t codeSel*/);
+// void GDT_init();
+// void IDT_init(/*uint16_t codeSel*/);
 void init_descriptor_tables();
 
-void IDT_default_handler();
+// void IDT_default_handler();
 
 void IDT_set_gate(const uint8_t numInt, IRQ_Handler irq_func);
