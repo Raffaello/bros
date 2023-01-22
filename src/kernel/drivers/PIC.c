@@ -108,8 +108,8 @@ void PIC_init()
     outb(PIC1_REG_DATA, PIC_ICW4_UPM_86MODE);
     outb(PIC2_REG_DATA, PIC_ICW4_UPM_86MODE);
 
-    outb(PIC1_REG_DATA, 0x0);
-    outb(PIC2_REG_DATA, 0x0);
+    // outb(PIC1_REG_DATA, 0x0);
+    // outb(PIC2_REG_DATA, 0x0);
 }
 
 void PIC_EOI(const uint8_t num_int)
@@ -121,6 +121,10 @@ void PIC_EOI(const uint8_t num_int)
     outb(PIC1_REG_STATUS, PIC_OCW2_MASK_EOI);
 }
 
+void PIC_disable()
+{
+    // TODO
+}
 
 /* Helper func */
 static uint16_t __pic_get_irq_reg(const int ocw3)
@@ -133,13 +137,13 @@ static uint16_t __pic_get_irq_reg(const int ocw3)
 }
  
 /* Returns the combined value of the cascaded PICs irq request register */
-uint16_t pic_get_irr()
+uint16_t PIC_get_irr()
 {
     return __pic_get_irq_reg(0x0A);
 }
  
 /* Returns the combined value of the cascaded PICs in-service register */
-uint16_t pic_get_isr()
+uint16_t PIC_get_isr()
 {
     return __pic_get_irq_reg(0x0B);
 }
