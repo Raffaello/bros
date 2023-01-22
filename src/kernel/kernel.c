@@ -14,8 +14,6 @@
 #define KERNEL_ADDR ((uint32_t*)(KERNEL_SEG))
 
 
-#define KERNEL_ADDR ((uint32_t*)(0x1000))
-
 void main();
 // TODO: this is a basic int handlers, all ring0 for now
 // void init_interrupt_handlers();
