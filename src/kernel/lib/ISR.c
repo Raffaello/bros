@@ -59,28 +59,28 @@ extern void IDT_set_gate();
 
 void ISR_init()
 {
-    IDT_set_gate(INT_Divide_Error, ISR_INT_0);
-    IDT_set_gate(INT_Debug_Exception, ISR_INT_1);
-    IDT_set_gate(INT_NMI_Interrupt, ISR_INT_2);
-    IDT_set_gate(INT_Breakpoint, ISR_INT_3);
-    IDT_set_gate(INT_Overflow, ISR_INT_4);
-    IDT_set_gate(INT_Bbounds_Range_Exceeded, ISR_INT_5);
-    IDT_set_gate(INT_Invalid_Opcode, ISR_INT_6);
-    IDT_set_gate(INT_Device_Not_Available, ISR_INT_7);
-    IDT_set_gate(INT_Double_Falt, ISR_INT_8);
-    IDT_set_gate(INT_Coprocessor_Segment_Overrun, ISR_INT_9);
-    IDT_set_gate(INT_Invalid_TSS, ISR_INT_10);
-    IDT_set_gate(INT_Segment_Not_Present, ISR_INT_11);
-    IDT_set_gate(INT_Stack_Segment_Fault, ISR_INT_12);
-    IDT_set_gate(INT_General_Protection, ISR_INT_13);
-    IDT_set_gate(INT_Page_Fault, ISR_INT_14);
-    IDT_set_gate(INT_Intel_Reserved, ISR_INT_15);
-    IDT_set_gate(INT_FPU_Error, ISR_INT_16);
-    IDT_set_gate(INT_Alignment_Check, ISR_INT_17);
-    IDT_set_gate(INT_Machine_Check, ISR_INT_18);
+    IDT_set_gate(INT_Divide_Error,                  ISR_INT_0);
+    IDT_set_gate(INT_Debug_Exception,               ISR_INT_1);
+    IDT_set_gate(INT_NMI_Interrupt,                 ISR_INT_2);
+    IDT_set_gate(INT_Breakpoint,                    ISR_INT_3);
+    IDT_set_gate(INT_Overflow,                      ISR_INT_4);
+    IDT_set_gate(INT_Bbounds_Range_Exceeded,        ISR_INT_5);
+    IDT_set_gate(INT_Invalid_Opcode,                ISR_INT_6);
+    IDT_set_gate(INT_Device_Not_Available,          ISR_INT_7);
+    IDT_set_gate(INT_Double_Falt,                   ISR_INT_8);
+    IDT_set_gate(INT_Coprocessor_Segment_Overrun,   ISR_INT_9);
+    IDT_set_gate(INT_Invalid_TSS,                   ISR_INT_10);
+    IDT_set_gate(INT_Segment_Not_Present,           ISR_INT_11);
+    IDT_set_gate(INT_Stack_Segment_Fault,           ISR_INT_12);
+    IDT_set_gate(INT_General_Protection,            ISR_INT_13);
+    IDT_set_gate(INT_Page_Fault,                    ISR_INT_14);
+    IDT_set_gate(INT_Intel_Reserved,                ISR_INT_15);
+    IDT_set_gate(INT_FPU_Error,                     ISR_INT_16);
+    IDT_set_gate(INT_Alignment_Check,               ISR_INT_17);
+    IDT_set_gate(INT_Machine_Check,                 ISR_INT_18);
     IDT_set_gate(INT_SIMD_Floating_Point_Exception, ISR_INT_19);
-    IDT_set_gate(INT_Virtualization_Exception, ISR_INT_20);
-    IDT_set_gate(INT_Control_Protection_Exception, ISR_INT_21);
+    IDT_set_gate(INT_Virtualization_Exception,      ISR_INT_20);
+    IDT_set_gate(INT_Control_Protection_Exception,  ISR_INT_21);
 }
 
 

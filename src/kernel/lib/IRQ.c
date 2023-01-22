@@ -41,31 +41,30 @@ extern void IRQ_INT_15();
 
 void IRQ_init()
 {
-    // Irq Timer set up in PIT, shoudl be set up here instead?
-    // IDT_set_gate(PIC1_BASE_INT + IRQ_TIMER, PIT_timer_interrupt_handler);
-    IDT_set_gate(PIC1_BASE_INT + IRQ_TIMER, IRQ_INT_0);
-    IDT_set_gate(PIC1_BASE_INT + IRQ_KEYBOARD, IRQ_INT_1);
-    IDT_set_gate(PIC1_BASE_INT + IRQ_CASCADE, IRQ_INT_2);
-    IDT_set_gate(PIC1_BASE_INT + IRQ_SERIAL2, IRQ_INT_3);
-    IDT_set_gate(PIC1_BASE_INT + IRQ_SERIAL1, IRQ_INT_4);
-    IDT_set_gate(PIC1_BASE_INT + IRQ_PARALLEL2, IRQ_INT_5);
-    IDT_set_gate(PIC1_BASE_INT + IRQ_DISKETTE, IRQ_INT_6);
-    IDT_set_gate(PIC1_BASE_INT + IRQ_PARALLEL1, IRQ_INT_7);
-
-    IDT_set_gate(PIC2_BASE_INT + IRQ_CMOSTIMER, IRQ_INT_8);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_CGARETRACE, IRQ_INT_9);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_OPEN1, IRQ_INT_10);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_OPEN2, IRQ_INT_11);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_AUX, IRQ_INT_12);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_FPU, IRQ_INT_13);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_ATA_PRIMARY, IRQ_INT_14);
+    // PIC 1
+    IDT_set_gate(PIC1_BASE_INT + IRQ_TIMER,         IRQ_INT_0);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_KEYBOARD,      IRQ_INT_1);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_CASCADE,       IRQ_INT_2);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_SERIAL2,       IRQ_INT_3);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_SERIAL1,       IRQ_INT_4);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_PARALLEL2,     IRQ_INT_5);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_DISKETTE,      IRQ_INT_6);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_PARALLEL1,     IRQ_INT_7);
+    // PIC 2
+    IDT_set_gate(PIC2_BASE_INT + IRQ_CMOSTIMER,     IRQ_INT_8);
+    IDT_set_gate(PIC2_BASE_INT + IRQ_CGARETRACE,    IRQ_INT_9);
+    IDT_set_gate(PIC2_BASE_INT + IRQ_OPEN1,         IRQ_INT_10);
+    IDT_set_gate(PIC2_BASE_INT + IRQ_OPEN2,         IRQ_INT_11);
+    IDT_set_gate(PIC2_BASE_INT + IRQ_AUX,           IRQ_INT_12);
+    IDT_set_gate(PIC2_BASE_INT + IRQ_FPU,           IRQ_INT_13);
+    IDT_set_gate(PIC2_BASE_INT + IRQ_ATA_PRIMARY,   IRQ_INT_14);
     IDT_set_gate(PIC2_BASE_INT + IRQ_ATA_SECONDARY, IRQ_INT_15);
 }
 
 void IRQ_register_interrupt_handler(uint8_t n, IRQ_Handler_t handler)
 {
     // TODO: it can be more efficient havinga IDT_handler of 255 element instead
-    //       unifying IRQ & INT in 1 file ... 
+    //       unifying IRQ & INT in 1 file ... or ok in this way?
     //       do it later
     if(n >= IRQ_TOTAL)
         return;

@@ -95,12 +95,12 @@ image: floppy boot2 kernel
 gdb-kernel-debug: image
 	qemu-system-i386 -fda ${FLOPPY_IMAGE_NAME} -S -s &
 	gdb build/kernel.out  \
-        -ex 'target remote localhost:1234' \
-        -ex 'layout src' \
-        -ex 'layout reg' \
-        -ex 'break _start' \
+		-ex 'target remote localhost:1234' \
+		-ex 'layout src' \
+		-ex 'layout reg' \
+		-ex 'break _start' \
 		-ex 'set disassembly-flavor intel' \
-        -ex 'continue'
+		-ex 'continue'
 
 clean:
 	rm bin/* -fv
