@@ -16,7 +16,7 @@
 #define GDT_FLAGS_DB            0x4 // Size
 #define GDT_FLAGS_G             0x8 // Granularity
 
-// NOTE: I had issue reloading a GDT from C, so i have done it trhough ASM
+// NOTE: I had issue reloading a GDT from C, so i have done it through ASM
 //       Not sure why the gdtd[] isn't initialized, but just zeros
 //       forced to call some code to set up and i don't want it.
 //       there were some other errors with memory address etc.
@@ -24,7 +24,10 @@
 // CONS: I don't have the CODE_SEG from ASM accessible here.
 //       it might force to do IDT into ASM as well.
 //       prefer ASM anyway..
+// TODO: review later...
 extern void GDT_load_asm();
+
+#define CODE_SEL            0x8 // hardcoded, it depends on the GDT selector. for now keep it simple
 
 
 // extern void GDT_reload_segment(uint16_t codeSeg, uint16_t dataSeg); // defined in cpu/GDT_reload_segment.S
@@ -81,7 +84,7 @@ extern void GDT_load_asm();
 // }
 
 // initialize gdt
-void GDT_initialize()
+static void GDT_init()
 {
     // static uint64_t gdtd[3] = {0, 0x00CF9A000000FFFF, 0x00CF9A000000FFFF};
     // static DT_register_t gdtr;
@@ -124,8 +127,7 @@ void GDT_initialize()
 // ----------------------------------------------------------
 // ***                  IDT section                       ***
 // ----------------------------------------------------------
-
-#define X86_MAX_INTERRUPTS  256
+#define MAX_INTERRUPTS  256
 
 #define IDT_GATE_TASK       0x5 // 
 #define IDT_GATE_INT16      0x6 // 16-bit
@@ -133,26 +135,25 @@ void GDT_initialize()
 #define IDT_GATE_INT32      0xE // 32-bit
 #define IDT_GATE_TRAP32     0xF // 32-bit
 
+#define IDT_DPL_RING0       0   // no bits
+#define IDT_DPL_RING1       2   // bit 1  (looks weird ring 1 & 2 have that bits swapped...)
+#define IDT_DPL_RING2       1   // bit 0
+#define IDT_DPL_RING3       3   // both bits
 
 //interrupt descriptor table
-static struct IDT_descriptor_t  idtd[X86_MAX_INTERRUPTS];
-
-//! idtr structure used to help define the cpu's idtr register
+static struct IDT_descriptor_t  idtd[MAX_INTERRUPTS];
 static struct DT_register_t     idtr;
 
-//! interrupt handler function type definition
-typedef void ((*irq_handler)(void));
-
-void IDT_load(const DT_register_t* dtr)
+static void IDT_load(const DT_register_t* dtr)
 {
     __asm__("cli");
     __asm__ volatile("lidt %0" : : "m"(idtr));
 }
 
 // install a new interrupt handler
-static void IDT_install_irq_handler(IDT_descriptor_t* idtd, uint8_t gate_type, uint8_t dpl, uint16_t sel, irq_handler irq)
+static void IDT_set_IDT_handler(IDT_descriptor_t* idtd, uint8_t gate_type, uint8_t dpl, uint16_t sel, IDT_Handler idt)
 {
-    register uint32_t base = ((uint32_t)&(*irq));
+    register uint32_t base = ((uint32_t)&(*idt));
 
     idtd->base_lo   = base & 0xFFFF;
     idtd->base_hi   = (base >> 16) & 0xFFFF;
@@ -163,34 +164,42 @@ static void IDT_install_irq_handler(IDT_descriptor_t* idtd, uint8_t gate_type, u
 
 void IDT_default_handler()
 {
-    clearVGA();
-    writeVGAChar(0, 0, 'X', 15);
+    VGA_clear();
+    VGA_WriteChar(0, 0, 'X', 15);
     while(1);
 }
 
+void IDT_set_gate(const uint8_t numInt, IDT_Handler idt_func)
+{
+    IDT_set_IDT_handler(&idtd[numInt], IDT_GATE_INT32, IDT_DPL_RING0, CODE_SEL, idt_func);
+}
 
-void IDT_initialize(/*uint16_t codeSel*/)
+static void IDT_init(/*uint16_t codeSel*/)
 {
     // TODO: not sure now how to segment memory and install interrupt handler..
     //       so for now just basic settings for the function to almost work.
 
-    int code_sel = 0x8;
-    // writeVGAChar(20,0,)
     // set up idtr for processor
-    idtr.size = sizeof(IDT_descriptor_t) * X86_MAX_INTERRUPTS - 1;
+    idtr.size = sizeof(IDT_descriptor_t) * MAX_INTERRUPTS - 1;
     idtr.offset	= (uint32_t)&idtd[0];
 
     //register default handlers
-    for (int i=0; i<X86_MAX_INTERRUPTS; i++)
+    for (int i=0; i < MAX_INTERRUPTS; i++)
     {
-        IDT_install_irq_handler(
+        IDT_set_IDT_handler(
             &idtd[i],
             IDT_GATE_INT32,
-            0,
-            code_sel,
+            IDT_DPL_RING0,
+            CODE_SEL,
             IDT_default_handler
         );
     }
 
     IDT_load(&idtr);
+}
+
+void init_descriptor_tables()
+{
+    GDT_init();
+    IDT_init();
 }

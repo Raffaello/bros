@@ -19,12 +19,14 @@ BUILD_DIR=build
 SRC  = ${SRC_DIR}/kernel.c $(wildcard ${SRC_DIR}/lib/*.c ${SRC_DIR}/cpu/*.c ${SRC_DIR}/bios/*.c wildcard ${SRC_DIR}/drivers/*.c)
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
 
-SRC_S  = $(wildcard ${SRC_DIR}/lib/*.S ${SRC_DIR}/cpu/*.S)
+SRC_S  = $(wildcard ${SRC_DIR}/lib/*.S ${SRC_DIR}/cpu/*.S ${SRC_DIR}/drivers/*.S)
 OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)
 
 INCLUDE_DIR=${SRC_DIR}
 
-#CFLAGS+=-Wall -Werror #-Wmissing-prototypes
+ASFLAGS+=-k -I src/bootloader
+
+CFLAGS+=-Wall -Werror #-Wmissing-prototypes
 CFLAGS+=-masm=intel
 # CFLAGS+=-o2
 CFLAGS+=-g
@@ -32,6 +34,7 @@ CFLAGS+=-std=c17
 CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR}
 CFLAGS+=-nostartfiles -nostdlib
 CFLAGS+=-lgcc
+CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
 
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
@@ -40,23 +43,23 @@ LFLAGS+=-Ttext ${KERNEL_SEG}
 
 .PHONY: kernel $(OBJS)
 
-# t:
-# 	echo ${SRC}
-# 	echo ${OBJS}
-# 	echo ${SRC_S}
-# 	echo ${OBJS_S}
+t:
+	echo ${SRC}
+	echo ${OBJS}
+	echo ${SRC_S}
+	echo ${OBJS_S}
 
 all: floppy boot2 image kernel
 
 floppy:
 	@mkdir -p build
-	as -k -o build/boot.o src/bootloader/floppy.asm -I src/bootloader
+	as ${ASFLAGS} -o build/boot.o src/bootloader/floppy.asm
 	ld -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG}
 	objcopy -O binary -j .text build/boot.out bin/boot.bin
 
 boot2:
 	@mkdir -p build
-	as -k -o build/boot2.o src/bootloader/boot2.asm -I src/bootloader
+	as ${ASFLAGS} -o build/boot2.o src/bootloader/boot2.asm
 	ld -o build/boot2.out build/boot2.o -Ttext ${BOOT2_REL_SEG}
 	objcopy -O binary -j .text build/boot2.out bin/boot2.bin
 
@@ -92,11 +95,12 @@ image: floppy boot2 kernel
 gdb-kernel-debug: image
 	qemu-system-i386 -fda ${FLOPPY_IMAGE_NAME} -S -s &
 	gdb build/kernel.out  \
-        -ex 'target remote localhost:1234' \
-        -ex 'layout src' \
-        -ex 'layout reg' \
-        -ex 'break _start' \
-        -ex 'continue'
+		-ex 'target remote localhost:1234' \
+		-ex 'layout src' \
+		-ex 'layout reg' \
+		-ex 'break _start' \
+		-ex 'set disassembly-flavor intel' \
+		-ex 'continue'
 
 clean:
 	rm bin/* -fv
