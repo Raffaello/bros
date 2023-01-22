@@ -107,6 +107,9 @@ void PIC_init()
     // Send Initialization control word 4. Enables x86 mode
     outb(PIC1_REG_DATA, PIC_ICW4_UPM_86MODE);
     outb(PIC2_REG_DATA, PIC_ICW4_UPM_86MODE);
+
+    outb(PIC1_REG_DATA, 0x0);
+    outb(PIC2_REG_DATA, 0x0);
 }
 
 void PIC_EOI(const uint8_t num_int)
@@ -115,7 +118,7 @@ void PIC_EOI(const uint8_t num_int)
         outb(PIC2_REG_STATUS, PIC_OCW2_MASK_EOI);
     }
 
-    outb(PIC2_REG_STATUS, PIC_OCW2_MASK_EOI);
+    outb(PIC1_REG_STATUS, PIC_OCW2_MASK_EOI);
 }
 
 

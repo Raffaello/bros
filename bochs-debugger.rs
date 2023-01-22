@@ -39,7 +39,7 @@ clock: sync=none, time0=local, rtc_sync=0
 # no cmosimage
 log: -
 logprefix: %t%e%d
-debug: action=ignore
+debug: action=ignore, PIC=report
 info: action=report
 error: action=report
 panic: action=ask

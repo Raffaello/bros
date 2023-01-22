@@ -1,6 +1,5 @@
 #include <lib/ISR.h>
 #include <defs/interrupts.h>
-#include <cpu/GDT_IDT.h>
 
 #include <bios/vga.h>
 #include <lib/std.h>
@@ -56,6 +55,7 @@ extern void ISR_INT_19();
 extern void ISR_INT_20();
 extern void ISR_INT_21();
 
+extern void IDT_set_gate();
 
 void ISR_init()
 {

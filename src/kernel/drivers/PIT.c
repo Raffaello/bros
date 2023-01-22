@@ -39,7 +39,7 @@
 #define PIT_OCW_COUNTER_1           0x40    //01000000
 #define PIT_OCW_COUNTER_2           0x80    //10000000
 
-static uint32_t ticks = 0;
+static volatile uint32_t ticks = 0;
 
 static void timer_callback(IRQ_registers_t r)
 {
@@ -50,24 +50,33 @@ static void timer_callback(IRQ_registers_t r)
     VGA_WriteString(0,24, buf, VGA_COLOR_BRIGHT_GREEN);
 }
 
-void PIT_init()
+void PIT_init(const uint32_t freq)
 {
+    // PIT_set_timer_freq(freq);
     // Timer
     IRQ_register_interrupt_handler(IRQ_TIMER, timer_callback);
 }
 
 void PIT_set_timer_freq(const uint32_t freq)
 {
-    uint32_t divisor = PIT_FREQ / freq;
+    if (freq == 0)
+        return;
+    __asm__("pushfd");
+    __asm__("cli");
+
+    const uint16_t divisor = (uint16_t) (PIT_FREQ / freq);
 
     // Send the command byte.
    outb(PIT_REG_CMD, PIT_OCW_BINCOUNT_BINARY | PIT_OCW_MODE_SQUAREWAVEGEN | PIT_OCW_RL_DATA | PIT_OCW_COUNTER_0);
 
    // Divisor has to be sent byte-wise, so split here into upper/lower bytes.
-   register uint8_t l = (uint8_t)(divisor & 0xFF);
-   register uint8_t h = (uint8_t)( (divisor >> 8) & 0xFF);
+   register uint8_t l = (uint8_t) (divisor & 0xFF);
+   register uint8_t h = (uint8_t) ((divisor >> 8) & 0xFF);
 
    // Send the frequency divisor.
    outb(PIT_REG_COUNTER0, l);
    outb(PIT_REG_COUNTER0, h);
+
+   ticks = 0;
+   __asm__("popfd");
 }
