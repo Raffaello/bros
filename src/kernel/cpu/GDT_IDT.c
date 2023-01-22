@@ -151,9 +151,9 @@ static void IDT_load(const DT_register_t* dtr)
 }
 
 // install a new interrupt handler
-static void IDT_set_IRQ_handler(IDT_descriptor_t* idtd, uint8_t gate_type, uint8_t dpl, uint16_t sel, IRQ_Handler irq)
+static void IDT_set_IDT_handler(IDT_descriptor_t* idtd, uint8_t gate_type, uint8_t dpl, uint16_t sel, IDT_Handler idt)
 {
-    register uint32_t base = ((uint32_t)&(*irq));
+    register uint32_t base = ((uint32_t)&(*idt));
 
     idtd->base_lo   = base & 0xFFFF;
     idtd->base_hi   = (base >> 16) & 0xFFFF;
@@ -169,9 +169,9 @@ void IDT_default_handler()
     while(1);
 }
 
-void IDT_set_gate(const uint8_t numInt, IRQ_Handler irq_func)
+void IDT_set_gate(const uint8_t numInt, IDT_Handler idt_func)
 {
-    IDT_set_IRQ_handler(&idtd[numInt], IDT_GATE_INT32, IDT_DPL_RING0, CODE_SEL, irq_func);
+    IDT_set_IDT_handler(&idtd[numInt], IDT_GATE_INT32, IDT_DPL_RING0, CODE_SEL, idt_func);
 }
 
 static void IDT_init(/*uint16_t codeSel*/)
@@ -186,7 +186,7 @@ static void IDT_init(/*uint16_t codeSel*/)
     //register default handlers
     for (int i=0; i < MAX_INTERRUPTS; i++)
     {
-        IDT_set_IRQ_handler(
+        IDT_set_IDT_handler(
             &idtd[i],
             IDT_GATE_INT32,
             IDT_DPL_RING0,

@@ -20,5 +20,4 @@
 #define IRQ_ATA_PRIMARY     6   // ATA Primary Controller
 #define IRQ_ATA_SECONDARY   7   // ATA Secondary Controller 
 
-// Interrupt handler function type definition
-typedef void ((*IRQ_Handler)(void));
+#define IRQ_TOTAL           16

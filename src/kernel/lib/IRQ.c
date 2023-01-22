@@ -8,20 +8,17 @@
 #include <drivers/PIC.h>
 #include <cpu/GDT_IDT.h>
 
-#pragma pack(push, 1)
-typedef struct IRQ_registers_t
-{
-   uint16_t ds;                                         // Data segment selector
-   uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;     // Pushed by pusha.
-   uint32_t irq_no/*, irq_map*/;                            // IRQ
-   uint32_t eip, cs, eflags, useresp, ss;               // Pushed by the processor automatically, restored by iretd.
-
-} __attribute__((packed)) IRQ_registers_t;
-#pragma pack(pop)
+IRQ_Handler_t irq_handlers[IRQ_TOTAL];
 
 void IRQ_UniversalHandler(IRQ_registers_t r)
 {
     PIC_EOI(r.irq_no);
+
+    if (irq_handlers[r.irq_no] != NULL)
+    {
+       IRQ_Handler_t handler = irq_handlers[r.irq_no];
+       handler(r);
+    }
 }
 
 extern void IRQ_INT_0();
