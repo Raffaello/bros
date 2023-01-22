@@ -40,14 +40,13 @@ GDT_TOC:
 .globl GDT_load_asm
 GDT_load_asm:
   cli
-  sgdt [GDT_TOC]
   lgdt [GDT_TOC]
 reloadSegments:
    # Reload CS register containing code selector:
-   JMP   GDT_CODE_SEG:reload_CS # 0x08 is a stand-in for your code segment
+   JMP   GDT_CODE_SEG:reload_CS
 reload_CS:
    # Reload data segment registers:
-   MOV   AX, GDT_DATA_SEG # 0x10 is a stand-in for your data segment
+   MOV   AX, GDT_DATA_SEG
    MOV   DS, AX
    MOV   ES, AX
    MOV   FS, AX

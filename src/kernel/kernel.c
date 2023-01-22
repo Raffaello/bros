@@ -5,7 +5,7 @@
 #include <lib/std.h>
 #include <drivers/PIC.h>
 #include <drivers/PIT.h>
-#include <lib/exceptions.h>
+#include <lib/ISR.h>
 
 #ifndef KERNEL_SEG
     #error KERNEL_SEG define missing
@@ -34,7 +34,7 @@ void _start()
     init_descriptor_tables();
     PIC_init();
     PIT_init();
-    init_exception_handlers();
+    ISR_init();
     __asm__("sti");
     main();
 }
@@ -50,7 +50,8 @@ void main()
     VGA_update_cursor(0, 24);
 
 // TEST int handler
-    //  __asm__("int 0");
+    //  __asm__("int 5");
+     __asm__("int 4");
 
     while(1);
 }

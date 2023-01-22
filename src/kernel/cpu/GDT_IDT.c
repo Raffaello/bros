@@ -16,7 +16,7 @@
 #define GDT_FLAGS_DB            0x4 // Size
 #define GDT_FLAGS_G             0x8 // Granularity
 
-// NOTE: I had issue reloading a GDT from C, so i have done it trhough ASM
+// NOTE: I had issue reloading a GDT from C, so i have done it through ASM
 //       Not sure why the gdtd[] isn't initialized, but just zeros
 //       forced to call some code to set up and i don't want it.
 //       there were some other errors with memory address etc.
@@ -24,7 +24,10 @@
 // CONS: I don't have the CODE_SEG from ASM accessible here.
 //       it might force to do IDT into ASM as well.
 //       prefer ASM anyway..
+// TODO: review later...
 extern void GDT_load_asm();
+
+#define CODE_SEL            0x8 // hardcoded, it depends on the GDT selector. for now keep it simple
 
 
 // extern void GDT_reload_segment(uint16_t codeSeg, uint16_t dataSeg); // defined in cpu/GDT_reload_segment.S
@@ -125,7 +128,7 @@ void GDT_init()
 // ***                  IDT section                       ***
 // ----------------------------------------------------------
 
-#define X86_MAX_INTERRUPTS  256
+#define MAX_INTERRUPTS  256
 
 #define IDT_GATE_TASK       0x5 // 
 #define IDT_GATE_INT16      0x6 // 16-bit
@@ -134,15 +137,13 @@ void GDT_init()
 #define IDT_GATE_TRAP32     0xF // 32-bit
 
 #define IDT_DPL_RING0       0   // no bits
-#define IDT_DPL_RING1       2   // bit 1
+#define IDT_DPL_RING1       2   // bit 1  (looks weird ring 1 & 2 have that bits swapped...)
 #define IDT_DPL_RING2       1   // bit 0
 #define IDT_DPL_RING3       3   // both bits
 
 
-#define CODE_SEL            0x8 // hardcoded, it depends on the GDT selector. for now keep it simple
-
 //interrupt descriptor table
-static struct IDT_descriptor_t  idtd[X86_MAX_INTERRUPTS];
+static struct IDT_descriptor_t  idtd[MAX_INTERRUPTS];
 
 static struct DT_register_t     idtr;
 
@@ -182,14 +183,13 @@ void IDT_init(/*uint16_t codeSel*/)
 {
     // TODO: not sure now how to segment memory and install interrupt handler..
     //       so for now just basic settings for the function to almost work.
-    // int code_sel = 0x8;
 
     // set up idtr for processor
-    idtr.size = sizeof(IDT_descriptor_t) * X86_MAX_INTERRUPTS - 1;
+    idtr.size = sizeof(IDT_descriptor_t) * MAX_INTERRUPTS - 1;
     idtr.offset	= (uint32_t)&idtd[0];
 
     //register default handlers
-    for (int i=0; i<X86_MAX_INTERRUPTS; i++)
+    for (int i=0; i < MAX_INTERRUPTS; i++)
     {
         IDT_set_IRQ_handler(
             &idtd[i],
