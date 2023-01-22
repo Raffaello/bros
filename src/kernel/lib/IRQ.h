@@ -1,7 +1,7 @@
 #pragma once
 
 #include <defs.h>
-#include <defs/IRQ.h>
+// #include <defs/IRQ.h>
 
 #pragma pack(push, 1)
 typedef struct IRQ_registers_t

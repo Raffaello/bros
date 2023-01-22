@@ -61,3 +61,14 @@ void IRQ_init()
     IDT_set_gate(PIC2_BASE_INT + IRQ_ATA_PRIMARY, IRQ_INT_14);
     IDT_set_gate(PIC2_BASE_INT + IRQ_ATA_SECONDARY, IRQ_INT_15);
 }
+
+void IRQ_register_interrupt_handler(uint8_t n, IRQ_Handler_t handler)
+{
+    // TODO: it can be more efficient havinga IDT_handler of 255 element instead
+    //       unifying IRQ & INT in 1 file ... 
+    //       do it later
+    if(n >= IRQ_TOTAL)
+        return;
+
+    irq_handlers[n] = handler;
+}
