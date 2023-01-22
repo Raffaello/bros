@@ -1,7 +1,6 @@
 #pragma once
 
 #include <defs.h>
-// #include <defs/IRQ.h>
 
 #pragma pack(push, 1)
 typedef struct IRQ_registers_t
@@ -17,7 +16,7 @@ typedef struct IRQ_registers_t
 // Enables registration of callbacks for interrupts or IRQs.
 // For IRQs, to ease confusion, use the #defines above as the
 // first parameter.
-typedef void (*IRQ_Handler_t)(IRQ_registers_t);
+typedef void ((*IRQ_Handler_t)(IRQ_registers_t));
 
 void IRQ_init();
 void IRQ_register_interrupt_handler(uint8_t n, IRQ_Handler_t handler);

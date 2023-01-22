@@ -35,9 +35,10 @@ void _start()
     init_descriptor_tables();
 
     PIC_init();
-    PIT_init();
     ISR_init();
     IRQ_init();
+    PIT_init();
+    PIT_set_timer_freq(1000);
 
     __asm__("sti");
     main();
