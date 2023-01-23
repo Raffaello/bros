@@ -54,7 +54,7 @@ to the kernel, for e.g., passing the Total amount of RAM installed, some "magic"
 
 ```
 EAX = 'BROS' # magic string
-EBX = address of a struct for system information (a.k.a multiboot). (mostly will be `0x800`).
+EBX = address of a struct for system information (a.k.a multiboot). (mostly will be `0x600`).
 ```
 
 The system info struct is something like (it might evolve as needed):

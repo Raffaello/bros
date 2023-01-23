@@ -8,6 +8,7 @@
 KERNEL_FILENAME_ATTRIB  = 0b00000111 # System, Hidden, Read-only
 KERNEL_SEG              = 0x1000   # where to load the kernel
 FAT_BUFFER_SEG          = 0x600    # where to store the values for the FAT Cluster linked list
+SYS_INFO_SEG            = FAT_BUFFER_SEG
 
 .global _start
 
@@ -118,8 +119,21 @@ main32:
   mov ds, ax
   mov ss, ax
   mov es, ax
-  mov esp, 0x9000       # stack start at 9000h
-  # sti                 # should it be enabled by the kernel?
+  mov esp, 0x9000               # stack start at 9000h
+  # Store SYS_INFO values
+  mov edi, SYS_INFO_SEG
+  mov eax, 0x12345678           # begin_marker
+  stosd
+  mov eax, 0xFFFFFFFF           # total ram (TODO)
+  stosd
+  mov al, DrvNum                # boot_device
+  stosb
+  mov eax, 0x87654321           # end_marker
+  stosd
+  # Store kernel parameters
+  mov eax, 0x42524F53           # Bootloader Magic value
+  mov ebx, SYS_INFO_SEG         # System Info data structor address
+
   call GDT_CODE_SEG:KERNEL_SEG
 
 main32_stop:

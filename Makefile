@@ -11,6 +11,7 @@ KERNEL_SEG=0x1000
 # BOOT_RESERVED_SECTORS=3
 # FLOPPY_SIZE=1440
 FLOPPY_IMAGE_NAME="br-dos.img"
+SYS_INFO_SEG=0x600 # same as BOOT_REL_SEG as it won't be used anymore
 
 CC=gcc
 SRC_DIR=src/kernel
@@ -34,7 +35,7 @@ CFLAGS+=-std=c17
 CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR}
 CFLAGS+=-nostartfiles -nostdlib
 CFLAGS+=-lgcc
-CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
+CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG} -DSYS_INFO_SEG=${SYS_INFO_SEG}
 
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic

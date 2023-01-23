@@ -21,7 +21,7 @@ _start:
 # OEM Parameter Block
 .org 0x3                            # Ensure the BPB starts at the correct place
 bootsector:
-OEM:          .ascii  "--BROS--"    # OEM String (starting at offset 3)
+  OEM:          .ascii  "--BROS--"    # OEM String (starting at offset 3)
   BytsPerSec:   .word  _BytsPerSec  # bytes per sector
   SecPerClus:   .byte  _SecPerClus  # sectors per cluster
   RsvdSecCnt:   .word  _RsvdSecCnt  # #of reserved sectors (2nd stage bootloader)

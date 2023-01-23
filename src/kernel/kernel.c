@@ -7,30 +7,46 @@
 #include <drivers/PIT.h>
 #include <lib/ISR.h>
 #include <lib/IRQ.h>
+#include <defs/boot_SYS_Info.h>
 
 #ifndef KERNEL_SEG
     #error KERNEL_SEG define missing
 #endif
 #define KERNEL_ADDR ((uint32_t*)(KERNEL_SEG))
 
-
 void main();
-// TODO: this is a basic int handlers, all ring0 for now
-// void init_interrupt_handlers();
-// void init_exception_handlers();
+void start_failure();
 
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
  __attribute__((force_align_arg_pointer))
 void _start()
 {
     __asm__ ("cli");
+
+    uint32_t _eax, _ebx;
+    __asm__ volatile("mov %0, eax" : "=a"(_eax));
+    __asm__ volatile("mov %0, ebx" : "=a"(_ebx));
+    
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmultichar"
+    // check boot sector EAX value
+    if(_eax != (uint32_t)('BROS'))
+#pragma GCC diagnostic pop
+    {
+        start_failure();
+    }
+    // point to EBX SYS_INFO struct
+    boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
+    if(_sys_info->begin_marker != 0x22345678 || _sys_info->end_marker != 0x87654321)
+    {
+         start_failure();
+    }
+    
     const uint32_t* _startPtr = (uint32_t*)&_start;
     // if not in the Kernel aspected address...
     if(_startPtr != KERNEL_ADDR)
-     {
-         // TODO display an error message
-        VGA_WriteChar(20,20,'Z',15);
-        __asm__("hlt");
+    {
+        start_failure();
     }
 
     init_descriptor_tables();
@@ -44,6 +60,16 @@ void _start()
     main();
 }
 
+void start_failure()
+{
+    const char fail_msg[] = "Kernel load failure";
+    
+    VGA_fill(VGA_COLOR_WHITE, VGA_COLOR_BLUE);
+    VGA_WriteString(0,0, fail_msg, VGA_COLOR_WHITE);
+    __asm__("hlt");
+    while(1);
+}
+
 void main()
 {
     const char hello_msg[] = "*** HELLO FROM BROSKRNL.SYS ***";
@@ -53,6 +79,7 @@ void main()
 
     VGA_enable_cursor(0, 0);
     VGA_update_cursor(0, 24);
+    VGA_scroll_down();
 
 // TEST int handler
     //  __asm__("int 5");
