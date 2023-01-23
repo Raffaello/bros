@@ -86,8 +86,13 @@ void VGA_scroll_down()
     uint8_t *video_mem = (uint8_t*) VGA_MEM_TEXT;
     // TODO: using with eax=0 and rep movsd, shouldn't be faster?
     // TODO: besides this imply vga mode 3 :) ok for now
-    for(int i = VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2 - 2; i >=0 ;--i)
+    for(int i = VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT-1) * 2; i >=0 ;--i)
     {
         video_mem[i-2] = video_mem[i];
+    }
+    for(int i = VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT) * 2 - 1; i > VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT-1) * 2;)
+    {
+        video_mem[i--]=_col;
+        video_mem[i--]=0;
     }
 }

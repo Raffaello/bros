@@ -8,6 +8,7 @@
 #include <lib/ISR.h>
 #include <lib/IRQ.h>
 #include <defs/boot_SYS_Info.h>
+#include <lib/conio.h>
 
 #ifndef KERNEL_SEG
     #error KERNEL_SEG define missing
