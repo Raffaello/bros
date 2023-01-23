@@ -24,6 +24,7 @@ DrvNum:           .byte  0
 .include "utils/GateA20.asm"
 .include "filesystems/FAT12.asm"
 .include "bios/PrintNumber.asm"
+.include "bios/GetTotalMemory.asm"
 
 main:
   # in AL has been passed the DrvNum, storing it
@@ -82,6 +83,17 @@ load_fat:
   lea si, ok_msg
   call PrintStringNewLine
 
+  # Store SYS_INFO values
+  mov edi, SYS_INFO_SEG
+  mov eax, 0x12345678           # begin_marker
+  stosd
+  call GetTotalMemorySize
+  stosd
+  mov al, DrvNum                # boot_device
+  stosb
+  mov eax, 0x87654321           # end_marker
+  stosd
+  
   # Enable Gate A20
   lea si, a20_msg
   call PrintStringDots
@@ -120,22 +132,12 @@ main32:
   mov ss, ax
   mov es, ax
   mov esp, 0x9000               # stack start at 9000h
-  # Store SYS_INFO values
-  mov edi, SYS_INFO_SEG
-  mov eax, 0x12345678           # begin_marker
-  stosd
-  mov eax, 0           # total ram
-  stosd
-  mov al, DrvNum                # boot_device
-  stosb
-  mov eax, 0x87654321           # end_marker
-  stosd
   # Store kernel parameters
   mov eax, 0x42524F53           # Bootloader Magic value
-  mov ebx, SYS_INFO_SEG         # System Info data structor address
+  mov ebx, SYS_INFO_SEG         # System Info struct address
 
-  call GDT_CODE_SEG:KERNEL_SEG
-
+  jmp GDT_CODE_SEG:KERNEL_SEG  # not sure the kernel will never return, so no point to 'call'
+  # dead code below, it will be overridden by kernel memory manager anyway
 main32_stop:
   cli
   hlt
