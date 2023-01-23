@@ -30,15 +30,17 @@ void _start()
     
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmultichar"
-    // check boot sector EAX value
-    if(_eax != (uint32_t)('BROS'))
+    uint32_t __BROS = (uint32_t)('BROS');
 #pragma GCC diagnostic pop
+    // check boot sector EAX value
+    if(_eax != __BROS)
     {
         start_failure();
     }
+
     // point to EBX SYS_INFO struct
     boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
-    if(_sys_info->begin_marker != 0x22345678 || _sys_info->end_marker != 0x87654321)
+    if(_sys_info->begin_marker != 0x12345678 || _sys_info->end_marker != 0x87654321)
     {
          start_failure();
     }
@@ -80,7 +82,6 @@ void main()
 
     VGA_enable_cursor(0, 0);
     VGA_update_cursor(0, 24);
-    VGA_scroll_down();
 
 // TEST int handler
     //  __asm__("int 5");

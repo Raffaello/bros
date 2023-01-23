@@ -84,15 +84,16 @@ void VGA_update_cursor(const int x, const int y)
 void VGA_scroll_down()
 {
     uint8_t *video_mem = (uint8_t*) VGA_MEM_TEXT;
-    // TODO: using with eax=0 and rep movsd, shouldn't be faster?
-    // TODO: besides this imply vga mode 3 :) ok for now
-    for(int i = VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT-1) * 2; i >=0 ;--i)
+    register uint8_t col = video_mem[VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT) * 2 - 1];
+
+    for(int i = 0; i < VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT-1) * 2 ;i++)
     {
-        video_mem[i-2] = video_mem[i];
+        video_mem[i] = video_mem[i + (VGA_TEXT_WIDTH*2)];
     }
-    for(int i = VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT) * 2 - 1; i > VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT-1) * 2;)
+
+    for(int i = VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT-1) * 2; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;)
     {
-        video_mem[i--]=_col;
-        video_mem[i--]=0;
+        video_mem[i++]=0;
+        video_mem[i++]=col; // last background char
     }
 }

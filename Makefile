@@ -3,6 +3,7 @@
 # TODO to pass these values to ASM need to convert them to .S files and compiling them wih GCC
 #      at that point these can be defined as "defines" from CLI
 #      otherwise use NASM/FASM
+FAT_RESERVED_SECTORS=4
 BIOS_BOOT_SEG=0x7C00
 BOOT_REL_SEG=0x600
 BOOT2_REL_SEG=${BIOS_BOOT_SEG}
@@ -87,7 +88,7 @@ kernel: $(OBJS) ${OBJS_S}
 
 image: floppy boot2 kernel
 	# Using 2 extra Reserved Sectors
-	mformat -i ${FLOPPY_IMAGE_NAME} -v BROS -B bin/boot.bin -R 3 -f1440 -C
+	mformat -i ${FLOPPY_IMAGE_NAME} -v BROS -B bin/boot.bin -R ${FAT_RESERVED_SECTORS} -f1440 -C
 	dd if=bin/boot2.bin of=${FLOPPY_IMAGE_NAME} conv=notrunc seek=1
 	mcopy -i ${FLOPPY_IMAGE_NAME} bin/kernel.sys ::/BROSKRNL.SYS
 	mattrib -i ${FLOPPY_IMAGE_NAME} +r +h +s -a /BROSKRNL.SYS

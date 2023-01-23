@@ -124,7 +124,7 @@ main32:
   mov edi, SYS_INFO_SEG
   mov eax, 0x12345678           # begin_marker
   stosd
-  mov eax, 0xFFFFFFFF           # total ram (TODO)
+  mov eax, 0           # total ram
   stosd
   mov al, DrvNum                # boot_device
   stosb
