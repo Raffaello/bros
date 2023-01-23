@@ -68,7 +68,7 @@ main:
   mov si, BIOS_BOOT_SEG
   rep movsw         # relocating from 0x7c00 to 0x600
   # jmp 0:BOOT_RELOCATE_SEG + (main_relocated - _start)
-  jmp 0: main_relocated
+  jmp 0:main_relocated
 
 main_relocated:
   mov  sp, BOOT_RELOCATE_SEG - 2     # Stack grows down from offset 0x600 toward 0x0000.
@@ -78,7 +78,7 @@ main_relocated:
   lea  si, banner_msg
   call PrintString
 
-# Display Total Memory (it can be removed as it is a waste of space)
+# Display Total Low Memory (it can be removed as it is a waste of space)
   lea si, mem_msg
   call PrintString
   call GetMemorySize
@@ -96,8 +96,9 @@ main_relocated:
   call PrintStringDots
 
   mov dl, DrvNum
-  mov bx, BOOT2_SEG  # where to load
-  mov al, RsvdSecCnt    # Reading the FAT reserved sector(s), where the 2nd stage bootloader is located
+  mov bx, BOOT2_SEG     # where to load
+  mov al, 2 # RsvdSecCnt    # Reading the FAT reserved sector(s), where the 2nd stage bootloader is located
+#   dec al                # remove boot sector 0
   mov ch, 0             # Cylinder 0
   mov dh, 0             # Head 0
   mov cl, 2             # 2nd sector, 1 is boot sector (this one), next one is the 1st reserved sector
