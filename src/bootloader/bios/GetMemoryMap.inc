@@ -1,8 +1,8 @@
 # ***************************************************************** #
 # GetMemoryMap BIOS Call                                            #
 #                                                                   #
-# BOCHS doesn't support this function                               #
-# So this function is optional for the bootloader ...               #
+# BOCHS & QEMU don't support this function                          #
+# So this function is optional for the bootloader...                #
 # ----------------------------------------------------------------- #
 # Parameters:                                                       #
 #   ES:DI Destination Buffer, where to store results                #

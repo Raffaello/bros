@@ -103,13 +103,13 @@ load_fat:
   lea si, mem_map_msg
   call PrintStringDots
   mov edi, 0x2000 # test, change later
-  push bp
   call GetMemoryMap
   # todo pass to the kernel ...
-  pop bp
-
+  cmp bp, 0
+  je GetMemoryMap_not_supported
   lea si, ok_msg
   call PrintStringNewLine
+GetMemoryMap_not_supported:
   # Enable Gate A20
   lea si, a20_msg
   call PrintStringDots
