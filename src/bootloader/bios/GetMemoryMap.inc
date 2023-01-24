@@ -3,6 +3,7 @@
 #                                                                   #
 # BOCHS & QEMU don't support this function                          #
 # So this function is optional for the bootloader...                #
+# I can't test it so it won't be sent to the Kernel                 #
 # ----------------------------------------------------------------- #
 # Parameters:                                                       #
 #   ES:DI Destination Buffer, where to store results                #
