@@ -60,7 +60,6 @@ main:
   mov  ds, ax        # DS = CS = 0x0
   mov  es, ax        # ES = CS = 0x0
   mov  ss, ax        # SS = CS = 0x0
-  # sti                # enable interrupts
   
   # *** Self Relocating Boot sector ***
   mov cx, 256        # 512 bytes => 256 words
@@ -78,7 +77,7 @@ main_relocated:
   lea  si, banner_msg
   call PrintString
 
-# Display Total Low Memory (it can be removed as it is a waste of space)
+# Display Total Low Memory (it can be removed as it is not useful)
   lea si, mem_msg
   call PrintString
   call GetMemorySize
@@ -96,12 +95,12 @@ main_relocated:
   call PrintStringDots
 
   mov dl, DrvNum
-  mov bx, BOOT2_SEG     # where to load
-  mov al, 2 # RsvdSecCnt    # Reading the FAT reserved sector(s), where the 2nd stage bootloader is located
-#   dec al                # remove boot sector 0
-  mov ch, 0             # Cylinder 0
-  mov dh, 0             # Head 0
-  mov cl, 2             # 2nd sector, 1 is boot sector (this one), next one is the 1st reserved sector
+  mov bx, BOOT2_SEG         # where to load
+  mov al, RsvdSecCnt        # Reading the FAT reserved sector(s), where the 2nd stage bootloader is located
+  dec al                    # removing sector 0
+  mov ch, 0                 # Cylinder 0
+  mov dh, 0                 # Head 0
+  mov cl, 2                 # 2nd sector, 1 is boot sector (this one), next one is the 1st reserved sector
   call DriveReadSectors
   lea si, ok_msg
   call PrintStringNewLine

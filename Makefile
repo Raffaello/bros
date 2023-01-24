@@ -26,7 +26,8 @@ OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)
 
 INCLUDE_DIR=${SRC_DIR}
 
-ASFLAGS+=-k -I src/bootloader
+ASFLAGS+=--fatal-warnings -n --32 -march=i386 -I src/bootloader
+AS_LFLAGS+=-m elf_i386
 
 CFLAGS+=-Wall -Werror #-Wmissing-prototypes
 CFLAGS+=-masm=intel
@@ -56,13 +57,13 @@ all: floppy boot2 image kernel
 floppy:
 	@mkdir -p build
 	as ${ASFLAGS} -o build/boot.o src/bootloader/floppy.asm
-	ld -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG}
+	ld ${AS_LFLAGS} -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG}
 	objcopy -O binary -j .text build/boot.out bin/boot.bin
 
 boot2:
 	@mkdir -p build
 	as ${ASFLAGS} -o build/boot2.o src/bootloader/boot2.asm
-	ld -o build/boot2.out build/boot2.o -Ttext ${BOOT2_REL_SEG}
+	ld ${AS_LFLAGS} -o build/boot2.out build/boot2.o -Ttext ${BOOT2_REL_SEG}
 	objcopy -O binary -j .text build/boot2.out bin/boot2.bin
 
 .SECONDEXPANSION:

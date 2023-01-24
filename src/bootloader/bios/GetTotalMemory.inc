@@ -30,12 +30,9 @@ GetTotalMemorySize:
   mov eax,ecx                   # 1 MB less to avoid ecx overflow
   shl edx, 6                    # times 64
   add eax, edx
-  
-  
-
 
   ret
-
 GetTotalMemorySize_error:
     call BootFailure
+.endfunc
 .endif
