@@ -8,7 +8,7 @@
 KERNEL_FILENAME_ATTRIB  = 0b00000111 # System, Hidden, Read-only
 KERNEL_SEG              = 0x1000   # where to load the kernel
 FAT_BUFFER_SEG          = 0x600    # where to store the values for the FAT Cluster linked list
-SYS_INFO_SEG            = FAT_BUFFER_SEG
+SYS_INFO_SEG            = 0x600
 
 .global _start
 

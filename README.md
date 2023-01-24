@@ -25,17 +25,17 @@ The main goal of this project and its evolution is just for **learning** purpose
 
 It boots from a FAT12 Boot sector (0).
 
-It is self-relocating to `0x600` memory region and chain loading the FAT extra Reserved Sectors in his previous address atv`0x7C00` using BIOS interrupts for screen and disk I/O.
+It is self-relocating to `0x600` memory region and chain loading the FAT extra Reserved Sectors in his previous address at `0x7C00` using BIOS interrupts for screen and disk I/O.
 
 The first section of the boot-loader is passing the boot drive number in AL register.
 
-So when jumping to the 2nd stage, that information is passed on throug a CPU Register (AL).
+So when jumping to the 2nd stage, that information is passed on through a CPU Register (AL).
 
 ---
 
-The chained loaded 2nd stage is searching the Kernel file in the FAT12 filesystem and loading it at `0x1000`.
+The 2nd stage is searching the Kernel file in the FAT12 filesystem and loading it at `0x1000`.
 
-Then switch the CPU to Protected MODE (32 bits) and enabling A20 Gate (addressing up to 4GB RAM),
+Then It switches the CPU to Protected Mode (32 bits) and enabling A20 Gate (addressing up to 4GB RAM),
  then it executes the kernel.
 
 **NOTE:**
@@ -54,7 +54,7 @@ to the kernel, for e.g., passing the Total amount of RAM installed, some "magic"
 
 ```
 EAX = 'BROS' # magic string
-EBX = address of a struct for system information (a.k.a multiboot). (mostly will be `0x600`).
+EBX = address of a struct for system information (a.k.a multiboot). (mostly will be `0x600`) (not really required).
 ```
 
 The system info struct is something like (it might evolve as needed):
@@ -77,7 +77,7 @@ The name must be `BROSKRNL.SYS` with Hidden, System, Read-Only attributes.
 
 The kernel is a 32 bit executable and therefore need at least a `80386` CPU running in protected mode.
 
-At its very entry point, it performs some validation check that it has been loaded correctly from the bootloader, retrieving also some information passed by the bootloader at some given memory location.
+At its very entry point, it performs some validation checks, it has been loaded correctly from the bootloader and retrieving some information passed by the bootloader at some given memory location.
 
  It will also perform the re-initialization of protected memory and interrupts as a per Intel specs, also setting up the `PIC` and the `PIT`.
 
