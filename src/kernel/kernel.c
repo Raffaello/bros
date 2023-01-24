@@ -7,30 +7,43 @@
 #include <drivers/PIT.h>
 #include <lib/ISR.h>
 #include <lib/IRQ.h>
+#include <defs/boot_SYS_Info.h>
+#include <lib/conio.h>
 
 #ifndef KERNEL_SEG
     #error KERNEL_SEG define missing
 #endif
 #define KERNEL_ADDR ((uint32_t*)(KERNEL_SEG))
 
-
 void main();
-// TODO: this is a basic int handlers, all ring0 for now
-// void init_interrupt_handlers();
-// void init_exception_handlers();
+void start_failure();
 
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
  __attribute__((force_align_arg_pointer))
 void _start()
 {
     __asm__ ("cli");
-    const uint32_t* _startPtr = (uint32_t*)&_start;
+
+    uint32_t _eax, _ebx;
+    __asm__ volatile("mov %0, eax" : "=m"(_eax));
+    __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
+    // TODO: set up kernel stack, EBP,ESP ...
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmultichar"
+    uint32_t __BROS = (uint32_t)('BROS');
+#pragma GCC diagnostic pop
+    // check boot sector EAX value
+    // point to EBX SYS_INFO struct
     // if not in the Kernel aspected address...
-    if(_startPtr != KERNEL_ADDR)
-     {
-         // TODO display an error message
-        VGA_WriteChar(20,20,'Z',15);
-        __asm__("hlt");
+    boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
+    const uint32_t* _startPtr = (uint32_t*)&_start;
+    if(_eax != __BROS 
+        || _sys_info->begin_marker != SYS_INFO_BEGIN
+        || _sys_info->end_marker != SYS_INFO_END
+        || _startPtr != KERNEL_ADDR)
+    {
+         start_failure();
     }
 
     init_descriptor_tables();
@@ -42,6 +55,16 @@ void _start()
 
     __asm__("sti");
     main();
+}
+
+void start_failure()
+{
+    const char fail_msg[] = "Kernel load failure";
+    
+    VGA_fill(VGA_COLOR_WHITE, VGA_COLOR_BLUE);
+    VGA_WriteString(0,0, fail_msg, VGA_COLOR_WHITE);
+    __asm__("hlt");
+    while(1);
 }
 
 void main()

@@ -8,6 +8,7 @@
 KERNEL_FILENAME_ATTRIB  = 0b00000111 # System, Hidden, Read-only
 KERNEL_SEG              = 0x1000   # where to load the kernel
 FAT_BUFFER_SEG          = 0x600    # where to store the values for the FAT Cluster linked list
+SYS_INFO_SEG            = 0x600
 
 .global _start
 
@@ -17,12 +18,14 @@ KERNEL_FILENAME:  .ascii "BROSKRNLSYS"
 DrvNum:           .byte  0
   # nop
 
-.include "bios/PrintStringNewLine.asm"
-.include "bios/PrintStringDots.asm"
-.include "GDT.asm"
-.include "utils/GateA20.asm"
-.include "filesystems/FAT12.asm"
-.include "bios/PrintNumber.asm"
+.include "bios/PrintStringNewLine.inc"
+.include "bios/PrintStringDots.inc"
+.include "cpu/GDT.inc"
+.include "utils/GateA20.inc"
+.include "filesystems/FAT12.inc"
+.include "bios/PrintNumber.inc"
+.include "bios/GetTotalMemory.inc"
+# .include "bios/GetMemoryMap.inc"
 
 main:
   # in AL has been passed the DrvNum, storing it
@@ -81,6 +84,33 @@ load_fat:
   lea si, ok_msg
   call PrintStringNewLine
 
+  # Store SYS_INFO values
+  lea si, sys_info_msg
+  call PrintStringDots
+  mov edi, SYS_INFO_SEG
+  mov eax, 0x12345678           # begin_marker
+  stosd
+  call GetTotalMemorySize
+  stosd
+  mov al, DrvNum                # boot_device
+  stosb
+  mov eax, 0x87654321           # end_marker
+  stosd
+  lea si, ok_msg
+  call PrintStringNewLine
+
+  # Store MemoryMap values
+#   lea si, mem_map_msg
+#   call PrintStringDots
+#   mov edi, 0x2000 # test, change later
+#   call GetMemoryMap
+  # todo pass to the kernel ...
+#   cmp bp, 0
+#   je GetMemoryMap_not_supported
+#   lea si, ok_msg
+#   call PrintStringNewLine
+# GetMemoryMap_not_supported:
+
   # Enable Gate A20
   lea si, a20_msg
   call PrintStringDots
@@ -118,26 +148,34 @@ main32:
   mov ds, ax
   mov ss, ax
   mov es, ax
-  mov esp, 0x9000       # stack start at 9000h
-  # sti                 # should it be enabled by the kernel?
-  call GDT_CODE_SEG:KERNEL_SEG
+  mov esp, 0x9000               # stack start at 9000h
+  # Store kernel parameters
+  mov eax, 0x42524F53           # Bootloader Magic value
+  mov ebx, SYS_INFO_SEG         # System Info struct address
+  # todo review 2 belows
+#   mov edx, 0x2000               # Memory Map Info struct address
+#   mov ecx, 0                    # Memory Map Info entries (BP pointer actually)
 
+  jmp GDT_CODE_SEG:KERNEL_SEG  # not sure the kernel will never return, so no point to 'call'
+  # dead code below, it will be overridden by kernel memory manager anyway
 main32_stop:
   cli
   hlt
   jmp main32_stop
 
 
-root_dir_msg:         .asciz "Loading Root Dir"
-find_kernel_file_msg: .asciz "Searching Kernel"
-load_fat_msg:         .asciz "Loading FAT"
-load_kernel_file_msg: .asciz "Loading Kernel"
-file_missing_msg:   .asciz "File Missing"
-a20_msg:            .asciz "Enabling A20"
-gdt_msg:            .asciz "Loading GDT"
-ok_msg:             .asciz "OK"
-pmode_msg:          .asciz "Enabling Protected Mode and starting Kernel"
-press_a_key_msg:    .asciz "Press any key." # this is partially duplicate with Reboot section
+root_dir_msg:           .asciz "Loading Root Dir"
+find_kernel_file_msg:   .asciz "Searching Kernel"
+load_fat_msg:           .asciz "Loading FAT"
+load_kernel_file_msg:   .asciz "Loading Kernel"
+file_missing_msg:       .asciz "File Missing"
+sys_info_msg:           .asciz "Store SYS_INFO"
+mem_map_msg:            .asciz "Store MEM_MAP_INFO"
+a20_msg:                .asciz "Enabling A20"
+gdt_msg:                .asciz "Loading GDT"
+ok_msg:                 .asciz "OK"
+pmode_msg:              .asciz "Enabling Protected Mode and starting Kernel"
+press_a_key_msg:        .asciz "Press any key."
 
-.fill ((_BytsPerSec * (_RsvdSecCnt)) -(. - _start)), 1, 0
+.fill ((_BytsPerSec * (_RsvdSecCnt - 1)) -(. - _start)), 1, 0
 

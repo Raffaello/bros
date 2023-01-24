@@ -26,7 +26,9 @@
 #define VGA_COLOR_YELLOW            14
 #define VGA_COLOR_WHITE             15
 
+void VGA_fill(const uint8_t fg_col, const uint8_t bg_col);
 void VGA_clear();
+
 void VGA_WriteChar(const int x, const int y, const char ch, uint8_t col);
 // TODO: optimize
 void VGA_WriteString(const int x, const int y, const char str[], uint8_t col);
@@ -35,3 +37,5 @@ void VGA_enable_cursor(const uint8_t cursor_start, const uint8_t cursor_end);
 void VGA_disable_cursor();
 
 void VGA_update_cursor(const int x, const int y);
+
+void VGA_scroll_down();

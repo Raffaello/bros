@@ -12,15 +12,30 @@
 #define VGA_TEXT_WIDTH 80
 #define VGA_TEXT_HEIGHT 25
 
-void VGA_clear()
+void VGA_fill(const uint8_t fg_col, const uint8_t bg_col)
 {
-    uint8_t *video_mem = (uint8_t*) 0xb8000;
+    uint8_t *video_mem = (uint8_t*) VGA_MEM_TEXT;
+    const register uint8_t v = (bg_col << 4) | fg_col;
     // TODO: using with eax=0 and rep movsd, shouldn't be faster?
     // TODO: besides this imply vga mode 3 :) ok for now
     for(int i = 0; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;) {
         video_mem[i++]=0;
-        video_mem[i++]=7;
+        video_mem[i++]=v;
     }
+}
+
+
+void VGA_clear()
+{
+    // uint8_t *video_mem = (uint8_t*) 0xb8000;
+    // // TODO: using with eax=0 and rep movsd, shouldn't be faster?
+    // // TODO: besides this imply vga mode 3 :) ok for now
+    // for(int i = 0; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;) {
+    //     video_mem[i++]=0;
+    //     video_mem[i++]=VGA_COLOR_GRAY;
+    // }
+
+    VGA_fill(VGA_COLOR_GRAY, VGA_COLOR_BLACK);
 }
 
 void VGA_WriteChar(const int x, const int y, const char ch, uint8_t col)
@@ -64,4 +79,21 @@ void VGA_update_cursor(const int x, const int y)
     outb(VGA_REG_DATA, (uint8_t) (pos & 0xFF));
     outb(VGA_REG_CTRL, 0x0E);
     outb(VGA_REG_DATA, (uint8_t) ((pos >> 8) & 0xFF));
+}
+
+void VGA_scroll_down()
+{
+    uint8_t *video_mem = (uint8_t*) VGA_MEM_TEXT;
+    register uint8_t col = video_mem[VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT) * 2 - 1];
+
+    for(int i = 0; i < VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT-1) * 2 ;i++)
+    {
+        video_mem[i] = video_mem[i + (VGA_TEXT_WIDTH*2)];
+    }
+
+    for(int i = VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT-1) * 2; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;)
+    {
+        video_mem[i++]=0;
+        video_mem[i++]=col; // last background char
+    }
 }

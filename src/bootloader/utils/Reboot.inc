@@ -4,8 +4,8 @@
 
 .ifndef Reboot
 
-.include "bios/PrintStringNewLine.asm"
-.include "bios/WaitKey.asm"
+.include "bios/PrintStringNewLine.inc"
+.include "bios/WaitKey.inc"
 
 .func Reboot
  Reboot:

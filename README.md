@@ -25,17 +25,18 @@ The main goal of this project and its evolution is just for **learning** purpose
 
 It boots from a FAT12 Boot sector (0).
 
-It is self-relocating to `0x600` memory region and chain loading the FAT extra Reserved Sectors in his previous address `0x7C00`.
+It is self-relocating to `0x600` memory region and chain loading the FAT extra Reserved Sectors in his previous address at `0x7C00` using BIOS interrupts for screen and disk I/O.
 
-It is using BIOS interrupts for screen and disk I/O.
+The first section of the boot-loader is passing the boot drive number in AL register.
+
+So when jumping to the 2nd stage, that information is passed on through a CPU Register (AL).
 
 ---
 
-The chained loaded 2nd stage,
-it is searching the Kernel file in the FAT filesystem and loading it.
+The 2nd stage is searching the Kernel file in the FAT12 filesystem and loading it at `0x1000`.
 
-Then switch the CPU to Protected MODE (32 bits) addressing up to 4GB RAM (A20 Gate),
-to be able to execute the kernel.
+Then It switches the CPU to Protected Mode (32 bits) and enabling A20 Gate (addressing up to 4GB RAM),
+ then it executes the kernel.
 
 **NOTE:**
 
@@ -45,6 +46,29 @@ have been used.
 
 The FAT allow that, so just took advantages of it.
 
+
+### Multi-Boot
+
+The 2nd stage bootloader is not a real multi-boot loader, but it uses some of its specification to communicate correctly
+to the kernel, for e.g., passing the Total amount of RAM installed, some "magic" values to recognized the kernel was loaded from its official bootloader and so on:
+
+```
+EAX = 'BROS' # magic string
+EBX = address of a struct for system information (a.k.a multiboot). (mostly will be `0x600`) (not really required).
+```
+
+The system info struct is something like (it might evolve as needed):
+```
+uint32_t    begin_marker;   // 4 bytes magic marker to indicate start
+uint32_t    total_ram;      // total_mem in KB less 1MB, expect max value (0x3FFC00) (4GB), above this value won't be used.
+                            // a value of 0 represent an error at BIOS level and should trigger a kernel panic or running is own
+                            // routines to detect RAM.
+uint8_t     boot_device;    // boot "letter"
+uint32_t    end_marker;     // 4 bytes magic marker to indicate end
+```
+
+
+
 ## The Kernel
 
 The kernel is a file in the FAT12, so it is a physical file on the floppy image.
@@ -53,9 +77,14 @@ The name must be `BROSKRNL.SYS` with Hidden, System, Read-Only attributes.
 
 The kernel is a 32 bit executable and therefore need at least a `80386` CPU running in protected mode.
 
+At its very entry point, it performs some validation checks, it has been loaded correctly from the bootloader and retrieving some information passed by the bootloader at some given memory location.
+
+ It will also perform the re-initialization of protected memory and interrupts as a per Intel specs, also setting up the `PIC` and the `PIT`.
+
+
 **NOTE:**
 
-The same thing could have been done similarly for the bootloader (2nd stage), the boot sector loads the bootloader, but i prefered to exploit the FAT filesystem using few extra reserved sectors, instead to store the extra bootloader code as a file.
+The same thing of "storing the file on the filesystem (FAT12)" could have been done similarly for the bootloader (2nd stage), the boot sector loads the bootloader, but i prefered to exploit the FAT filesystem using few extra reserved sectors, instead to store the extra bootloader code as a file.
 
 ## Memory Mapping
 

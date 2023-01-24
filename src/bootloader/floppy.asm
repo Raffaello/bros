@@ -7,7 +7,7 @@
 .text
 .org 0x0
 
-.include "filesystems/FAT_bootsector.asm"
+.include "filesystems/FAT_bootsector.inc"
 
 BIOS_BOOT_SEG  = 0x7c00
 BOOT_RELOCATE_SEG = 0x600
@@ -21,7 +21,7 @@ _start:
 # OEM Parameter Block
 .org 0x3                            # Ensure the BPB starts at the correct place
 bootsector:
-OEM:          .ascii  "--BROS--"    # OEM String (starting at offset 3)
+  OEM:          .ascii  "--BROS--"    # OEM String (starting at offset 3)
   BytsPerSec:   .word  _BytsPerSec  # bytes per sector
   SecPerClus:   .byte  _SecPerClus  # sectors per cluster
   RsvdSecCnt:   .word  _RsvdSecCnt  # #of reserved sectors (2nd stage bootloader)
@@ -44,14 +44,14 @@ OEM:          .ascii  "--BROS--"    # OEM String (starting at offset 3)
   volumeLab:   .ascii "NO NAME    " # volume label
   FilSysType:  .ascii "FAT     "    # file system type
 
-.include "bios/PrintString.asm"
-.include "bios/PrintStringDots.asm"
-.include "bios/PrintStringNewLine.asm"
-.include "bios/DriveReadSectors.asm"
-.include "utils/BootFailure.asm"
-.include "bios/GetMemorySize.asm"
-.include "bios/PrintNumber.asm"
-.include "bios/ResetDrive.asm"
+.include "bios/PrintString.inc"
+.include "bios/PrintStringDots.inc"
+.include "bios/PrintStringNewLine.inc"
+.include "bios/DriveReadSectors.inc"
+.include "utils/BootFailure.inc"
+.include "bios/GetMemorySize.inc"
+.include "bios/PrintNumber.inc"
+.include "bios/ResetDrive.inc"
 
 main:
 # Setup segments:
@@ -60,7 +60,6 @@ main:
   mov  ds, ax        # DS = CS = 0x0
   mov  es, ax        # ES = CS = 0x0
   mov  ss, ax        # SS = CS = 0x0
-  # sti                # enable interrupts
   
   # *** Self Relocating Boot sector ***
   mov cx, 256        # 512 bytes => 256 words
@@ -68,7 +67,7 @@ main:
   mov si, BIOS_BOOT_SEG
   rep movsw         # relocating from 0x7c00 to 0x600
   # jmp 0:BOOT_RELOCATE_SEG + (main_relocated - _start)
-  jmp 0: main_relocated
+  jmp 0:main_relocated
 
 main_relocated:
   mov  sp, BOOT_RELOCATE_SEG - 2     # Stack grows down from offset 0x600 toward 0x0000.
@@ -78,7 +77,7 @@ main_relocated:
   lea  si, banner_msg
   call PrintString
 
-# Display Total Memory (it can be removed as it is a waste of space)
+# Display Total Low Memory (it can be removed as it is not useful)
   lea si, mem_msg
   call PrintString
   call GetMemorySize
@@ -96,11 +95,12 @@ main_relocated:
   call PrintStringDots
 
   mov dl, DrvNum
-  mov bx, BOOT2_SEG  # where to load
-  mov al, RsvdSecCnt    # Reading the FAT reserved sector(s), where the 2nd stage bootloader is located
-  mov ch, 0             # Cylinder 0
-  mov dh, 0             # Head 0
-  mov cl, 2             # 2nd sector, 1 is boot sector (this one), next one is the 1st reserved sector
+  mov bx, BOOT2_SEG         # where to load
+  mov al, RsvdSecCnt        # Reading the FAT reserved sector(s), where the 2nd stage bootloader is located
+  dec al                    # removing sector 0
+  mov ch, 0                 # Cylinder 0
+  mov dh, 0                 # Head 0
+  mov cl, 2                 # 2nd sector, 1 is boot sector (this one), next one is the 1st reserved sector
   call DriveReadSectors
   lea si, ok_msg
   call PrintStringNewLine

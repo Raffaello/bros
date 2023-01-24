@@ -3,11 +3,11 @@
 .ifndef __FAT12__
 __FAT12__:
 
-.include "filesystems/FAT_bootsector.asm" # Needed for variables values
+.include "filesystems/FAT_bootsector.inc" # Needed for variables values
 
 # Variables FAT Section
 FAT_TOTAL_SECTORS = _FATSz16
-FAT_SEC_OFFSET = _RsvdSecCnt + 1
+FAT_SEC_OFFSET = _RsvdSecCnt # + 1
 FAT_SEG = KERNEL_SEG  # temporary loading here, replacing ROOT_DIR
 
 # Variables Root Directory Section
@@ -25,8 +25,8 @@ MAX_CLUSTERS = _TotSec16 / _SecPerClus
 DATA_SEC_OFFSET = ROOT_DIR_SEC_OFFSET + ROOT_DIR_TOTAL_SECTORS
 
 
-.include "bios/DriveReadSectors.asm"
-.include "utils/LBA2CHS.asm"
+.include "bios/DriveReadSectors.inc"
+.include "utils/LBA2CHS.inc"
 
 # ************************************* #
 # Load FAT into memory region FAT_SEG   #
@@ -182,12 +182,11 @@ LoadFile_AX:
   jge LoadFile_parsed
   jmp LoadFile_start
 LoadFile_parsed:
-  # dec cx              # adjust loop counter
   pop si              # it was DI, FAT_BUFFER_SEG
                       # DS:SI has the clusters number in FORMAT
                       # instead of using CX, here i could have looped until SI < DI
                       # CX is guarantee to have at least 1 here
- 
+
 LoadFile_readClusters:
   push cx             # store if for later
 # in use SI, AX, CX
@@ -216,7 +215,7 @@ LoadFile_readClusters:
   push bx             # store again memory segment
   loop LoadFile_readClusters
   pop bx              # restore/revert pushed bx if not looping
-  
+
   ret
 .endfunc
 .endif
