@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 
+#define SYS_INFO_BEGIN  0x12345678
+#define SYS_INFO_END    0x87654321
+
 #pragma pack(push, 1)
 typedef struct boot_SYS_Info_t
 {
