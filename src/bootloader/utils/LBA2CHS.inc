@@ -16,7 +16,7 @@
 #   BX, DL, AX                                                                #
 # *************************************************************************** #
 .ifndef LBA2CHS
-.include "filesystems/FAT_bootsector.asm"
+.include "filesystems/FAT_bootsector.inc"
 .func LBA2CHS
 LBA2CHS:
   xor dx, dx            # value is in AX, but division is using DX:AX

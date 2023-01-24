@@ -3,8 +3,8 @@
 
 .ifndef PrintStringNewLine
 
-.include "bios/PrintString.asm"
-.include "bios/PrintNewLine.asm"
+.include "bios/PrintString.inc"
+.include "bios/PrintNewLine.inc"
 
 .func PrintStringNewLine
 PrintStringNewLine:

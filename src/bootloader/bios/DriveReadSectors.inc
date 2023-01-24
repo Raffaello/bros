@@ -26,8 +26,8 @@
 # *************************************
 .ifndef DriverReadSectors
 
-.include "bios/PrintNumber.asm"
-.include "utils/BootFailure.asm"
+.include "bios/PrintNumber.inc"
+.include "utils/BootFailure.inc"
 
 .func DriveReadSectors
 DriveReadSectors:

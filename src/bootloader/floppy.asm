@@ -7,7 +7,7 @@
 .text
 .org 0x0
 
-.include "filesystems/FAT_bootsector.asm"
+.include "filesystems/FAT_bootsector.inc"
 
 BIOS_BOOT_SEG  = 0x7c00
 BOOT_RELOCATE_SEG = 0x600
@@ -44,14 +44,14 @@ bootsector:
   volumeLab:   .ascii "NO NAME    " # volume label
   FilSysType:  .ascii "FAT     "    # file system type
 
-.include "bios/PrintString.asm"
-.include "bios/PrintStringDots.asm"
-.include "bios/PrintStringNewLine.asm"
-.include "bios/DriveReadSectors.asm"
-.include "utils/BootFailure.asm"
-.include "bios/GetMemorySize.asm"
-.include "bios/PrintNumber.asm"
-.include "bios/ResetDrive.asm"
+.include "bios/PrintString.inc"
+.include "bios/PrintStringDots.inc"
+.include "bios/PrintStringNewLine.inc"
+.include "bios/DriveReadSectors.inc"
+.include "utils/BootFailure.inc"
+.include "bios/GetMemorySize.inc"
+.include "bios/PrintNumber.inc"
+.include "bios/ResetDrive.inc"
 
 main:
 # Setup segments:

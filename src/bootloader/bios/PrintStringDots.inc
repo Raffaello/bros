@@ -3,7 +3,7 @@
 
 .ifndef PrintStringDots
 
-.include "bios/PrintString.asm"
+.include "bios/PrintString.inc"
 
 .func PrintStringDots
 PrintStringDots:

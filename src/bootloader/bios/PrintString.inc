@@ -3,7 +3,7 @@
 
 .ifndef PrintString
 
-.include "bios/PrintChar.asm"
+.include "bios/PrintChar.inc"
 
 .func PrintString
 PrintString:

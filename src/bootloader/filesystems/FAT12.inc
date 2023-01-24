@@ -3,7 +3,7 @@
 .ifndef __FAT12__
 __FAT12__:
 
-.include "filesystems/FAT_bootsector.asm" # Needed for variables values
+.include "filesystems/FAT_bootsector.inc" # Needed for variables values
 
 # Variables FAT Section
 FAT_TOTAL_SECTORS = _FATSz16
@@ -25,8 +25,8 @@ MAX_CLUSTERS = _TotSec16 / _SecPerClus
 DATA_SEC_OFFSET = ROOT_DIR_SEC_OFFSET + ROOT_DIR_TOTAL_SECTORS
 
 
-.include "bios/DriveReadSectors.asm"
-.include "utils/LBA2CHS.asm"
+.include "bios/DriveReadSectors.inc"
+.include "utils/LBA2CHS.inc"
 
 # ************************************* #
 # Load FAT into memory region FAT_SEG   #

@@ -18,13 +18,13 @@ KERNEL_FILENAME:  .ascii "BROSKRNLSYS"
 DrvNum:           .byte  0
   # nop
 
-.include "bios/PrintStringNewLine.asm"
-.include "bios/PrintStringDots.asm"
-.include "GDT.asm"
-.include "utils/GateA20.asm"
-.include "filesystems/FAT12.asm"
-.include "bios/PrintNumber.asm"
-.include "bios/GetTotalMemory.asm"
+.include "bios/PrintStringNewLine.inc"
+.include "bios/PrintStringDots.inc"
+.include "cpu/GDT.inc"
+.include "utils/GateA20.inc"
+.include "filesystems/FAT12.inc"
+.include "bios/PrintNumber.inc"
+.include "bios/GetTotalMemory.inc"
 
 main:
   # in AL has been passed the DrvNum, storing it

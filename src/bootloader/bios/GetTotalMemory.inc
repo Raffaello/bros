@@ -9,7 +9,7 @@
 #   EDX, ECX, BX                                                    *
 # *******************************************************************
 .ifndef GetTotalMemorySize
-.include "utils/BootFailure.asm"
+.include "utils/BootFailure.inc"
 .func GetTotalMemorySize
 GetTotalMemorySize:
   xor edx, edx
