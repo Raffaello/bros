@@ -1,9 +1,5 @@
 # ***************************************************************** #
 # GetMemoryMap BIOS Call                                            #
-#                                                                   #
-# BOCHS & QEMU don't support this function                          #
-# So this function is optional for the bootloader...                #
-# I can't test it so it won't be sent to the Kernel                 #
 # ----------------------------------------------------------------- #
 # Parameters:                                                       #
 #   ES:DI Destination Buffer, where to store results                #
@@ -34,7 +30,7 @@ GetMemoryMap:
   xor bp, bp            # counter
   xor ebx, ebx          # offset
 GetMemoryMap_loop:
-  mov eax, 0x8E20
+  mov eax, 0xE820
   mov ecx, ENTRY_SIZE   # struct size
   mov edx, SMAP         # 'SMAP'
   int 0x15

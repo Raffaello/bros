@@ -25,7 +25,7 @@ DrvNum:           .byte  0
 .include "filesystems/FAT12.inc"
 .include "bios/PrintNumber.inc"
 .include "bios/GetTotalMemory.inc"
-# .include "bios/GetMemoryMap.inc"
+.include "bios/GetMemoryMap.inc"
 
 main:
   # in AL has been passed the DrvNum, storing it
@@ -100,16 +100,16 @@ load_fat:
   call PrintStringNewLine
 
   # Store MemoryMap values
-#   lea si, mem_map_msg
-#   call PrintStringDots
-#   mov edi, 0x2000 # test, change later
-#   call GetMemoryMap
+  lea si, mem_map_msg
+  call PrintStringDots
+  mov edi, 0x2000 # test, change later
+  call GetMemoryMap
   # todo pass to the kernel ...
-#   cmp bp, 0
-#   je GetMemoryMap_not_supported
-#   lea si, ok_msg
-#   call PrintStringNewLine
-# GetMemoryMap_not_supported:
+  cmp bp, 0
+  je GetMemoryMap_not_supported
+  lea si, ok_msg
+  call PrintStringNewLine
+GetMemoryMap_not_supported:
 
   # Enable Gate A20
   lea si, a20_msg
@@ -153,8 +153,8 @@ main32:
   mov eax, 0x42524F53           # Bootloader Magic value
   mov ebx, SYS_INFO_SEG         # System Info struct address
   # todo review 2 belows
-#   mov edx, 0x2000               # Memory Map Info struct address
-#   mov ecx, 0                    # Memory Map Info entries (BP pointer actually)
+  mov edx, 0x2000               # Memory Map Info struct address
+  mov ecx, 0                    # Memory Map Info entries (BP pointer actually)
 
   jmp GDT_CODE_SEG:KERNEL_SEG  # not sure the kernel will never return, so no point to 'call'
   # dead code below, it will be overridden by kernel memory manager anyway
