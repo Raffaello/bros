@@ -49,7 +49,7 @@ void CON_putc(const char ch)
     }
 
     if(_curY >= CON_HEIGHT) {
-        // TODO: scroll down 1 line
+        VGA_scroll_down();
         _curY--;
     }
 
