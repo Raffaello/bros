@@ -6,10 +6,13 @@
 .org 0x0
 
 KERNEL_FILENAME_ATTRIB  = 0b00000111 # System, Hidden, Read-only
-# TODO move the kernel to 0x10000 (64KB) [need to change the segments in 16 bits]
+# TODO move the kernel to 0x10000 (64KB) [need to change the segments in 16 bits? maybe not]
 KERNEL_SEG              = 0x1000   # where to load the kernel
 FAT_BUFFER_SEG          = 0x600    # where to store the values for the FAT Cluster linked list
 SYS_INFO_SEG            = 0x600    # total size 13 bytes
+# TOOD: ecx is overwritten in the kernel _start function,
+#       the mem info can be just after the SYS_INFO_SEG
+#       mem_info_ptr = sys_info_ptr + sizeof(sys_info)
 MEM_INFO_SEG            = 0x620    # until 0x1000 total size 2480 bytes -> 105 entries
 
 .global _start
@@ -89,7 +92,7 @@ load_fat:
   # Store SYS_INFO values
   lea si, sys_info_msg
   call PrintStringDots
-  mov edi, SYS_INFO_SEG
+  mov di, SYS_INFO_SEG
   mov eax, 0x12345678           # begin_marker
   stosd
   call GetTotalMemorySize
@@ -104,7 +107,7 @@ load_fat:
   # Store MemoryMap values
   lea si, mem_map_msg
   call PrintStringDots
-  mov edi, MEM_INFO_SEG
+  mov edi, MEM_INFO_SEG         # NOTE: here edi is pointing already at the end of SYS_INFO_REG...
   call GetMemoryMap
   # todo pass to the kernel ...
   cmp bp, 0
@@ -158,6 +161,8 @@ main32:
   mov edx, MEM_INFO_SEG         # Memory Map Info struct address
   xor ecx, ecx
   mov cx, bp                    # Memory Map Info entries
+  # TODO: ecx is overwritten by the kernel before accessing it in _start()
+  #       need to find another way for it.
 
   jmp GDT_CODE_SEG:KERNEL_SEG  # not sure the kernel will never return, so no point to 'call'
   # dead code below, it will be overridden by kernel memory manager anyway
