@@ -34,8 +34,9 @@
 void main();
 void start_failure();
 
+// TODO this one overwrite ECX
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
- __attribute__((force_align_arg_pointer))
+__attribute__((force_align_arg_pointer))
 noreturn void _start()
 {
     __asm__ ("cli");
@@ -43,7 +44,9 @@ noreturn void _start()
     uint32_t _eax, _ebx, _ecx, _edx;
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
-    // TODO: ecx register is overwritten at the begining of the function.
+    // TODO: ecx register is overwritten at the begining of the function,
+    //       due to stack aligment...
+    //       better set it up manually instead, of using GCC ?
     __asm__ volatile("mov %0, ecx" : "=m"(_ecx)); 
     __asm__ volatile("mov %0, edx" : "=m"(_edx));
     // TODO: set up kernel stack, EBP,ESP ...
@@ -52,9 +55,9 @@ noreturn void _start()
 #pragma GCC diagnostic ignored "-Wmultichar"
     uint32_t __BROS = (uint32_t)('BROS');
 #pragma GCC diagnostic pop
-    // check boot sector EAX value
-    // point to EBX SYS_INFO struct
-    // if not in the Kernel aspected address...
+    // 1. check boot sector EAX value
+    // 2. point to EBX SYS_INFO struct
+    // 3. if not in the Kernel aspected address...
     boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
     const uint32_t* _startPtr = (uint32_t*)&_start;
     if(_eax != __BROS 
@@ -66,6 +69,7 @@ noreturn void _start()
     }
 
     // TODO MEM_MAP_Info related redo it later.. it is a contiguos of _ecx entries
+    // or it can just start after SYS_INFO section ..... less waste of bytes ?
     // boot_MEM_MAP_Info_Entry_t* _mem_map_info_entry =  (boot_MEM_MAP_Info_Entry_t*) _edx;
     // uint32_t _mem_map_info_size = _ecx;
 
@@ -80,7 +84,8 @@ noreturn void _start()
     main();
 }
 
-void start_failure()
+
+noreturn void start_failure()
 {
     const char fail_msg[] = "Kernel load failure";
     
@@ -90,6 +95,8 @@ void start_failure()
     while(1);
 }
 
+// Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
+ __attribute__((force_align_arg_pointer))
 noreturn void main()
 {
     const char hello_msg[] = "*** HELLO FROM BROSKRNL.SYS ***";
