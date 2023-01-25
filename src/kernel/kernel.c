@@ -8,7 +8,23 @@
 #include <lib/ISR.h>
 #include <lib/IRQ.h>
 #include <defs/boot_SYS_Info.h>
+// #include <defs/boot_MEM_MAP_Info.h>
 #include <lib/conio.h>
+
+#include <stdnoreturn.h>
+#include <stddef.h>   // this could replace defs.h, but wasn't compiling last time when i tried.
+
+/*
+ * TODO:
+ *  conforming freestanding implementation is only required to provide certain library facilities:
+ *  those in <float.h>, <limits.h>, <stdarg.h>, and <stddef.h>; since AMD1, also those in <iso646.h>;
+ *  since C99, also those in <stdbool.h> and <stdint.h>; and since C11, also those in <stdalign.h> 
+ * and <stdnoreturn.h>. In addition, complex types, added in C99, 
+ * are not required for freestanding implementations.
+
+
+*/
+
 
 #ifndef KERNEL_SEG
     #error KERNEL_SEG define missing
@@ -20,13 +36,16 @@ void start_failure();
 
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
  __attribute__((force_align_arg_pointer))
-void _start()
+noreturn void _start()
 {
     __asm__ ("cli");
 
-    uint32_t _eax, _ebx;
+    uint32_t _eax, _ebx, _ecx, _edx;
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
+    // TODO: ecx register is overwritten at the begining of the function.
+    __asm__ volatile("mov %0, ecx" : "=m"(_ecx)); 
+    __asm__ volatile("mov %0, edx" : "=m"(_edx));
     // TODO: set up kernel stack, EBP,ESP ...
 
 #pragma GCC diagnostic push
@@ -45,6 +64,10 @@ void _start()
     {
          start_failure();
     }
+
+    // TODO MEM_MAP_Info related redo it later.. it is a contiguos of _ecx entries
+    // boot_MEM_MAP_Info_Entry_t* _mem_map_info_entry =  (boot_MEM_MAP_Info_Entry_t*) _edx;
+    // uint32_t _mem_map_info_size = _ecx;
 
     init_descriptor_tables();
 
@@ -67,7 +90,7 @@ void start_failure()
     while(1);
 }
 
-void main()
+noreturn void main()
 {
     const char hello_msg[] = "*** HELLO FROM BROSKRNL.SYS ***";
 

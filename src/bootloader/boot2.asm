@@ -6,9 +6,11 @@
 .org 0x0
 
 KERNEL_FILENAME_ATTRIB  = 0b00000111 # System, Hidden, Read-only
+# TODO move the kernel to 0x10000 (64KB) [need to change the segments in 16 bits]
 KERNEL_SEG              = 0x1000   # where to load the kernel
 FAT_BUFFER_SEG          = 0x600    # where to store the values for the FAT Cluster linked list
-SYS_INFO_SEG            = 0x600
+SYS_INFO_SEG            = 0x600    # total size 13 bytes
+MEM_INFO_SEG            = 0x620    # until 0x1000 total size 2480 bytes -> 105 entries
 
 .global _start
 
@@ -102,7 +104,7 @@ load_fat:
   # Store MemoryMap values
   lea si, mem_map_msg
   call PrintStringDots
-  mov edi, 0x2000 # test, change later
+  mov edi, MEM_INFO_SEG
   call GetMemoryMap
   # todo pass to the kernel ...
   cmp bp, 0
@@ -153,10 +155,11 @@ main32:
   mov eax, 0x42524F53           # Bootloader Magic value
   mov ebx, SYS_INFO_SEG         # System Info struct address
   # todo review 2 belows
-  mov edx, 0x2000               # Memory Map Info struct address
-  mov ecx, 0                    # Memory Map Info entries (BP pointer actually)
+  mov edx, MEM_INFO_SEG         # Memory Map Info struct address
+  xor ecx, ecx
+  mov cx, bp                    # Memory Map Info entries
 
-  jmp GDT_CODE_SEG:KERNEL_SEG  # not sure the kernel will never return, so no point to 'call'
+  call GDT_CODE_SEG:KERNEL_SEG  # not sure the kernel will never return, so no point to 'call'
   # dead code below, it will be overridden by kernel memory manager anyway
 main32_stop:
   cli
