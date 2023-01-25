@@ -159,7 +159,7 @@ main32:
   xor ecx, ecx
   mov cx, bp                    # Memory Map Info entries
 
-  call GDT_CODE_SEG:KERNEL_SEG  # not sure the kernel will never return, so no point to 'call'
+  jmp GDT_CODE_SEG:KERNEL_SEG  # not sure the kernel will never return, so no point to 'call'
   # dead code below, it will be overridden by kernel memory manager anyway
 main32_stop:
   cli
