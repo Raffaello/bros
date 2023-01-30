@@ -7,7 +7,7 @@
 #include <drivers/PIT.h>
 #include <lib/ISR.h>
 #include <lib/IRQ.h>
-#include <defs/boot_SYS_Info.h>
+#include <bios/boot_info.h>
 #include <lib/conio.h>
 
 #include <stdnoreturn.h>
@@ -42,7 +42,6 @@ noreturn void _start()
     uint32_t _eax, _ebx;
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
-    // TODO: set up kernel stack, EBP,ESP ... and align it
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmultichar"
@@ -62,7 +61,13 @@ noreturn void _start()
          start_failure();
     }
 
+    // TODO: set up paging...
+
+
+    boot_info_init(_sys_info->tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
+
     // TODO MEM_MAP_Info related
+    // TODO remove this block later on...
     if (_sys_info->num_mem_map_entries > 0) {
       VGA_clear();
       con_col_t cc;
@@ -111,6 +116,9 @@ noreturn void _start()
     IRQ_init();
     PIT_init(1000);
 
+    // TODO: set up kernel stack, EBP,ESP ... and align it
+    __asm__ volatile("mov esp, 0x9000");
+    __asm__ volatile("mov ebp, esp");
     __asm__("sti");
     main();
 }
