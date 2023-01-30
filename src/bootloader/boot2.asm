@@ -105,8 +105,8 @@ load_fat:
   call PrintStringNewLine
 
   # Store MemoryMap values
-  lea si, mem_map_msg
-  call PrintStringDots
+#   lea si, mem_map_msg
+#   call PrintStringDots
   mov edi, MEM_INFO_SEG         # NOTE: here edi is pointing already at the end of SYS_INFO_REG...
   call GetMemoryMap
   # todo pass to the kernel ...
@@ -178,7 +178,7 @@ load_fat_msg:           .asciz "Loading FAT"
 load_kernel_file_msg:   .asciz "Loading Kernel"
 file_missing_msg:       .asciz "File Missing"
 sys_info_msg:           .asciz "Store SYS_INFO"
-mem_map_msg:            .asciz "Store MEM_MAP_INFO"
+# mem_map_msg:            .asciz "Store MEM_MAP_INFO"
 a20_msg:                .asciz "Enabling A20"
 gdt_msg:                .asciz "Loading GDT"
 ok_msg:                 .asciz "OK"
