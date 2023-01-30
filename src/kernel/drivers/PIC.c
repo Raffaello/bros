@@ -1,5 +1,5 @@
 #include <drivers/PIC.h>
-#include <defs.h>
+#include <stdint.h>
 #include <stdint.h>
 #include <lib/io.h>
 #include <defs/PIC.h>

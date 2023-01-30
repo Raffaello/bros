@@ -59,14 +59,15 @@ EBX = address of a struct for system information (a.k.a multiboot). (mostly will
 
 The system info struct is something like (it might evolve as needed):
 ```
-uint32_t    begin_marker;   // 4 bytes magic marker to indicate start
-uint32_t    total_ram;      // total_mem in KB less 1MB, expect max value (0x3FFC00) (4GB), above this value won't be used.
-                            // a value of 0 represent an error at BIOS level and should trigger a kernel panic or running is own
-                            // routines to detect RAM.
-uint8_t     boot_device;    // boot "letter"
-uint32_t    end_marker;     // 4 bytes magic marker to indicate end
+uint32_t        begin_marker;                        // 4 bytes magic marker to indicate start
+uint32_t        total_ram;                           // total_mem in KB less 1MB, expect max value (0x3FFC00) (4GB), above this value won't be used.
+                                                     // a value of 0 represent an error at BIOS level and should trigger a kernel panic or running is own
+                                                     // routines to detect RAM.
+uint8_t         boot_device;                         // boot "letter"
+uint8_t         num_mem_map_entries                  // BIOS MEM_MAP entries 24 bytes each in size
+MEM_MAP_ENTRIES mem_map_entries[num_mem_Map_entries] // array of mem map entries
+uint32_t        end_marker;                          // 4 bytes magic marker to indicate end
 ```
-
 
 
 ## The Kernel

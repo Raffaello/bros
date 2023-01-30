@@ -5,7 +5,7 @@
  *******************************/
 #pragma once
 
-#include <defs.h>
+#include <stdint.h>
 
 void PIT_init(const uint32_t freq);
 

@@ -104,6 +104,7 @@ gdb-kernel-debug: image
 		-ex 'layout src' \
 		-ex 'layout reg' \
 		-ex 'break _start' \
+		-ex 'break *0x7c00' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
 
