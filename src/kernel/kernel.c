@@ -52,7 +52,6 @@ noreturn void _start()
     // 2. point to EBX SYS_INFO struct
     // 3. if not in the Kernel aspected address...
     boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
-    //const uint32_t* _sys_info_end_marker = (uint32_t*) (((uint8_t*) _sys_info) + sizeof(boot_SYS_Info_t) + (_sys_info->num_mem_map_entries * sizeof(boot_MEM_MAP_Info_Entry_t)));
     const uint32_t* _sys_info_end_marker = SYS_INFO_END_MARKER_PTR(_sys_info);
     const uint32_t* _startPtr = (uint32_t*)&_start;
     if(_eax != __BROS 
@@ -63,10 +62,7 @@ noreturn void _start()
          start_failure();
     }
 
-    // TODO MEM_MAP_Info related redo it later.. it is a contiguos of _ecx entries
-    // or it can just start after SYS_INFO section ..... less waste of bytes ?
-    // boot_MEM_MAP_Info_Entry_t* _mem_map_info_entry =  (boot_MEM_MAP_Info_Entry_t*) _edx;
-    // uint32_t _mem_map_info_size = _ecx;
+    // TODO MEM_MAP_Info related
 
     init_descriptor_tables();
 
