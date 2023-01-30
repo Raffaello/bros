@@ -1,10 +1,24 @@
 #include <lib/conio.h>
 #include <bios/vga.h>
 
-static uint8_t _col;
+static uint8_t _col = 7;
 static uint8_t _curX = 0;
 static uint8_t _curY = 0;
 
+static void _AdjscrollDrown()
+{
+    if(_curX >= CON_WIDTH) {
+        _curX = 0;
+        _curY++;
+    }
+
+    if(_curY >= CON_HEIGHT) {
+        VGA_scroll_down();
+        _curY--;
+    }
+
+    VGA_update_cursor(_curX, _curY);
+}
 
 void CON_setConsoleColor(const con_col_t col)
 {
@@ -43,18 +57,19 @@ void CON_putc(const char ch)
 {
     VGA_WriteChar(_curX, _curY, ch, _col);
     _curX++;
-    if(_curX >= CON_WIDTH) {
-        _curX =0;
-        _curY++;
-    }
+    
 
-    if(_curY >= CON_HEIGHT) {
-        VGA_scroll_down();
-        _curY--;
-    }
-
-    VGA_update_cursor(_curX, _curY);
+    _AdjscrollDrown();
 }
 
-void CON_puts(const char str[]);
+void CON_puts(const char str[])
+{
+    for(int i = 0; str[i] != 0; i++)
+        CON_putc(str[i]);
+}
 
+void CON_newline()
+{
+    CON_gotoXY(0, _curY+1);
+    _AdjscrollDrown();
+}

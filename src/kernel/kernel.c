@@ -34,7 +34,7 @@ void main();
 void start_failure();
 
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
-__attribute__((force_align_arg_pointer))
+// __attribute__((force_align_arg_pointer))
 noreturn void _start()
 {
     __asm__ ("cli");
@@ -42,7 +42,7 @@ noreturn void _start()
     uint32_t _eax, _ebx;
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
-    // TODO: set up kernel stack, EBP,ESP ...
+    // TODO: set up kernel stack, EBP,ESP ... and align it
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmultichar"
@@ -63,6 +63,46 @@ noreturn void _start()
     }
 
     // TODO MEM_MAP_Info related
+    if (_sys_info->num_mem_map_entries > 0) {
+      VGA_clear();
+      con_col_t cc;
+      cc.fg_col=VGA_COLOR_BRIGHT_CYAN;
+      cc.bg_col=VGA_COLOR_RED;
+      CON_setConsoleColor(cc);
+      const boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
+      for(int i = 0; i < _sys_info->num_mem_map_entries; ++i) {
+          const char mem_type_msg[] = "mem type: ";
+          const char a_msg[] = "available";
+          const char r_msg[] = "reserved";
+          const char c_msg[] = "ACPI recl";
+          const char n_msg[] = "ACPI nvs";
+          const char e_msg[] = "error";
+
+          CON_puts(mem_type_msg);
+          switch(mem_map[i].type)
+          {
+              case MEM_MAP_TYPE_AVAILABLE: 
+                CON_puts(a_msg);
+                break;
+            case MEM_MAP_TYPE_RESERVED: 
+                CON_puts(r_msg);
+                break;
+            case MEM_MAP_TYPE_ACPI_RECLAIM:
+                CON_puts(c_msg);
+                break;
+            case MEM_MAP_TYPE_ACPI_NVS:
+                CON_puts(n_msg);
+                break;
+            default:
+                CON_puts(e_msg);
+                break;
+          }
+          CON_newline();
+      }
+    }
+
+    // TODO: self-relocate the kernel
+
 
     init_descriptor_tables();
 
@@ -87,12 +127,13 @@ noreturn void start_failure()
 }
 
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
+// TODO remove later when manually aligned in _start
  __attribute__((force_align_arg_pointer))
 noreturn void main()
 {
     const char hello_msg[] = "*** HELLO FROM BROSKRNL.SYS ***";
 
-    VGA_clear();
+    // VGA_clear();
     VGA_WriteString(20, 10, hello_msg, 15);
 
     VGA_enable_cursor(0, 0);

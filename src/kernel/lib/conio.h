@@ -27,4 +27,5 @@ void CON_getXY(uint8_t* x, uint8_t* y);
 
 void CON_putc(const char ch);
 void CON_puts(const char str[]);
+void CON_newline();
 

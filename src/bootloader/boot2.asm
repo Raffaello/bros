@@ -5,11 +5,12 @@
 .text
 .org 0x0
 
-KERNEL_FILENAME_ATTRIB  = 0b00000111 # System, Hidden, Read-only
+KERNEL_FILENAME_ATTRIB  = 0b00000111    # System, Hidden, Read-only
 # TODO move the kernel to 0x10000 (64KB) [need to change the segments in 16 bits? maybe not]
-KERNEL_SEG              = 0x1000   # where to load the kernel
-FAT_BUFFER_SEG          = 0x600    # where to store the values for the FAT Cluster linked list
-SYS_INFO_SEG            = 0x600    # total size 13 bytes
+KERNEL_SEG              = 0x1000    # where to load the kernel
+FAT_BUFFER_SEG          = 0x600     # where to store the values for the FAT Cluster linked list
+SYS_INFO_SEG            = 0x600     # total size 10 bytes for the header,
+                                    # plus MEM_MAP array and 4 bytes end marker
 
 .global _start
 

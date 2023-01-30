@@ -11,6 +11,7 @@
 #define MEM_MAP_TYPE_ACPI_NVS       4
 
 #define SYS_INFO_END_MARKER_PTR(x) (uint32_t*) (((uint8_t*) x) + sizeof(boot_SYS_Info_t) + (x->num_mem_map_entries * sizeof(boot_MEM_MAP_Info_Entry_t)))
+#define MEM_MAP_ENTRY_PTR(x) (boot_MEM_MAP_Info_Entry_t*) (((uint8_t*) x) + sizeof(boot_SYS_Info_t))
 
 #pragma pack(push, 1)
 typedef struct boot_SYS_Info_t
