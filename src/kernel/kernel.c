@@ -8,7 +8,6 @@
 #include <lib/ISR.h>
 #include <lib/IRQ.h>
 #include <defs/boot_SYS_Info.h>
-// #include <defs/boot_MEM_MAP_Info.h>
 #include <lib/conio.h>
 
 #include <stdnoreturn.h>
@@ -34,21 +33,15 @@
 void main();
 void start_failure();
 
-// TODO this one overwrite ECX
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
 __attribute__((force_align_arg_pointer))
 noreturn void _start()
 {
     __asm__ ("cli");
 
-    uint32_t _eax, _ebx, _ecx, _edx;
+    uint32_t _eax, _ebx;
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
-    // TODO: ecx register is overwritten at the begining of the function,
-    //       due to stack aligment...
-    //       better set it up manually instead, of using GCC ?
-    __asm__ volatile("mov %0, ecx" : "=m"(_ecx)); 
-    __asm__ volatile("mov %0, edx" : "=m"(_edx));
     // TODO: set up kernel stack, EBP,ESP ...
 
 #pragma GCC diagnostic push
@@ -59,19 +52,17 @@ noreturn void _start()
     // 2. point to EBX SYS_INFO struct
     // 3. if not in the Kernel aspected address...
     boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
+    const uint32_t* _sys_info_end_marker = SYS_INFO_END_MARKER_PTR(_sys_info);
     const uint32_t* _startPtr = (uint32_t*)&_start;
     if(_eax != __BROS 
         || _sys_info->begin_marker != SYS_INFO_BEGIN
-        || _sys_info->end_marker != SYS_INFO_END
+        || *_sys_info_end_marker != SYS_INFO_END
         || _startPtr != KERNEL_ADDR)
     {
          start_failure();
     }
 
-    // TODO MEM_MAP_Info related redo it later.. it is a contiguos of _ecx entries
-    // or it can just start after SYS_INFO section ..... less waste of bytes ?
-    // boot_MEM_MAP_Info_Entry_t* _mem_map_info_entry =  (boot_MEM_MAP_Info_Entry_t*) _edx;
-    // uint32_t _mem_map_info_size = _ecx;
+    // TODO MEM_MAP_Info related
 
     init_descriptor_tables();
 
