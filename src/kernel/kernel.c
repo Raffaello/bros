@@ -11,7 +11,7 @@
 #include <lib/conio.h>
 
 #include <stdnoreturn.h>
-#include <stddef.h>   // this could replace defs.h, but wasn't compiling last time when i tried.
+#include <stddef.h>
 
 /*
  * TODO:

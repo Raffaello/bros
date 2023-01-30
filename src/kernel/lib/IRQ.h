@@ -1,6 +1,6 @@
 #pragma once
 
-#include <defs.h>
+#include <stdint.h>
 
 #pragma pack(push, 1)
 typedef struct IRQ_registers_t

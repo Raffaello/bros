@@ -2,7 +2,8 @@
 // ***             IRQ Section                 ***
 // ===============================================
 #include <lib/IRQ.h>
-#include <defs.h>
+#include <stdint.h>
+#include <stddef.h>
 #include <defs/IRQ.h>
 #include <defs/PIC.h>
 #include <drivers/PIC.h>
