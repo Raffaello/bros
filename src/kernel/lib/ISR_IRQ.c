@@ -54,7 +54,6 @@ extern void ISR_INT_19();
 extern void ISR_INT_20();
 extern void ISR_INT_21();
 
-// extern void IDT_set_gate();
 
 void ISR_init()
 {
