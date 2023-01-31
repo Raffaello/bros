@@ -19,7 +19,8 @@ LD=ld
 
 SRC_DIR=src/kernel
 BUILD_DIR=build
-# kernel.c must be the 1st in the list
+BIN_DIR=bin
+
 SRC  = ${SRC_DIR}/kernel.c $(wildcard ${SRC_DIR}/lib/*.c ${SRC_DIR}/cpu/*.c ${SRC_DIR}/bios/*.c wildcard ${SRC_DIR}/drivers/*.c)
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
 
@@ -43,7 +44,7 @@ CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG} -DSYS_INFO_SEG=${SYS_INFO_SEG}
 
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
-# LFLAGS+=-Tlinker.ld # linker option definition file
+LFLAGS+=-Tlinker.ld # linker option definition file
 LFLAGS+=-Ttext ${KERNEL_SEG}
 
 .PHONY: kernel $(OBJS)
@@ -60,13 +61,13 @@ floppy:
 	@mkdir -p build
 	${AS} ${ASFLAGS} -o build/boot.o src/bootloader/floppy.asm
 	${LD} ${AS_LFLAGS} -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG}
-	objcopy -O binary -j .text build/boot.out bin/boot.bin
+	objcopy -O binary -j .text build/boot.out ${BIN_DIR}/boot.bin
 
 boot2:
 	@mkdir -p build
 	${AS} ${ASFLAGS} -o build/boot2.o src/bootloader/boot2.asm
 	${LD} ${AS_LFLAGS} -o build/boot2.out build/boot2.o -Ttext ${BOOT2_SEG}
-	objcopy -O binary -j .text build/boot2.out bin/boot2.bin
+	objcopy -O binary -j .text build/boot2.out ${BIN_DIR}/boot2.bin
 
 .SECONDEXPANSION:
 $(OBJS): $$(patsubst $(BUILD_DIR)/%.o,$(SRC_DIR)/%.c,$$@)
@@ -79,27 +80,21 @@ $(OBJS_S): $$(patsubst $(BUILD_DIR)/%.oS,$(SRC_DIR)/%.S,$$@)
 
 # Monolithic for now
 kernel: $(OBJS) ${OBJS_S}
-	# gcc -o2 -ffreestanding -nostartfiles -nostdlib kernel/kernel.c -o build/kernel.o
-	# gcc -m32 -g -ffreestanding -nostartfiles -nostdlib src/kernel/kernel.c -o build/kernel.o
-	# ${CC} $(CFLAGS) ${SRC} -o build/$(@F).o
-	
-	# ld -m elf_i386 -o build/kernel.out build/kernel.o #-Ttext ${KERNEL_SEG}
-	${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
-	
-	objcopy -O binary -j .text build/kernel.out bin/kernel.sys
-
+	# ${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
+	# objcopy -O binary -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
+	${LD} $(LFLAGS) -o ${BIN_DIR}/kernel.sys ${OBJS} ${OBJS_S}
 
 image: floppy boot2 kernel
 	# Using 2 extra Reserved Sectors
-	mformat -i ${FLOPPY_IMAGE_NAME} -v BROS -B bin/boot.bin -R ${FAT_RESERVED_SECTORS} -f1440 -C
-	dd if=bin/boot2.bin of=${FLOPPY_IMAGE_NAME} conv=notrunc seek=1
-	mcopy -i ${FLOPPY_IMAGE_NAME} bin/kernel.sys ::/BROSKRNL.SYS
+	mformat -i ${FLOPPY_IMAGE_NAME} -v BROS -B ${BIN_DIR}/boot.bin -R ${FAT_RESERVED_SECTORS} -f1440 -C
+	dd if=${BIN_DIR}/boot2.bin of=${FLOPPY_IMAGE_NAME} conv=notrunc seek=1
+	mcopy -i ${FLOPPY_IMAGE_NAME} ${BIN_DIR}/kernel.sys ::/BROSKRNL.SYS
 	mattrib -i ${FLOPPY_IMAGE_NAME} +r +h +s -a /BROSKRNL.SYS
 	mdir -i ${FLOPPY_IMAGE_NAME} -a
 
 gdb-kernel-debug: image
 	qemu-system-i386 -fda ${FLOPPY_IMAGE_NAME} -S -s &
-	gdb build/kernel.out  \
+	gdb ${BIN_DIR}/kernel.sys  \
 		-ex 'target remote localhost:1234' \
 		-ex 'layout src' \
 		-ex 'layout reg' \
@@ -109,6 +104,6 @@ gdb-kernel-debug: image
 		-ex 'continue'
 
 clean:
-	rm bin/* -fv
-	rm build -fr	v
+	rm ${BIN_DIR}/* -fv
+	rm ${BUILD_DIR} -fr	v
 	rm ${FLOPPY_IMAGE_NAME} -fv

@@ -2,11 +2,9 @@
 
 BR Operating System.
 
-Educational project.
-
 ## Info / Abstract / Synopsys
 
-The project uses the legacy technology based on BIOS, a roughly 30-40 years old tech.
+The project uses the legacy technology based on BIOS, a roughly between 20-40 years old tech.
 
 In the "next phase", it might be consider to do a UEFI bootloader, but i might be more interested 
 dealing with `long mode` (x64) and multi-core CPUs.
