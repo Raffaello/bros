@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <bios/vga.h>
-#include <lib/mem.h>
 #include <cpu/GDT_IDT.h>
 #include <lib/std.h>
 #include <drivers/PIC.h>
@@ -74,6 +73,7 @@ noreturn void _start()
       cc.fg_col=VGA_COLOR_BRIGHT_CYAN;
       cc.bg_col=VGA_COLOR_RED;
       CON_setConsoleColor(cc);
+      CON_puts("TEST: ");
       const boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
       for(int i = 0; i < _sys_info->num_mem_map_entries; ++i) {
           const char mem_type_msg[] = "mem type: ";
