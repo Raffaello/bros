@@ -20,6 +20,10 @@ typedef struct boot_SYS_Info_t
     uint32_t tot_mem;
     uint8_t  boot_drive;
     uint8_t  num_mem_map_entries;
+    // TODO:
+    // add 2 bytes reserved here? to align to have a heaer block of 12 bytes instead?
+    // or just upgrade the 2 uint8 to uint16 instead ....
+    // end TODO
     // memMap_entries[num_mem_map_entries] // 24 bytes
     // uint32_t end_marker;
 

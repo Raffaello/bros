@@ -108,6 +108,8 @@ noreturn void _start()
 
     // TODO: self-relocate the kernel
 
+    // TODO: init other cores...
+
 
     init_descriptor_tables();
 
