@@ -12,7 +12,7 @@
 .globl ISR_INT_\x
 ISR_INT_\x:
   cli
-  push 0
+#   push 0
   push \x
   jmp ISR_universal_handler_caller
 .type ISR_INT_\x, @function
