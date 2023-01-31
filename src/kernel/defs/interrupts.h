@@ -24,3 +24,11 @@
 #define INT_Control_Protection_Exception    21
 // INT_Intel_Reserved 22-31
 // INT 32-255 User Defined Interrupts
+// IRQ are mapped to INT 32-47
+
+// #define INT_RESERVED_START                  22
+// #define INT_RESERVED_END                    (32 + 15) // IRQ
+
+// #define INT_RESERVED_TOTAL                  (INT_RESERVED_END - INT_RESERVED_START + 1)
+// #define INT_TOTAL                           (255 - INT_RESERVED_TOTAL)
+#define INT_TOTAL                           255

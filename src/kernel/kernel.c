@@ -4,8 +4,7 @@
 #include <lib/std.h>
 #include <drivers/PIC.h>
 #include <drivers/PIT.h>
-#include <lib/ISR.h>
-#include <lib/IRQ.h>
+#include <lib/ISR_IRQ.h>
 #include <bios/boot_info.h>
 #include <lib/conio.h>
 
@@ -116,7 +115,7 @@ noreturn void _start()
     PIC_init();
     ISR_init();
     IRQ_init();
-    PIT_init(1000);
+    PIT_init(10);
 
     // TODO: set up kernel stack, EBP,ESP ... and align it
     __asm__ volatile("mov esp, 0x9000");

@@ -1,5 +1,5 @@
 #include <drivers/PIT.h>
-#include <lib/IRQ.h>
+#include <lib/ISR_IRQ.h>
 #include <defs/IRQ.h>
 #include <lib/io.h>
 #include <lib/std.h>
@@ -41,7 +41,7 @@
 
 static volatile uint32_t ticks = 0;
 
-static void timer_callback(IRQ_registers_t r)
+static void timer_callback(ISR_registers_t r)
 {
     char buf[11]; // 4294967295
 
@@ -52,7 +52,7 @@ static void timer_callback(IRQ_registers_t r)
 
 void PIT_init(const uint32_t freq)
 {
-    // PIT_set_timer_freq(freq);
+    PIT_set_timer_freq(freq);
     // Timer
     IRQ_register_interrupt_handler(IRQ_TIMER, timer_callback);
 }
