@@ -156,7 +156,6 @@ void IRQ_init()
 
 void IRQ_register_interrupt_handler(const uint8_t n, ISR_Handler_t handler)
 {
-    // PIC2_BASE_INT is just 
+    // PIC2_BASE_INT is just following
     ISR_register_interrupt_handler(PIC1_BASE_INT + n, handler);
-
 }
