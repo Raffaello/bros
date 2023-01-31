@@ -13,9 +13,7 @@ typedef struct IRQ_registers_t
 } __attribute__((packed)) IRQ_registers_t;
 #pragma pack(pop)
 
-// Enables registration of callbacks for interrupts or IRQs.
-// For IRQs, to ease confusion, use the #defines above as the
-// first parameter.
+// Enables registration of callbacks for IRQs.
 typedef void ((*IRQ_Handler_t)(IRQ_registers_t));
 
 void IRQ_init();

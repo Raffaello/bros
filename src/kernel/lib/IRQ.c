@@ -9,7 +9,7 @@
 #include <drivers/PIC.h>
 #include <cpu/GDT_IDT.h>
 
-IRQ_Handler_t irq_handlers[IRQ_TOTAL];
+static IRQ_Handler_t irq_handlers[IRQ_TOTAL];
 
 void IRQ_UniversalHandler(IRQ_registers_t r)
 {

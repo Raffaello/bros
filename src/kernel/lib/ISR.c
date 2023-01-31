@@ -4,16 +4,9 @@
 #include <bios/vga.h>
 #include <lib/std.h>
 
-#pragma pack(push, 1)
-typedef struct ISR_registers_t
-{
-   uint16_t ds;                                         // Data segment selector
-   uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;     // Pushed by pusha.
-   uint32_t int_no, err_code;                           // Interrupt number and error code
-   uint32_t eip, cs, eflags, useresp, ss;               // Pushed by the processor automatically, restored by iretd.
+static ISR_Handler_t isr_handlers[INT_TOTAL];
 
-} __attribute__((packed)) ISR_registers_t;
-#pragma pack(pop)
+
 
 void ISR_UniversalHandler(ISR_registers_t r)
 {
@@ -27,6 +20,7 @@ void ISR_UniversalHandler(ISR_registers_t r)
     VGA_WriteString(1,2,buf, 15);
     itoa10(r.err_code, buf);
     VGA_WriteString(1,3,buf, 15);
+    
 }
 
 // TODO do it with a macro?
@@ -83,4 +77,13 @@ void ISR_init()
     IDT_set_gate(INT_Control_Protection_Exception,  ISR_INT_21);
 }
 
+void ISR_register_interrupt_handler(uint8_t n, ISR_Handler_t handler);
+{
+    // TODO: it can be more efficient havinga IDT_handler of 255 element instead
+    //       unifying IRQ & INT in 1 file ... or ok in this way?
+    //       do it later
+    if(n >= IRQ_TOTAL)
+        return;
 
+    irq_handlers[n] = handler;
+}
