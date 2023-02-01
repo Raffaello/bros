@@ -6,21 +6,25 @@ SECTIONS
 {
     /* . = KERNEL_SEG; */
     .text KERNEL_SEG : {
-        code = .;
+        /* code = .; */
         *(.text._start)
+        *(.text._start_failure)
+        code_main = .;
+        *(.text.main)
         *(.text)
         *(.rodata)
         . = ALIGN(PAGE_SIZE);
     }
     .data : {
-        data = .;
+        /* data = .; */
         *(.data)
         . = ALIGN(PAGE_SIZE);
     }
     .bss  : {
-        bss = .;
+        /* bss = .; */
         *(.bss)
         . = ALIGN(PAGE_SIZE);
     }
     __end = .;
+    __size = __end - (code_main);
 }

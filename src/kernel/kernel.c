@@ -28,18 +28,34 @@
 #endif
 #define KERNEL_ADDR ((uint32_t*)(KERNEL_SEG))
 
-void main();
-void start_failure();
+noreturn void main() __attribute__((section(".text.main")));
+noreturn void _start_failure() __attribute__((section(".text._start_failure")));
 
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
 // __attribute__((force_align_arg_pointer))
-noreturn void _start()
+__attribute__((section(".text._start"))) noreturn void _start()
 {
     __asm__ ("cli");
 
     uint32_t _eax, _ebx;
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
+
+// TODO to self-relocate the kernel, when? if doing here can't drop this function,
+//      i should do at the end before calling main, so i can drop the _start* functions
+
+    // self-relocating kernel, from main();
+    extern const uint32_t __end;
+    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
+    extern const uint32_t __size;
+    if(kernel_size == 0) {
+        _start_failure();
+    }
+
+if(kernel_size != (uint32_t)&__size) {
+        _start_failure();
+    }
+
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmultichar"
@@ -56,7 +72,7 @@ noreturn void _start()
         || *_sys_info_end_marker != SYS_INFO_END
         || _startPtr != KERNEL_ADDR)
     {
-         start_failure();
+         _start_failure();
     }
 
     // TODO: set up paging...
@@ -125,7 +141,7 @@ noreturn void _start()
 }
 
 
-noreturn void start_failure()
+noreturn void _start_failure()
 {
     const char fail_msg[] = "Kernel load failure";
     
