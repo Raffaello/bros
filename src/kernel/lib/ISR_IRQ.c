@@ -83,8 +83,8 @@ void ISR_init()
 
 void ISR_register_interrupt_handler(const uint8_t n, ISR_Handler_t handler)
 {
-    if (n >= INT_TOTAL)
-        return;
+    // if (n >= INT_TOTAL)
+        // return;
 
     isr_handlers[n] = handler;
 }
