@@ -45,7 +45,8 @@ CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG} -DSYS_INFO_SEG=${SYS_INFO_SEG}
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
 LFLAGS+=-Tlinker.ld # linker option definition file
-LFLAGS+=-Ttext ${KERNEL_SEG}
+# LFLAGS+=-Ttext ${KERNEL_SEG}
+LFLAGS+=--defsym=KERNEL_SEG=$(KERNEL_SEG)
 
 .PHONY: kernel $(OBJS)
 
@@ -81,8 +82,10 @@ $(OBJS_S): $$(patsubst $(BUILD_DIR)/%.oS,$(SRC_DIR)/%.S,$$@)
 # Monolithic for now
 kernel: $(OBJS) ${OBJS_S}
 	# ${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
-	# objcopy -O binary -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
-	${LD} $(LFLAGS) -o ${BIN_DIR}/kernel.sys ${OBJS} ${OBJS_S}
+	# objcopy -O binary  -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
+	# ${LD} $(LFLAGS) -o ${BIN_DIR}/kernel.sys ${OBJS} ${OBJS_S}
+	${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
+	objcopy -O binary  -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
 
 image: floppy boot2 kernel
 	# Using 2 extra Reserved Sectors
@@ -94,7 +97,7 @@ image: floppy boot2 kernel
 
 gdb-kernel-debug: image
 	qemu-system-i386 -fda ${FLOPPY_IMAGE_NAME} -S -s &
-	gdb ${BIN_DIR}/kernel.sys  \
+	gdb ${BUILD_DIR}/kernel.out \
 		-ex 'target remote localhost:1234' \
 		-ex 'layout src' \
 		-ex 'layout reg' \
@@ -105,5 +108,5 @@ gdb-kernel-debug: image
 
 clean:
 	rm ${BIN_DIR}/* -fv
-	rm ${BUILD_DIR} -fr	v
+	rm ${BUILD_DIR}/* -frv
 	rm ${FLOPPY_IMAGE_NAME} -fv

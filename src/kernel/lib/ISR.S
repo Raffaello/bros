@@ -8,11 +8,13 @@
 .intel_syntax noprefix
 .text
 
-.macro ISR_INT x
+.macro ISR_INT x, e
 .globl ISR_INT_\x
 ISR_INT_\x:
   cli
-#   push 0
+  .if \e == 0
+    push \e
+  .endif
   push \x
   jmp ISR_universal_handler_caller
 .type ISR_INT_\x, @function
@@ -21,28 +23,28 @@ ISR_INT_\x:
 
 # ISR INT_Divide_Error
 # Can't make the macro working calling the other macro
-ISR_INT 0
-ISR_INT 1
-ISR_INT 2
-ISR_INT 3
-ISR_INT 4
-ISR_INT 5
-ISR_INT 6
-ISR_INT 7
-ISR_INT 8
-ISR_INT 9
-ISR_INT 10
-ISR_INT 11
-ISR_INT 12
-ISR_INT 13
-ISR_INT 14
-ISR_INT 15
-ISR_INT 16
-ISR_INT 17
-ISR_INT 18
-ISR_INT 19
-ISR_INT 20
-ISR_INT 21
+ISR_INT 0, 0
+ISR_INT 1, 0
+ISR_INT 2, 0
+ISR_INT 3, 0
+ISR_INT 4, 0
+ISR_INT 5, 0
+ISR_INT 6, 0
+ISR_INT 7, 0
+ISR_INT 8, 1
+ISR_INT 9, 0
+ISR_INT 10, 1
+ISR_INT 11, 1
+ISR_INT 12, 1
+ISR_INT 13, 1
+ISR_INT 14, 1
+ISR_INT 15, 0
+ISR_INT 16, 0
+ISR_INT 17, 0
+ISR_INT 18, 0
+ISR_INT 19, 0
+ISR_INT 20, 0
+ISR_INT 21, 0
 
 # .macro ISR_INT_init from, to
 #    ISR_INT \from

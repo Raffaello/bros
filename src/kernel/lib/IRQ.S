@@ -11,7 +11,7 @@
 .globl IRQ_INT_\x
 IRQ_INT_\x:
   cli
-#   push 0
+  push 0    # this can be used instead for the re-maped interrupt value
   push \x
   jmp IRQ_universal_handler_caller
 .type IRQ_INT_\x, @function
@@ -58,7 +58,7 @@ IRQ_universal_handler_caller:
   mov gs, ax
 
   popad          # Pops edi,esi,ebp...
-  add esp, 4     # Cleans up the pushed IRQ number
+  add esp, 8     # Cleans up the pushed IRQ number
   sti
   iretd
 .type IRQ_universal_handler_caller, @function

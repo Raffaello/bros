@@ -1,26 +1,26 @@
-/* OUTPUT_FORMAT(elf32-i386) */
-OUTPUT_FORMAT(binary)
+OUTPUT_FORMAT(elf32-i386)
+/* OUTPUT_FORMAT(binary) */
 ENTRY(_start)
 PAGE_SIZE = 4096;
 SECTIONS
 {
-    /* . = 0x1000; */
-    .text : /*AT(0x1000)*/ {
+    . = KERNEL_SEG;
+    .text : AT(KERNEL_SEG){
         code = .;
-        /* *(.text.start) */
+        *(.text._start)
         *(.text)
         *(.rodata)
-        /* . = ALIGN(PAGE_SIZE); */
+        . = ALIGN(PAGE_SIZE);
     }
-    .data : /*AT(data - code)*/ {
+    .data : AT(KERNEL_SEG + data - code) {
         data = .;
         *(.data)
-        /* . = ALIGN(PAGE_SIZE); */
+        . = ALIGN(PAGE_SIZE);
     }
-    .bss  : /*AT(bss - code)*/ {
+    .bss  : AT(KERNEL_SEG + bss - code) {
         bss = .;
         *(.bss)
-        /* . = ALIGN(PAGE_SIZE); */
+        . = ALIGN(PAGE_SIZE);
     }
     __end = .;
 }
