@@ -60,7 +60,11 @@ all: floppy boot2 image kernel
 
 floppy:
 	@mkdir -p build
-	${AS} ${ASFLAGS} -o build/boot.o src/bootloader/floppy.asm
+	${AS} ${ASFLAGS} \
+		--defsym=BIOS_BOOT_SEG=${BIOS_BOOT_SEG} \
+		--defsym=BOOT_RELOCATE_SEG=${BOOT_REL_SEG} \
+		--defsym=BOOT2_SEG=${BOOT2_SEG} \
+		-o build/boot.o src/bootloader/floppy.asm
 	${LD} ${AS_LFLAGS} -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG}
 	objcopy -O binary -j .text build/boot.out ${BIN_DIR}/boot.bin
 
