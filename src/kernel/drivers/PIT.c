@@ -39,14 +39,14 @@
 #define PIT_OCW_COUNTER_1           0x40    //01000000
 #define PIT_OCW_COUNTER_2           0x80    //10000000
 
-static volatile uint32_t ticks = 0;
+static volatile uint32_t _ticks = 0;
 
 static void timer_callback(ISR_registers_t r)
 {
     char buf[11]; // 4294967295
 
-    ticks++;
-    itoa10(ticks, buf);
+    _ticks++;
+    itoa10(_ticks, buf);
     VGA_WriteString(0,24, buf, VGA_COLOR_BRIGHT_GREEN);
 }
 
@@ -77,6 +77,14 @@ void PIT_set_timer_freq(const uint32_t freq)
    outb(PIT_REG_COUNTER0, l);
    outb(PIT_REG_COUNTER0, h);
 
-   ticks = 0;
+   _ticks = 0;
    __asm__("popfd");
+}
+
+void sleep(const unsigned int ticks_)
+{
+    unsigned long eticks;
+
+    eticks = _ticks + ticks_;
+    while(_ticks < eticks);
 }
