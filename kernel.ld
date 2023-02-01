@@ -4,20 +4,20 @@ ENTRY(_start)
 PAGE_SIZE = 4096;
 SECTIONS
 {
-    . = KERNEL_SEG;
-    .text : AT(KERNEL_SEG){
+    /* . = KERNEL_SEG; */
+    .text KERNEL_SEG : {
         code = .;
         *(.text._start)
         *(.text)
         *(.rodata)
         . = ALIGN(PAGE_SIZE);
     }
-    .data : AT(KERNEL_SEG + data - code) {
+    .data : {
         data = .;
         *(.data)
         . = ALIGN(PAGE_SIZE);
     }
-    .bss  : AT(KERNEL_SEG + bss - code) {
+    .bss  : {
         bss = .;
         *(.bss)
         . = ALIGN(PAGE_SIZE);

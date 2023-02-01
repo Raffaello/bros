@@ -45,7 +45,7 @@ CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG} -DSYS_INFO_SEG=${SYS_INFO_SEG}
 
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
-LFLAGS+=-Tlinker.ld # linker option definition file
+LFLAGS+=-Tkernel.ld # linker option definition file
 # LFLAGS+=-Ttext ${KERNEL_SEG}
 LFLAGS+=--defsym=KERNEL_SEG=$(KERNEL_SEG)
 
