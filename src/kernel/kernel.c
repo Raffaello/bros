@@ -41,20 +41,6 @@ __attribute__((section(".text._start"))) noreturn void _start()
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
 
-// TODO to self-relocate the kernel, when? if doing here can't drop this function,
-//      i should do at the end before calling main, so i can drop the _start* functions
-
-    // self-relocating kernel, from main();
-    extern const uint32_t __end;
-    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
-    extern const uint32_t __size;
-    if(kernel_size == 0) {
-        _start_failure();
-    }
-
-if(kernel_size != (uint32_t)&__size) {
-        _start_failure();
-    }
 
 
 #pragma GCC diagnostic push
@@ -74,6 +60,9 @@ if(kernel_size != (uint32_t)&__size) {
     {
          _start_failure();
     }
+
+    
+
 
     // TODO: set up paging...
 
@@ -122,8 +111,21 @@ if(kernel_size != (uint32_t)&__size) {
     }
 
     // TODO: self-relocate the kernel
+    // TODO to self-relocate the kernel, when? if doing it here can't drop this function,
+    //      i should do at the end before calling main, so i can drop the _start* functions
 
-    // TODO: init other cores...
+    // self-relocating kernel, from main();
+    extern const uint32_t __end;
+    extern const uint32_t __size;
+    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
+
+    if(kernel_size != (uint32_t)&__size
+    || (uint32_t)&main <= (uint32_t)&_start_failure
+    || (uint32_t)&main <= (uint32_t)&_start) {
+        _start_failure();
+    }
+
+    // TODO: init other cpu cores...
 
 
     init_descriptor_tables();
