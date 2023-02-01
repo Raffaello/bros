@@ -3,29 +3,40 @@
 #include <lib/ISR_IRQ.h>
 #include <defs/interrupts.h>
 
-#define PAGE_SIZE 4096
+#define PAGE_SIZE   4096
+#define CR0_PG_MASK 0x80000000
 
 // Bitsets
-static uint32_t* frames;
-static uint32_t  nframes;
+static uint32_t* _frames;
+static uint32_t  _nframes;
 
-void paging_init()
+page_dir_t* _kernel_directory  = NULL;
+page_dir_t* _current_directory = NULL;
+
+void page_fault_handler(ISR_registers_t regs);
+void switch_page_directory(page_dir_t *dir);
+
+void init_paging()
 {
     // TODO pass memory information from boot info
     // hardcoding now to understand how it works, 16MB ?
-    uint32_t mem_end_page = 0x1000000;
-    nframes = mem_end_page / PAGE_SIZE; // if not evenly divided what to do with the remaining mem?
-
+    extern uint32_t __end;
+    const uint32_t mem_end_page = 0x1000000;
+    // const uint32_t mem_start_page = (uint32_t)&__end;
+    _nframes = mem_end_page / PAGE_SIZE; // if not evenly divided what to do with the remaining mem?
+    _frames = &__end;
     // alloc all frames
 
     // TODO
 
-    frames = (u32int*)kmalloc(INDEX_FROM_BIT(nframes));
-    memset(frames, 0, INDEX_FROM_BIT(nframes));
+    // frames = (u32int*)kmalloc(INDEX_FROM_BIT(nframes));
+    // memset(frames, 0, INDEX_FROM_BIT(nframes));
 
       // Let's make a page directory.
-    kernel_directory = (page_directory_t*)kmalloc_a(sizeof(page_directory_t));
-    current_directory = kernel_directory;
+    // kernel_directory = (page_directory_t*)kmalloc_a(sizeof(page_directory_t));
+    // current_directory = kernel_directory;
+
+    _kernel_directory = (page_dir_t*)&__end;
 
     // We need to identity map (phys addr = virt addr) from
     // 0x0 to the end of used memory, so we can access this
@@ -41,11 +52,20 @@ void paging_init()
     //     alloc_frame( get_page(i, 1, kernel_directory), 0, 0);
     //     i += 0x1000;
     // }
-    // Before we enable paging, we must register our page fault handler.
-    register_interrupt_handler(INT_Page_Fault, page_fault_handler);
 
-    // Now, enable paging!
-    // switch_page_directory(kernel_directory);
+    ISR_register_interrupt_handler(INT_Page_Fault, page_fault_handler);
+
+    switch_page_directory(_kernel_directory);
+}
+
+void switch_page_directory(page_dir_t *dir)
+{
+//    current_directory = dir;
+//    __asm__ volatile("mov cr3, %0":: "r"(&dir->page_table_physical));
+   uint32_t _cr0;
+   __asm__ volatile("mov %0, cr0": "=r"(_cr0));
+   _cr0 |= CR0_PG_MASK; // Enable paging
+//    __asm__ volatile("mov cr0, %0":: "r"(_cr0));
 }
 
 void page_fault_handler(ISR_registers_t regs)

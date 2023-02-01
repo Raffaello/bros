@@ -11,6 +11,8 @@
 #include <stdnoreturn.h>
 #include <stddef.h>
 
+#include <cpu/mmu/paging.h>
+
 /*
  * TODO:
  *  conforming freestanding implementation is only required to provide certain library facilities:
@@ -41,8 +43,6 @@ __attribute__((section(".text._start"))) noreturn void _start()
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
 
-
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmultichar"
     uint32_t __BROS = (uint32_t)('BROS');
@@ -65,6 +65,7 @@ __attribute__((section(".text._start"))) noreturn void _start()
 
 
     // TODO: set up paging...
+    init_paging();
 
 
     boot_info_init(_sys_info->tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));

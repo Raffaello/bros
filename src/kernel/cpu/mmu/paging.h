@@ -14,6 +14,10 @@
 #include <stdint.h>
 // #include <assert.h> // for static_assert macro mapped to _Static_assert
 
+#define PAGE_DIR_ENTRIES    1024
+#define PAGE_TABLE_ENTRIES  1024
+
+
 #pragma pack(push, 1)
 typedef struct PDE_t
 {
@@ -28,7 +32,7 @@ typedef struct PDE_t
     uint32_t ign2       :   4;  // ignored
     uint32_t page_table :   20; // Physical address of 4-KByte aligned page table referenced by this entry
 
-} __attribbte__((packed)) PDE_t;
+} __attribute__((packed)) PDE_t;
 _Static_assert(sizeof(PDE_t) == sizeof(uint32_t));
 
 typedef struct PTE_t
@@ -50,15 +54,19 @@ _Static_assert(sizeof(PTE_t) == sizeof(uint32_t));
 
 typedef struct page_table_t
 {
-    PTE_t pages[1024];
+    PTE_t entries[PAGE_TABLE_ENTRIES];
 } page_table_t;
+
+
 
 typedef struct page_dir_t
 {
+    PDE_t         entries[PAGE_DIR_ENTRIES];
+    
     page_table_t* page_tables[1024];
     uint32_t page_table_physical[1024];
     uint32_t physical_addr;
 } page_dir_t;
 
 
-void paging_init();
+void init_paging();
