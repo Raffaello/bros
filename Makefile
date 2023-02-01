@@ -11,8 +11,8 @@ KERNEL_SEG=0x1000
 # KERNEL_FILENAME="BROSKRNL.SYS"
 # FLOPPY_SIZE=1440
 FLOPPY_IMAGE_NAME="br-dos.img"
-FAT_BUFFER_SEG=0x600
-SYS_INFO_SEG=0x600 # same as BOOT_REL_SEG as it won't be used anymore
+FAT_BUFFER_SEG=0x600 # same as BOOT_REL_SEG as it won't be used anymore
+SYS_INFO_SEG=0x600 # it will replace the FAT_BUFFER_SEG after the kernel is loaded.
 
 CC=gcc
 AS=as
