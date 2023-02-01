@@ -30,7 +30,11 @@ SRC  = ${SRC_DIR}/kernel.c $(wildcard \
 	${SRC_DIR}/drivers/*.c)
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
 
-SRC_S  = $(wildcard ${SRC_DIR}/lib/*.S ${SRC_DIR}/cpu/*.S ${SRC_DIR}/drivers/*.S)
+SRC_S  = $(wildcard \
+	${SRC_DIR}/lib/*.S \
+	${SRC_DIR}/cpu/*.S \
+	${SRC_DIR}/cpu/mmu/*.S \
+	${SRC_DIR}/drivers/*.S)
 OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)
 
 INCLUDE_DIR=${SRC_DIR}

@@ -1,8 +1,8 @@
 /**************************************************************************
  *** 32 bit paging only for now (PAE later?)                            ***
- *** 3 Level paging only 4KB pages                                      ***
+ *** 2 Level paging only 4KB pages                                      ***
  *** TODO:                                                              ***
- *** opimizing page size on process based e.g.:                         ***
+ *** opimizing page size on process based with 3 level paging e.g.:     ***
  *** mix 4k, 2MB and 1GB pages. No need to use uniform page size.       ***
  *** So a process having 9MB of data can get 4 2MB pages and            ***
  *** the rest with 4k pages.                                            ***
@@ -59,14 +59,14 @@ typedef struct page_table_t
 
 
 
-typedef struct page_dir_t
+typedef struct page_directory_t
 {
     PDE_t         entries[PAGE_DIR_ENTRIES];
     
     page_table_t* page_tables[1024];
     uint32_t page_table_physical[1024];
     uint32_t physical_addr;
-} page_dir_t;
+} page_directory_t;
 
 
 void init_paging();
