@@ -11,6 +11,7 @@ KERNEL_SEG=0x1000
 # KERNEL_FILENAME="BROSKRNL.SYS"
 # FLOPPY_SIZE=1440
 FLOPPY_IMAGE_NAME="br-dos.img"
+FAT_BUFFER_SEG=0x600
 SYS_INFO_SEG=0x600 # same as BOOT_REL_SEG as it won't be used anymore
 
 CC=gcc
@@ -70,7 +71,11 @@ floppy:
 
 boot2:
 	@mkdir -p build
-	${AS} ${ASFLAGS} -o build/boot2.o src/bootloader/boot2.asm
+	${AS} ${ASFLAGS} \
+		--defsym=KERNEL_SEG=${KERNEL_SEG} \
+		--defsym=FAT_BUFFER_SEG=${FAT_BUFFER_SEG} \
+		--defsym=SYS_INFO_SEG=${SYS_INFO_SEG} \
+		-o build/boot2.o src/bootloader/boot2.asm
 	${LD} ${AS_LFLAGS} -o build/boot2.out build/boot2.o -Ttext ${BOOT2_SEG}
 	objcopy -O binary -j .text build/boot2.out ${BIN_DIR}/boot2.bin
 
