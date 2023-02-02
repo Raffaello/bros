@@ -16,7 +16,7 @@
 //     return res;
 // }
 
-char* itoa(int value, char * str, const uint8_t base)
+char* itoa(unsigned int value, char * str, const uint8_t base)
 {
     // if (base!=10 || base !=16)
     // {
@@ -34,7 +34,7 @@ char* itoa(int value, char * str, const uint8_t base)
         value /= base;
         buf[i++] = alphadigit[r];
     } while(value > 0);
-    // strcpy
+    // strcpy reversed
     buf[i--] = 0;
     int k = 0;
     for(; k <= i; ++k)
