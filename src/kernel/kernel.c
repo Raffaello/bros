@@ -124,13 +124,11 @@ __attribute__((section(".text._start"))) noreturn void _start()
             }
         }
 
-        // reserve the kernel memory area plus the 
+        // reserve the kernel memory area plus the PMM Bit set
         PMM_MemMap_deinit_kernel((uint32_t)KERNEL_ADDR, kernel_size);
 
-        // TODO: display bitmap / memory status after init
         CON_setConsoleColor((con_col_t){.bg_col=VGA_COLOR_BLUE, .fg_col=VGA_COLOR_YELLOW});
         CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
-
         CON_setConsoleColor(old_col);
     }
 

@@ -70,3 +70,32 @@ inline uint32_t PMM_Blocks_free()
 {
     return _PMM_max_blocks - _PMM_used_blocks;
 }
+
+void *PMM_malloc(size_t size)
+{
+    if (PMM_Blocks_free() < size)
+        return NULL;
+
+    unsigned int pos;
+    if(!bitset_find(_PMM_mem_map, _PMM_mem_map_size, size, &pos))
+        return NULL;
+    
+    for(size_t i = 0; i < size; ++i)
+        bitset_set(_PMM_mem_map, pos + i);
+
+    _PMM_used_blocks += size;
+
+    return (void*) (pos * PMM_BLOCK_SIZE);
+}
+
+void PMM_free(void* ptr, size_t size)
+{
+    // TODO assert used blocks > size
+    // if (_PMM_used_blocks < size)
+    //     return;
+
+    unsigned int pos = ((unsigned int) ptr) / PMM_BLOCK_SIZE;
+    for(size_t i = 0; i < size; i++)
+        bitset_unset(_PMM_mem_map, pos + i);
+    _PMM_used_blocks -= size;
+}
