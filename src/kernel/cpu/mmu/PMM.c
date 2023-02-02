@@ -21,5 +21,6 @@ void PMM_init(const uint32_t tot_mem_KB, uint32_t* physical_mem_start)
     _PMM_used_blocks = _PMM_max_blocks;
     _PMM_mem_map = physical_mem_start;
 
+    // All Memory in use, as not known if it can be really used...
     memset(_PMM_mem_map, 0xF, _PMM_max_blocks / PMM_BLOCKS_PER_BYTE);
 }

@@ -9,6 +9,7 @@
 #define MEM_MAP_TYPE_RESERVED       2
 #define MEM_MAP_TYPE_ACPI_RECLAIM   3
 #define MEM_MAP_TYPE_ACPI_NVS       4
+#define MEM_MAP_TYPE_BAD            5
 
 #define SYS_INFO_END_MARKER_PTR(x) (uint32_t*) (((uint8_t*) x) + sizeof(boot_SYS_Info_t) + (x->num_mem_map_entries * sizeof(boot_MEM_MAP_Info_Entry_t)))
 #define MEM_MAP_ENTRY_PTR(x) (boot_MEM_MAP_Info_Entry_t*) (((uint8_t*) x) + sizeof(boot_SYS_Info_t))

@@ -21,8 +21,6 @@
  *  since C99, also those in <stdbool.h> and <stdint.h>; and since C11, also those in <stdalign.h> 
  * and <stdnoreturn.h>. In addition, complex types, added in C99, 
  * are not required for freestanding implementations.
-
-
 */
 
 
@@ -54,10 +52,18 @@ __attribute__((section(".text._start"))) noreturn void _start()
     boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
     const uint32_t* _sys_info_end_marker = SYS_INFO_END_MARKER_PTR(_sys_info);
     const uint32_t* _startPtr = (uint32_t*)&_start;
+    // self-relocating kernel checks
+    extern uint32_t __end;
+    extern const uint32_t __size;
+    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
+
     if(_eax != __BROS 
         || _sys_info->begin_marker != SYS_INFO_BEGIN
         || *_sys_info_end_marker != SYS_INFO_END
-        || _startPtr != KERNEL_ADDR)
+        || _startPtr != KERNEL_ADDR
+        || kernel_size != (uint32_t)&__size
+        || (uint32_t)&main <= (uint32_t)&_start_failure
+        || (uint32_t)&main <= (uint32_t)&_start)
     {
          _start_failure();
     }
@@ -71,70 +77,54 @@ __attribute__((section(".text._start"))) noreturn void _start()
         CON_puts("Console Init\n");
     }
 
-    // PMM_init(_sys_info->tot_mem, &__end);
+    // Boot Info
+    {
+        CON_puts("Boot Info\n");
+        boot_info_init(_sys_info->tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
+        con_col_t old_col = CON_getConsoleColor();
+        CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
+        const boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
+
+        for(int i = 0; i < _sys_info->num_mem_map_entries; ++i)
+        {
+            const char* mem_types[] = {
+                "Available",
+                "Reserved",
+                "ACPI recl",
+                "ACPI nvs",
+                "Bad"
+            };
+
+            const boot_MEM_MAP_Info_Entry_t memi = mem_map[i];
+            CON_printf(
+                "Mem Map %d: start=0x%X%X --- length=0x%X%X --- type=%d (%s)\n",
+                i,
+                memi.base_addr_hi,
+                memi.base_addr_lo,
+                memi.length_hi,
+                memi.length_lo,
+                memi.type,
+                mem_types[memi.type]
+            );
+        }
+
+        CON_setConsoleColor(old_col);
+    }
+
+    CON_puts("PMM Init\n");
+    PMM_init(_sys_info->tot_mem, &__end);
 
 
     // TODO: set up paging...
     // init_paging();
 
 
-    boot_info_init(_sys_info->tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
-
-    // TODO MEM_MAP_Info related
-    // TODO remove this block later on...
-    if (_sys_info->num_mem_map_entries > 0) {
-    //   VGA_clear();
-      con_col_t cc;
-      cc.fg_col=VGA_COLOR_BRIGHT_CYAN;
-      cc.bg_col=VGA_COLOR_RED;
-      CON_setConsoleColor(cc);
-      CON_puts("TEST: ");
-      const boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
-      for(int i = 0; i < _sys_info->num_mem_map_entries; ++i) {
-          const char mem_type_msg[] = "mem type: ";
-          const char a_msg[] = "available";
-          const char r_msg[] = "reserved";
-          const char c_msg[] = "ACPI recl";
-          const char n_msg[] = "ACPI nvs";
-          const char e_msg[] = "error";
-
-          CON_puts(mem_type_msg);
-          switch(mem_map[i].type)
-          {
-              case MEM_MAP_TYPE_AVAILABLE: 
-                CON_puts(a_msg);
-                break;
-            case MEM_MAP_TYPE_RESERVED: 
-                CON_puts(r_msg);
-                break;
-            case MEM_MAP_TYPE_ACPI_RECLAIM:
-                CON_puts(c_msg);
-                break;
-            case MEM_MAP_TYPE_ACPI_NVS:
-                CON_puts(n_msg);
-                break;
-            default:
-                CON_puts(e_msg);
-                break;
-          }
-          CON_newline();
-      }
-    }
-
     // TODO: self-relocate the kernel
     // TODO to self-relocate the kernel, when? if doing it here can't drop this function,
     //      i should do at the end before calling main, so i can drop the _start* functions
 
     // self-relocating kernel, from main();
-    extern const uint32_t __end;
-    extern const uint32_t __size;
-    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
 
-    if(kernel_size != (uint32_t)&__size
-    || (uint32_t)&main <= (uint32_t)&_start_failure
-    || (uint32_t)&main <= (uint32_t)&_start) {
-        _start_failure();
-    }
 
     // TODO: init other cpu cores...
 
@@ -169,10 +159,10 @@ noreturn void _start_failure()
  __attribute__((force_align_arg_pointer))
 noreturn void main()
 {
-    // const char hello_msg[] = "*** HELLO FROM BROSKRNL.SYS ***";
+    const char hello_msg[] = "*** HELLO FROM BROSKRNL.SYS ***";
 
     // VGA_clear();
-    // VGA_WriteString(20, 10, hello_msg, 15);
+    VGA_WriteString(20, 10, hello_msg, 15);
 
     VGA_update_cursor(0, 24);
 
