@@ -34,6 +34,7 @@ void CON_setBackgroundColor(const uint8_t bg_col)
 {
     _col |= (bg_col << 4);
 }
+
 void CON_setForegroundColor(const uint8_t fg_col)
 {
     _col |= (fg_col & 0xF);
@@ -48,18 +49,24 @@ void CON_gotoXY(const uint8_t x, const uint8_t y)
 
 void CON_getXY(uint8_t* x, uint8_t* y)
 {
-    // TODO should call a VGA function to get the cursor position, instead of using cached values
+    // TODO should call a VGA function to get the cursor position, instead of using cached values?
     *x = _curX;
     *y = _curY;
 }
 
 void CON_putc(const char ch)
 {
-    VGA_WriteChar(_curX, _curY, ch, _col);
-    _curX++;
-    
-
-    _AdjscrollDrown();
+    switch(ch)
+    {
+    case '\n':
+        CON_newline();
+    break;
+    default:
+        VGA_WriteChar(_curX, _curY, ch, _col);
+        _curX++;
+        _AdjscrollDrown();
+    break;
+    }
 }
 
 void CON_puts(const char str[])
@@ -70,6 +77,6 @@ void CON_puts(const char str[])
 
 void CON_newline()
 {
-    CON_gotoXY(0, _curY+1);
+    CON_gotoXY(0, _curY + 1);
     _AdjscrollDrown();
 }

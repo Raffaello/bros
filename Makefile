@@ -124,6 +124,9 @@ gdb-kernel-debug: image
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
 
+bochs-kerenl-debug: image
+	bochs-debugger -q -f bochs-debugger.rs
+
 clean:
 	rm ${BIN_DIR}/* -fv
 	rm ${BUILD_DIR}/* -frv

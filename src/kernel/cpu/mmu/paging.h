@@ -1,6 +1,6 @@
 /**************************************************************************
  *** 32 bit paging only for now (PAE later?)                            ***
- *** 2 Level paging only 4KB pages                                      ***
+ *** 3 Level paging only 4KB pages                                      ***
  *** TODO:                                                              ***
  *** opimizing page size on process based with 3 level paging e.g.:     ***
  *** mix 4k, 2MB and 1GB pages. No need to use uniform page size.       ***

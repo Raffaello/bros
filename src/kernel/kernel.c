@@ -12,6 +12,7 @@
 #include <stddef.h>
 
 #include <cpu/mmu/paging.h>
+#include <cpu/mmu/PMM.h>
 
 /*
  * TODO:
@@ -61,11 +62,20 @@ __attribute__((section(".text._start"))) noreturn void _start()
          _start_failure();
     }
 
-    
+    // Init VGA Console
+    {
+        int cur_offs = VGA_get_cursor_offset();
+        CON_gotoXY(cur_offs % 80, cur_offs / 80);
+        VGA_enable_cursor(0, 0);
+        CON_setConsoleColor2(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
+        CON_puts("Console Init\n");
+    }
+
+    // PMM_init(_sys_info->tot_mem, &__end);
 
 
     // TODO: set up paging...
-    init_paging();
+    // init_paging();
 
 
     boot_info_init(_sys_info->tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
@@ -73,7 +83,7 @@ __attribute__((section(".text._start"))) noreturn void _start()
     // TODO MEM_MAP_Info related
     // TODO remove this block later on...
     if (_sys_info->num_mem_map_entries > 0) {
-      VGA_clear();
+    //   VGA_clear();
       con_col_t cc;
       cc.fg_col=VGA_COLOR_BRIGHT_CYAN;
       cc.bg_col=VGA_COLOR_RED;
@@ -159,12 +169,11 @@ noreturn void _start_failure()
  __attribute__((force_align_arg_pointer))
 noreturn void main()
 {
-    const char hello_msg[] = "*** HELLO FROM BROSKRNL.SYS ***";
+    // const char hello_msg[] = "*** HELLO FROM BROSKRNL.SYS ***";
 
     // VGA_clear();
-    VGA_WriteString(20, 10, hello_msg, 15);
+    // VGA_WriteString(20, 10, hello_msg, 15);
 
-    VGA_enable_cursor(0, 0);
     VGA_update_cursor(0, 24);
 
 // TEST int handler
