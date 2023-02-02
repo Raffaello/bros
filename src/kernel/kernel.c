@@ -96,7 +96,6 @@ __attribute__((section(".text._start"))) noreturn void _start()
         for(int i = 0; i < _sys_info->num_mem_map_entries; ++i)
         {
             const char* mem_types[] = {
-                "error",
                 "Available",
                 "Reserved",
                 "ACPI recl",
@@ -113,7 +112,7 @@ __attribute__((section(".text._start"))) noreturn void _start()
                 memi.length_hi,
                 memi.length_lo,
                 memi.type,
-                mem_types[memi.type]
+                mem_types[memi.type - 1]
             );
 
             if(memi.type == MEM_MAP_TYPE_AVAILABLE)

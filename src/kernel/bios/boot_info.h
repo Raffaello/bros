@@ -5,6 +5,7 @@
 #define SYS_INFO_BEGIN  0x12345678
 #define SYS_INFO_END    0x87654321
 
+#define MEM_MAP_TYPE_ERROR          0
 #define MEM_MAP_TYPE_AVAILABLE      1
 #define MEM_MAP_TYPE_RESERVED       2
 #define MEM_MAP_TYPE_ACPI_RECLAIM   3

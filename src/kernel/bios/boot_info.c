@@ -21,7 +21,8 @@ void boot_info_sanitize(uint32_t *tot_mem, const uint8_t num_mem_map, boot_MEM_M
     for(int i = 0; i < num_mem_map; ++i)
     {
         // index[i] = i;
-        if(mem_map[i].type >= MEM_MAP_TYPE_BAD)
+        if(mem_map[i].type >= MEM_MAP_TYPE_BAD 
+        || mem_map[i].type == MEM_MAP_TYPE_ERROR)
             mem_map[i].type = MEM_MAP_TYPE_RESERVED;
 
         if(mem_map[i].type == MEM_MAP_TYPE_AVAILABLE)
