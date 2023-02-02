@@ -1,7 +1,8 @@
-/***************************
- * Physical Memory Manager *
- *   continuos mem areas   *
- **************************/
+/************************************
+ * Physical Memory Manager          *
+ *   continuos mem areas            *
+ * susceptible to fragmentation     *
+ ************************************/
 #pragma once
 
 #include <stdint.h>
