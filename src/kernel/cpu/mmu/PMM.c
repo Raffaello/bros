@@ -58,6 +58,7 @@ void PMM_MemMap_deinit(const uint32_t physical_addr, const uint32_t size)
 
 void PMM_MemMap_deinit_kernel(const uint32_t physical_addr, const uint32_t size)
 {
+    // TODO: add also something for the stack!
     PMM_MemMap_deinit(physical_addr, size + _PMM_mem_map_size);
 }
 
@@ -71,31 +72,46 @@ inline uint32_t PMM_Blocks_free()
     return _PMM_max_blocks - _PMM_used_blocks;
 }
 
-void *PMM_malloc(size_t size)
+void *PMM_malloc_blocks(const size_t num_blocks)
 {
-    if (PMM_Blocks_free() < size)
+    if (PMM_Blocks_free() < num_blocks)
         return NULL;
 
     unsigned int pos;
-    if(!bitset_find(_PMM_mem_map, _PMM_mem_map_size, size, &pos))
+    if(!bitset_find(_PMM_mem_map, _PMM_mem_map_size, num_blocks, &pos))
         return NULL;
     
-    for(size_t i = 0; i < size; ++i)
+    for(size_t i = 0; i < num_blocks; ++i)
         bitset_set(_PMM_mem_map, pos + i);
 
-    _PMM_used_blocks += size;
+    _PMM_used_blocks += num_blocks;
 
     return (void*) (pos * PMM_BLOCK_SIZE);
 }
 
-void PMM_free(void* ptr, size_t size)
+void PMM_free_blocks(void* ptr, const size_t num_blocks)
 {
     // TODO assert used blocks > size
     // if (_PMM_used_blocks < size)
     //     return;
 
     unsigned int pos = ((unsigned int) ptr) / PMM_BLOCK_SIZE;
-    for(size_t i = 0; i < size; i++)
+    for(size_t i = 0; i < num_blocks; i++)
         bitset_unset(_PMM_mem_map, pos + i);
-    _PMM_used_blocks -= size;
+    _PMM_used_blocks -= num_blocks;
+}
+
+static inline size_t _size2block(const size_t size)
+{
+    return (size / PMM_BLOCK_SIZE) + ((size % PMM_BLOCK_SIZE) ? 1 : 0);
+}
+
+void *PMM_malloc(const size_t size)
+{
+    return PMM_malloc_blocks(_size2block(size));
+}
+
+void PMM_free(void* ptr, const size_t size)
+{
+    PMM_free_blocks(ptr, _size2block(size));
 }

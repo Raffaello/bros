@@ -11,8 +11,9 @@
 #include <stdnoreturn.h>
 #include <stddef.h>
 
-#include <cpu/mmu/paging.h>
+// #include <cpu/mmu/paging.h>
 #include <cpu/mmu/PMM.h>
+#include <cpu/mmu/VMM.h>
 
 /*
  * TODO:
@@ -131,7 +132,14 @@ __attribute__((section(".text._start"))) noreturn void _start()
         CON_setConsoleColor(old_col);
     }
 
-
+    // VMM
+    {
+        CON_puts("VMM Init\n");
+        if (!VMM_init())
+        {
+            _start_failure();
+        }
+    }
 
 
     // TODO: set up paging...

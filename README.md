@@ -155,6 +155,7 @@ To debug can be used `gdb`: `target remote localhost:1234`
 
 ## Note
 
+- GCC inline assembly is just silly, must be checked as is generating stupid asm.
 - consider switching from GAS to NASM
 - eventually consider supporting MSVC too as exercise.
 - consider doing C++  along side C kernel
