@@ -76,14 +76,19 @@ __attribute__((section(".text._start"))) noreturn void _start()
         CON_setConsoleColor2(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
         CON_puts("Console Init\n");
     }
-
-    CON_puts("PMM Init\n");
-    PMM_init(_sys_info->tot_mem, &__end);
-
-    // Boot Info
+    // boot info sanitize
     {
+        uint32_t tot_mem = _sys_info->tot_mem;
+        boot_info_sanitize(&tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
+        _sys_info->tot_mem = tot_mem;
+        CON_printf("Total Available Memory: %u MB\n", tot_mem/1024);
+    }
+
+    // PMM
+    {
+        CON_puts("PMM Init\n");
+        PMM_init(_sys_info->tot_mem, &__end);
         CON_puts("Memory Regions\n");
-        boot_info_sanitize(_sys_info->tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
         con_col_t old_col = CON_getConsoleColor();
         CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
         const boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
@@ -119,8 +124,8 @@ __attribute__((section(".text._start"))) noreturn void _start()
             }
         }
 
-        // reserve the kernel memory area
-        PMM_MemMap_deinit((uint32_t)KERNEL_ADDR, kernel_size);
+        // reserve the kernel memory area plus the 
+        PMM_MemMap_deinit_kernel((uint32_t)KERNEL_ADDR, kernel_size);
 
         // TODO: display bitmap / memory status after init
         CON_setConsoleColor((con_col_t){.bg_col=VGA_COLOR_BLUE, .fg_col=VGA_COLOR_YELLOW});

@@ -7,11 +7,12 @@
 // static uint8_t _num_mem_map;
 // static boot_MEM_MAP_Info_Entry_t* _mem_map_entries = NULL;
 
-void boot_info_sanitize(const uint32_t tot_mem, const uint8_t num_mem_map, boot_MEM_MAP_Info_Entry_t* mem_map)
+void boot_info_sanitize(uint32_t *tot_mem, const uint8_t num_mem_map, boot_MEM_MAP_Info_Entry_t* mem_map)
 {
     // __tot_mem = tot_mem;
     // _num_mem_map = num_mem_map;
 
+    uint32_t tot_memMap = 0;
     if (num_mem_map == 0)
         return;
 
@@ -22,6 +23,13 @@ void boot_info_sanitize(const uint32_t tot_mem, const uint8_t num_mem_map, boot_
         // index[i] = i;
         if(mem_map[i].type >= MEM_MAP_TYPE_BAD)
             mem_map[i].type = MEM_MAP_TYPE_RESERVED;
+
+        if(mem_map[i].type == MEM_MAP_TYPE_AVAILABLE)
+            tot_memMap += mem_map[i].length_lo/1024;
+    }
+
+    if(*tot_mem < tot_memMap) {
+        *tot_mem = tot_memMap;
     }
 
     // bubble sort

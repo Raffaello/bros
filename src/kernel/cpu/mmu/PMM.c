@@ -12,6 +12,7 @@ static uint32_t     _PMM_tot_mem        = 0; // should be size_t ?
 static uint32_t     _PMM_max_blocks     = 0;
 static uint32_t     _PMM_used_blocks    = 0;
 static bitset32_t   _PMM_mem_map        = NULL;
+static uint32_t     _PMM_mem_map_size   = 0;
 
 
 void PMM_init(const uint32_t tot_mem_KB, uint32_t* physical_mem_start)
@@ -20,10 +21,10 @@ void PMM_init(const uint32_t tot_mem_KB, uint32_t* physical_mem_start)
     _PMM_max_blocks = tot_mem_KB * 1024 / PMM_BLOCK_SIZE;
     _PMM_used_blocks = _PMM_max_blocks;
     _PMM_mem_map = physical_mem_start;
+    _PMM_mem_map_size = _PMM_max_blocks / PMM_BLOCKS_PER_BYTE;
 
     // All Memory in use, as not known if it can be really used...
-    memset(_PMM_mem_map, 0xF, _PMM_max_blocks / PMM_BLOCKS_PER_BYTE);
-    
+    memset(_PMM_mem_map, 0xF, _PMM_mem_map_size);
 }
 
 void PMM_MemMap_init(const uint32_t physical_addr, const uint32_t size)
@@ -37,7 +38,6 @@ void PMM_MemMap_init(const uint32_t physical_addr, const uint32_t size)
         _PMM_used_blocks--;
     }
 
-    // bitset_set(_PMM_mem_map, 0);
     // TODO assert used blocks <= max blocks (underflow)
 
 }
@@ -49,11 +49,16 @@ void PMM_MemMap_deinit(const uint32_t physical_addr, const uint32_t size)
 
     for(uint32_t i = 0; i < blocks; ++i)
     {
-        bitset_unset(_PMM_mem_map, block_addr++);
+        bitset_set(_PMM_mem_map, block_addr++);
         _PMM_used_blocks++;
     }
 
     // TODO assert used blocks <= max blocks
+}
+
+void PMM_MemMap_deinit_kernel(const uint32_t physical_addr, const uint32_t size)
+{
+    PMM_MemMap_deinit(physical_addr, size + _PMM_mem_map_size);
 }
 
 inline uint32_t PMM_Blocks_used()
