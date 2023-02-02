@@ -130,12 +130,21 @@ void CON_printf(const char* fmt, ...)
                 continue;
             }
             /*** integers ***/
+            
             case 'd':
             case 'i':
+            // {
+            //     // TODO not supported, not able to print negative numbers
+            //     int i = va_arg (args, int);
+            //     char buf[12];
+            //     CON_puts(itoa10(i, buf));
+            //     continue;
+            // }
+            case 'u':
             {
-                int i = va_arg (args, int);
+                unsigned u = va_arg (args, unsigned int);
                 char buf[12];
-                CON_puts(itoa10(i, buf));
+                CON_puts(itoa(u, buf, 10));
                 continue;
             }
             /*** display in hex ***/

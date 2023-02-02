@@ -91,6 +91,7 @@ __attribute__((section(".text._start"))) noreturn void _start()
         for(int i = 0; i < _sys_info->num_mem_map_entries; ++i)
         {
             const char* mem_types[] = {
+                "error",
                 "Available",
                 "Reserved",
                 "ACPI recl",
@@ -100,7 +101,7 @@ __attribute__((section(".text._start"))) noreturn void _start()
 
             const boot_MEM_MAP_Info_Entry_t memi = mem_map[i];
             CON_printf(
-                "Mem Map %d: start=0x%X:%X --- length=0x%X:%X --- type=%d (%s)\n",
+                "Mem Map %u: start=0x%X:%X --- length=0x%X:%X --- type=%u (%s)\n",
                 i,
                 memi.base_addr_hi,
                 memi.base_addr_lo,
@@ -122,7 +123,8 @@ __attribute__((section(".text._start"))) noreturn void _start()
         PMM_MemMap_deinit((uint32_t)KERNEL_ADDR, kernel_size);
 
         // TODO: display bitmap / memory status after init
-
+        CON_setConsoleColor((con_col_t){.bg_col=VGA_COLOR_BLUE, .fg_col=VGA_COLOR_YELLOW});
+        CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
 
         CON_setConsoleColor(old_col);
     }

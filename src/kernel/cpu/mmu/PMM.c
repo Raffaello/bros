@@ -55,3 +55,13 @@ void PMM_MemMap_deinit(const uint32_t physical_addr, const uint32_t size)
 
     // TODO assert used blocks <= max blocks
 }
+
+inline uint32_t PMM_Blocks_used()
+{
+    return _PMM_used_blocks;
+}
+
+inline uint32_t PMM_Blocks_free()
+{
+    return _PMM_max_blocks - _PMM_used_blocks;
+}

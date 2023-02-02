@@ -121,9 +121,7 @@ gdb-kernel-debug: image
 		-ex 'layout reg' \
 		-ex 'break _start' \
 		-ex 'break *0x7c00' \
-		-ex 'break src/kernel/kernel.c:100' \
-		-ex 'break src/kernel/lib/std.c:40' \
-		-ex 'break src/kernel/lib/std.c:47' \
+		-ex 'break src/kernel/kernel.c:126' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
 
