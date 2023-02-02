@@ -47,7 +47,7 @@ CFLAGS+=-masm=intel
 # CFLAGS+=-o2
 CFLAGS+=-g
 CFLAGS+=-std=c17
-CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR}
+CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR} -MMD
 CFLAGS+=-nostartfiles -nostdlib
 CFLAGS+=-lgcc
 CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG} -DSYS_INFO_SEG=${SYS_INFO_SEG}
