@@ -23,4 +23,35 @@ void PMM_init(const uint32_t tot_mem_KB, uint32_t* physical_mem_start)
 
     // All Memory in use, as not known if it can be really used...
     memset(_PMM_mem_map, 0xF, _PMM_max_blocks / PMM_BLOCKS_PER_BYTE);
+    
+}
+
+void PMM_MemMap_init(const uint32_t physical_addr, const uint32_t size)
+{
+    uint32_t block_addr = physical_addr / PMM_BLOCK_SIZE;
+    const uint32_t blocks = size / PMM_BLOCK_SIZE;
+
+    for(uint32_t i = 0; i < blocks; ++i)
+    {
+        bitset_unset(_PMM_mem_map, block_addr++);
+        _PMM_used_blocks--;
+    }
+
+    // bitset_set(_PMM_mem_map, 0);
+    // TODO assert used blocks <= max blocks (underflow)
+
+}
+
+void PMM_MemMap_deinit(const uint32_t physical_addr, const uint32_t size)
+{
+    uint32_t block_addr = physical_addr / PMM_BLOCK_SIZE;
+    const uint32_t blocks = size / PMM_BLOCK_SIZE;
+
+    for(uint32_t i = 0; i < blocks; ++i)
+    {
+        bitset_unset(_PMM_mem_map, block_addr++);
+        _PMM_used_blocks++;
+    }
+
+    // TODO assert used blocks <= max blocks
 }

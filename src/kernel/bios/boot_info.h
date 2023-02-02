@@ -45,4 +45,6 @@ _Static_assert(sizeof(boot_MEM_MAP_Info_Entry_t) == 24);
 #pragma pack(pop)
 
 
-void boot_info_init(const uint32_t tot_mem, const uint8_t num_mem_map, boot_MEM_MAP_Info_Entry_t* mem_map);
+void boot_info_sanitize(const uint32_t tot_mem, const uint8_t num_mem_map, boot_MEM_MAP_Info_Entry_t* mem_map);
+uint8_t boot_info_get_num_mem_map();
+boot_MEM_MAP_Info_Entry_t* boot_info_get_mem_map();

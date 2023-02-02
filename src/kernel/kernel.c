@@ -77,10 +77,13 @@ __attribute__((section(".text._start"))) noreturn void _start()
         CON_puts("Console Init\n");
     }
 
+    CON_puts("PMM Init\n");
+    PMM_init(_sys_info->tot_mem, &__end);
+
     // Boot Info
     {
-        CON_puts("Boot Info\n");
-        boot_info_init(_sys_info->tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
+        CON_puts("Memory Regions\n");
+        boot_info_sanitize(_sys_info->tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
         con_col_t old_col = CON_getConsoleColor();
         CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
         const boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
@@ -97,7 +100,7 @@ __attribute__((section(".text._start"))) noreturn void _start()
 
             const boot_MEM_MAP_Info_Entry_t memi = mem_map[i];
             CON_printf(
-                "Mem Map %d: start=0x%X%X --- length=0x%X%X --- type=%d (%s)\n",
+                "Mem Map %d: start=0x%X:%X --- length=0x%X:%X --- type=%d (%s)\n",
                 i,
                 memi.base_addr_hi,
                 memi.base_addr_lo,
@@ -106,13 +109,25 @@ __attribute__((section(".text._start"))) noreturn void _start()
                 memi.type,
                 mem_types[memi.type]
             );
+
+            if(memi.type == MEM_MAP_TYPE_AVAILABLE)
+            {
+                // Because 32 bits, the High part is always zero.
+                // can't address more the 4GB after all..
+                PMM_MemMap_init(memi.base_addr_lo, memi.length_lo);
+            }
         }
+
+        // reserve the kernel memory area
+        PMM_MemMap_deinit((uint32_t)KERNEL_ADDR, kernel_size);
+
+        // TODO: display bitmap / memory status after init
+
 
         CON_setConsoleColor(old_col);
     }
 
-    CON_puts("PMM Init\n");
-    PMM_init(_sys_info->tot_mem, &__end);
+
 
 
     // TODO: set up paging...

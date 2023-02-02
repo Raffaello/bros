@@ -43,7 +43,6 @@ char* itoa(unsigned int value, char * str, const uint8_t base)
     }
     str[k] = 0;
 
-
     return str;
 }
 

@@ -4,19 +4,18 @@
 
 // TODO these values might not be required as global...
 // static uint32_t __tot_mem;
-// static uint8_t __num_mem_map;
-// static boot_MEM_MAP_Info_Entry_t* __mem_map_entries = NULL;
+// static uint8_t _num_mem_map;
+// static boot_MEM_MAP_Info_Entry_t* _mem_map_entries = NULL;
 
-
-void boot_info_init(const uint32_t tot_mem, const uint8_t num_mem_map, boot_MEM_MAP_Info_Entry_t* mem_map)
+void boot_info_sanitize(const uint32_t tot_mem, const uint8_t num_mem_map, boot_MEM_MAP_Info_Entry_t* mem_map)
 {
     // __tot_mem = tot_mem;
-    // __num_mem_map = num_mem_map;
+    // _num_mem_map = num_mem_map;
 
     if (num_mem_map == 0)
         return;
 
-    // __mem_map_entries = mem_map;
+    // _mem_map_entries = mem_map;
     // uint8_t index[255];
     for(int i = 0; i < num_mem_map; ++i)
     {
@@ -47,3 +46,13 @@ void boot_info_init(const uint32_t tot_mem, const uint8_t num_mem_map, boot_MEM_
     //     }
     // }
 }
+
+// uint8_t boot_info_get_num_mem_map()
+// {
+//     return _num_mem_map;
+// }
+
+// boot_MEM_MAP_Info_Entry_t* boot_info_get_mem_map()
+// {
+//     return _mem_map_entries;
+// }
