@@ -1,6 +1,7 @@
 OUTPUT_FORMAT(elf32-i386)
 ENTRY(_start)
 PAGE_SIZE = 4096;
+/* TODO: remove STACK section from linker */
 STACK_SIZE = PAGE_SIZE * 1;
 SECTIONS
 {
