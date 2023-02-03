@@ -62,21 +62,19 @@ bool VMM_init()
     // first 1MB
     for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
     {
-        // PTE_t* page = &page_table->entries[i];
-        // page->p     = 1;
-        // page->rw    = 1;
-        // page->frame = (i << 12); // * PAGE_SIZE (4096) , physical addr
+        PTE_t* page = &page_table->entries[i];
+        page->p     = 1;
+        page->rw    = 1;
+        page->frame = i; // * PAGE_SIZE (4096) , physical addr
 
-        page_table->entries[i] = (PTE_t){((i << 12) | 3)};
-        // *page = (PTE_t){((i << 12) | 3)};
-       
+        // page_table->entries[i] = (PTE_t){((i << 12) | 3)};
     }
 
-    // PDE_t* entry = &_kernel_directory->entries[0];
-    // entry->p = 1;
-    // entry->rw = 1;
-    // entry->page_table = ((uint32_t)page_table) >> 12;
-    _kernel_directory->entries[0] = ((PDE_t)page_table) | 3;
+    PDE_t* entry = &_kernel_directory->entries[0];
+    entry->p = 1;
+    entry->rw = 1;
+    entry->page_table = ((uint32_t)page_table >> 12);
+    // _kernel_directory->entries[0] = ((PDE_t)page_table) | 3;
 
     ISR_register_interrupt_handler(INT_Page_Fault, page_fault_handler);
     VMM_switch_page_directory(_kernel_directory);
