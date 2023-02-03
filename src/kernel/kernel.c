@@ -56,8 +56,8 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
     // self-relocating kernel checks
     extern uint32_t __end;
     extern const uint32_t __size;
-    extern const uint32_t code_main;
-    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&code_main);
+    // TODO: with optimization there is a difference...
+    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
 
     if(_eax != __BROS
         || _sys_info->begin_marker != SYS_INFO_BEGIN
@@ -78,6 +78,7 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
         CON_setConsoleColor2(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
         CON_puts("Console Init\n");
     }
+
     // boot info sanitize
     {
         uint32_t tot_mem = _sys_info->tot_mem;
@@ -86,14 +87,20 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
         CON_printf("Total Available Memory: %u MB\n", tot_mem/1024);
     }
 
+    CON_puts("Init DTs\n");
     init_descriptor_tables();
+    CON_puts("Init PIC\n");
     PIC_init();
+    CON_puts("Init ISR\n");
     ISR_init();
+    CON_puts("Init IRQ\n");
     IRQ_init();
+    CON_puts("Init PIT\n");
     PIT_init(10);
+
     // PMM
     {
-        CON_puts("PMM Init\n");
+        CON_puts("Init PMM\n");
         PMM_init(_sys_info->tot_mem, (paddr_t)&__end);
         CON_puts("Memory Regions\n");
         con_col_t old_col = CON_getConsoleColor();
@@ -107,7 +114,7 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
                 "Reserved",
                 "ACPI recl",
                 "ACPI nvs",
-                "Bad"
+                // "Bad"
             };
 
             const boot_MEM_MAP_Info_Entry_t memi = mem_map[i];
@@ -140,7 +147,7 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
 
     // VMM
     {
-        CON_puts("VMM Init\n");
+        CON_puts("Init VMM\n");
         if (!VMM_init())
         {
             _start_failure();
