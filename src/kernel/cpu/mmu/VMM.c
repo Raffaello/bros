@@ -56,8 +56,7 @@ bool VMM_init()
 
     memset(page_table, 0, sizeof(page_table_t));
     memset(page_table2, 0, sizeof(page_table_t));
-    // TODO: this overwrite the actual stack at 0x9000 ...
-    // TODO: forgot to allocate some space for the stack ...
+    // TODO: forgot to allocate some space for the stack ... just inside the linker at the moment
     memset(page_dir, 0, sizeof(page_directory_t));
 
     // first 4MB
