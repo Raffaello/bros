@@ -93,17 +93,3 @@ bool VMM_switch_page_directory(page_directory_t* page_directory)
 
     return true;
 }
-
-inline void VMM_enable_paging()
-{
-    __asm__ volatile("mov eax, cr0");
-    __asm__ volatile("or eax, %0"::"i"(CR0_PG_MASK));
-    __asm__ volatile("mov cr0, eax");
-}
-
-inline void VMM_disable_paging()
-{
-    __asm__ volatile("mov eax, cr0");
-    __asm__ volatile("or eax, %0":: "i"(~CR0_PG_MASK));
-    __asm__ volatile("mov cr0, eax");
-}
