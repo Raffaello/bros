@@ -15,11 +15,6 @@
 static page_directory_t* _kernel_directory  = NULL;
 static page_directory_t* _current_directory = NULL;
 
-//////// TEST ///////////
-// uint32_t* page_directory;
-// uint32_t* first_page_table;
-
-
 void page_fault_handler(ISR_registers_t regs)
 {
     // A page fault has occurred.
@@ -55,14 +50,12 @@ bool VMM_init()
     _kernel_directory = PMM_malloc(sizeof(page_directory_t));
     
     page_table_t*       page_table  = PMM_malloc(sizeof(page_table_t));
-    // page_table_t*       page_table2 = PMM_malloc(sizeof(page_table_t));
 
-    if(page_table == NULL /*|| page_table2 == NULL */|| _kernel_directory == NULL)
+    if(page_table == NULL || _kernel_directory == NULL)
         return false;
 
     memset(_kernel_directory, 0, sizeof(page_directory_t));
     memset(page_table, 0, sizeof(page_table_t));
-    // memset(page_table2, 0, sizeof(page_table_t));
  
     // TODO: forgot to allocate some space for the stack ... just inside the linker at the moment
 
@@ -79,68 +72,17 @@ bool VMM_init()
        
     }
 
-//     for (int i = 0, frame = 0x100000, virt = 0xc0000000; i<PAGE_TABLE_ENTRIES; i++, frame+=PAGE_SIZE, virt+=PAGE_SIZE)
-//     {
-//         PTE_t page = {0};
-//         page.p = 1;
-//         page.frame = frame;
-//         page_table->entries[PAGE_TABLE_INDEX(virt)] = page;
-//    }
-
-    PDE_t* entry = &_kernel_directory->entries[0];
-    entry->p = 1;
-    entry->rw = 1;
-    entry->page_table = ((uint32_t)page_table) >> 12;
-    // _kernel_directory->entries[0] = ((PDE_t)page_table) | 3;
-    int t =( (uint32_t)page_table)|3;
-    t=t;
-    // PDE_t* entry2 = &page_dir->entries[PAGE_DIR_INDEX(0)];
-    // entry2->p = 1;
-    // entry2->rw = 1;
-    // // entry2->page_table = (uint32_t)page_table2;
-    // entry2->page_table = (uint32_t) page_table;
+    // PDE_t* entry = &_kernel_directory->entries[0];
+    // entry->p = 1;
+    // entry->rw = 1;
+    // entry->page_table = ((uint32_t)page_table) >> 12;
+    _kernel_directory->entries[0] = ((PDE_t)page_table) | 3;
 
     ISR_register_interrupt_handler(INT_Page_Fault, page_fault_handler);
     VMM_switch_page_directory(_kernel_directory);
     VMM_enable_paging();
 
     return true;
-
- ///// TEST //////
-// page_directory = PMM_malloc(1024);
-// memset(page_directory, 0,1024);
-// first_page_table = PMM_malloc(1024);
-// memset(first_page_table, 0,1024);
-
-
-// for(int i = 0; i < 1024; i++)
-// {
-//     // This sets the following flags to the pages:
-//     //   Supervisor: Only kernel-mode can access them
-//     //   Write Enabled: It can be both read from and written to
-//     //   Not Present: The page table is not present
-//     page_directory[i] = 0x00000002;
-// }
-
-// // holds the physical address where we want to start mapping these pages to.
-// // in this case, we want to map these pages to the very beginning of memory.
- 
-// //we will fill all 1024 entries in the table, mapping 4 megabytes
-// for(unsigned int i = 0; i < 1024; i++)
-// {
-//     // As the address is page aligned, it will always leave 12 bits zeroed.
-//     // Those bits are used by the attributes ;)
-//     first_page_table[i] = (i * 0x1000) | 3; // attributes: supervisor level, read/write, present.
-// }
-
-// // attributes: supervisor level, read/write, present
-// page_directory[0] = ((unsigned int)first_page_table) | 3;
-//  __asm__ volatile("mov cr3, %0": : "a"(page_directory));
-
-// VMM_enable_paging();
-
-// return true;
-
 }
 
 bool VMM_switch_page_directory(page_directory_t* page_directory)
