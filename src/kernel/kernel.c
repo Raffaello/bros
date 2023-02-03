@@ -85,15 +85,11 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
         CON_printf("Total Available Memory: %u MB\n", tot_mem/1024);
     }
 
-
     init_descriptor_tables();
-
     PIC_init();
     ISR_init();
     IRQ_init();
     PIT_init(10);
-
-
     // PMM
     {
         CON_puts("PMM Init\n");
@@ -151,10 +147,6 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
     }
 
 
-    // TODO: set up paging...
-    // init_paging();
-
-
     // TODO: self-relocate the kernel
     // TODO to self-relocate the kernel, when? if doing it here can't drop this function,
     //      i should do at the end before calling main, so i can drop the _start* functions
@@ -193,10 +185,6 @@ noreturn void main()
     VGA_WriteString(20, 10, hello_msg, 15);
 
     VGA_update_cursor(0, 24);
-
-// TEST int handler
-    //  __asm__("int 5");
-    //  __asm__("int 4");
 
     while(1);
 }
