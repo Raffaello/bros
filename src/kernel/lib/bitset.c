@@ -6,11 +6,6 @@
 
 _Static_assert(BITSET_SIZE == 32);
 
-// inline void bitset_assign(bitset32_t, unsigned int bit, const bool value)
-// {
-
-// }
-
 inline void bitset_set(bitset32_t bitset, const unsigned int bit)
 {
     bitset[BITSET_INDEX(bit)] |= (1 << (BITSET_OFFSET(bit)));

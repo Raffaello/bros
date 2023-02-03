@@ -2,16 +2,8 @@
 #include <stddef.h>
 #include <lib/conio.h>
 
-// TODO these values might not be required as global...
-// static uint32_t __tot_mem;
-// static uint8_t _num_mem_map;
-// static boot_MEM_MAP_Info_Entry_t* _mem_map_entries = NULL;
-
 void boot_info_sanitize(uint32_t *tot_mem, const uint8_t num_mem_map, boot_MEM_MAP_Info_Entry_t* mem_map)
 {
-    // __tot_mem = tot_mem;
-    // _num_mem_map = num_mem_map;
-
     uint32_t tot_memMap = 0;
     if (num_mem_map == 0)
         return;
@@ -55,13 +47,3 @@ void boot_info_sanitize(uint32_t *tot_mem, const uint8_t num_mem_map, boot_MEM_M
     //     }
     // }
 }
-
-// uint8_t boot_info_get_num_mem_map()
-// {
-//     return _num_mem_map;
-// }
-
-// boot_MEM_MAP_Info_Entry_t* boot_info_get_mem_map()
-// {
-//     return _mem_map_entries;
-// }

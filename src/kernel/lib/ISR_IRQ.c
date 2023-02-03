@@ -17,12 +17,10 @@ void ISR_UniversalHandler(ISR_registers_t r)
     
     VGA_clear();
 
-    // itoa10(r.ds, buf);
-    // VGA_WriteString(1,1,buf, 15);
-    itoa10(r.int_no, buf);
+    itoa(r.int_no, buf, 10);
     VGA_WriteString(1,2,buf, 15);
-    // itoa10(r.err_code, buf);
-    // VGA_WriteString(1,3,buf, 15);
+    itoa(r.err_code, buf, 10);
+    VGA_WriteString(1,3,buf, 15);
 
     if (isr_handlers[r.int_no] != NULL)
     {

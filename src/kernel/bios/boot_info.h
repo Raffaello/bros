@@ -40,12 +40,8 @@ typedef struct boot_MEM_MAP_Info_Entry_t
     uint32_t length_hi;
     uint32_t type;
     uint32_t acpi;
-
 } __attribute__((packed)) boot_MEM_MAP_Info_Entry_t;
 _Static_assert(sizeof(boot_MEM_MAP_Info_Entry_t) == 24);
 #pragma pack(pop)
 
-
 void boot_info_sanitize(uint32_t *tot_mem, const uint8_t num_mem_map, boot_MEM_MAP_Info_Entry_t* mem_map);
-uint8_t boot_info_get_num_mem_map();
-boot_MEM_MAP_Info_Entry_t* boot_info_get_mem_map();
