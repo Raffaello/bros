@@ -93,7 +93,7 @@ bool VMM_init()
 
     ISR_register_interrupt_handler(INT_Page_Fault, page_fault_handler);
     VMM_switch_page_directory(page_dir);
-    VMM_enable_paging();
+    // VMM_enable_paging();
 
     return true;
 }

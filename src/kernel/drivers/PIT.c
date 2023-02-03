@@ -43,11 +43,11 @@ static volatile uint32_t _ticks = 0;
 
 static void timer_callback(ISR_registers_t r)
 {
-    // char buf[11]; // 4294967295
+    char buf[11]; // 4294967295
 
     _ticks++;
-    // itoa10(_ticks, buf);
-    // VGA_WriteString(0,24, buf, VGA_COLOR_BRIGHT_GREEN);
+    itoa10(_ticks, buf);
+    VGA_WriteString(0,24, buf, VGA_COLOR_BRIGHT_GREEN);
 }
 
 void PIT_init(const uint32_t freq)
