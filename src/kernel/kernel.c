@@ -69,13 +69,6 @@ __attribute__((section(".text._start"))) noreturn void _start()
          _start_failure();
     }
 
-    init_descriptor_tables();
-
-    PIC_init();
-    ISR_init();
-    IRQ_init();
-    PIT_init(10);
-
     // Init VGA Console
     {
         int cur_offs = VGA_get_cursor_offset();
@@ -91,6 +84,15 @@ __attribute__((section(".text._start"))) noreturn void _start()
         _sys_info->tot_mem = tot_mem;
         CON_printf("Total Available Memory: %u MB\n", tot_mem/1024);
     }
+
+
+    init_descriptor_tables();
+
+    PIC_init();
+    ISR_init();
+    IRQ_init();
+    PIT_init(10);
+
 
     // PMM
     {

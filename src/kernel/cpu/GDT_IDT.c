@@ -142,7 +142,7 @@ static void GDT_init()
 #define IDT_DPL_RING3       3   // both bits
 
 //interrupt descriptor table
-static struct IDT_descriptor_t  idtd[MAX_INTERRUPTS];
+static struct /*__attribute__((aligned(16)))*/ IDT_descriptor_t  idtd[MAX_INTERRUPTS];
 static struct DT_register_t     idtr;
 
 static void IDT_load(const DT_register_t* dtr)

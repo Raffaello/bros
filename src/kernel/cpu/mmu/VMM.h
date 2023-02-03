@@ -65,9 +65,9 @@ typedef struct page_table_t
 
 typedef struct page_directory_t
 {
-    PDE_t         entries[PAGE_DIR_ENTRIES];
+    PDE_t  entries[PAGE_DIR_ENTRIES];
     
-    // page_table_t* page_tables[1024];
+    // page_table_t* page_tables[PAGE_TABLE_ENTRIES];
     // uint32_t page_table_physical[1024];
     // uint32_t physical_addr;
 } page_directory_t;

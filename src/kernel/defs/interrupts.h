@@ -33,7 +33,7 @@ Exception#  Description	Error                           Code?
 #define INT_Bbounds_Range_Exceeded          5
 #define INT_Invalid_Opcode                  6
 #define INT_Device_Not_Available            7  // (No Math CoProcessor)
-#define INT_Double_Falt                     8
+#define INT_Double_Fault                    8
 #define INT_Coprocessor_Segment_Overrun     9  // (Reserved)
 #define INT_Invalid_TSS                     10 // Task Switch or TSS Access
 #define INT_Segment_Not_Present             11

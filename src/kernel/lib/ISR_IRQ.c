@@ -65,7 +65,7 @@ void ISR_init()
     IDT_set_gate(INT_Bbounds_Range_Exceeded,        ISR_INT_5);
     IDT_set_gate(INT_Invalid_Opcode,                ISR_INT_6);
     IDT_set_gate(INT_Device_Not_Available,          ISR_INT_7);
-    IDT_set_gate(INT_Double_Falt,                   ISR_INT_8);
+    IDT_set_gate(INT_Double_Fault,                  ISR_INT_8);
     IDT_set_gate(INT_Coprocessor_Segment_Overrun,   ISR_INT_9);
     IDT_set_gate(INT_Invalid_TSS,                   ISR_INT_10);
     IDT_set_gate(INT_Segment_Not_Present,           ISR_INT_11);
