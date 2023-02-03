@@ -59,15 +59,16 @@ bool VMM_init()
     // TODO: forgot to allocate some space for the stack ... just inside the linker at the moment
     memset(page_dir, 0, sizeof(page_directory_t));
 
-    // first 4MB
-    for (int i = 0, frame = 0, virt = 0; i < PAGE_TABLE_ENTRIES; i++, frame += PAGE_SIZE, virt += PAGE_SIZE)
+    // first 1MB
+    for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
     {
-        PTE_t page = {0};
-        page.p = 1;
-        page.rw =1;
-        page.frame = frame;
+        PTE_t* page = &page_table->entries[i];
+        page->p = 1;
+        page->rw =1;
+        // page.us = 1;
+        page->frame = i << 12; // * PAGE_SIZE (4096) , physical addr
         // page_table2->entries[PAGE_TABLE_INDEX(virt)] = page;
-        page_table->entries[PAGE_TABLE_INDEX(virt)] = page;
+        // page_table->entries[i] = page;
     }
 
 //     for (int i = 0, frame = 0x100000, virt = 0xc0000000; i<PAGE_TABLE_ENTRIES; i++, frame+=PAGE_SIZE, virt+=PAGE_SIZE)
@@ -78,9 +79,10 @@ bool VMM_init()
 //         page_table->entries[PAGE_TABLE_INDEX(virt)] = page;
 //    }
 
-    PDE_t* entry = &page_dir->entries[PAGE_DIR_INDEX(0)];
+    PDE_t* entry = &page_dir->entries[0];
     entry->p = 1;
     entry->rw = 1;
+    // entry->us = 1;
     entry->page_table = (uint32_t)page_table;
 
     // PDE_t* entry2 = &page_dir->entries[PAGE_DIR_INDEX(0)];

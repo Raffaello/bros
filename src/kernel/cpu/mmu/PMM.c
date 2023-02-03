@@ -21,19 +21,19 @@ static inline size_t _size2block(const size_t size)
 }
 
 
-void PMM_init(const uint32_t tot_mem_KB, uint32_t* physical_mem_start)
+void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start)
 {
     _PMM_tot_mem = tot_mem_KB;
     _PMM_max_blocks = tot_mem_KB * 1024 / PMM_BLOCK_SIZE;
     _PMM_used_blocks = _PMM_max_blocks;
-    _PMM_mem_map = physical_mem_start;
+    _PMM_mem_map = (bitset32_t) physical_mem_start;
     _PMM_mem_map_size = _PMM_max_blocks / PMM_BLOCKS_PER_BYTE;
 
     // All Memory in use, as not known if it can be really used...
     memset(_PMM_mem_map, 0xF, _PMM_mem_map_size);
 }
 
-void PMM_MemMap_init(const uint32_t physical_addr, const uint32_t size)
+void PMM_MemMap_init(const paddr_t physical_addr, const uint32_t size)
 {
     uint32_t block_addr = physical_addr / PMM_BLOCK_SIZE;
     const uint32_t blocks = _size2block(size);
@@ -48,7 +48,7 @@ void PMM_MemMap_init(const uint32_t physical_addr, const uint32_t size)
 
 }
 
-void PMM_MemMap_deinit(const uint32_t physical_addr, const uint32_t size)
+void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size)
 {
     uint32_t block_addr = physical_addr / PMM_BLOCK_SIZE;
     const uint32_t blocks = _size2block(size);
@@ -62,7 +62,7 @@ void PMM_MemMap_deinit(const uint32_t physical_addr, const uint32_t size)
     // TODO assert used blocks <= max blocks
 }
 
-void PMM_MemMap_deinit_kernel(const uint32_t paddr_start)
+void PMM_MemMap_deinit_kernel(const paddr_t paddr_start)
 {
     extern uint32_t __end;
     // TODO: add also something for the stack! (at the moment is defined in kernel.ld)

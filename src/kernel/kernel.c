@@ -69,6 +69,13 @@ __attribute__((section(".text._start"))) noreturn void _start()
          _start_failure();
     }
 
+    init_descriptor_tables();
+
+    PIC_init();
+    ISR_init();
+    IRQ_init();
+    PIT_init(10);
+
     // Init VGA Console
     {
         int cur_offs = VGA_get_cursor_offset();
@@ -88,7 +95,7 @@ __attribute__((section(".text._start"))) noreturn void _start()
     // PMM
     {
         CON_puts("PMM Init\n");
-        PMM_init(_sys_info->tot_mem, &__end);
+        PMM_init(_sys_info->tot_mem, (paddr_t)&__end);
         CON_puts("Memory Regions\n");
         con_col_t old_col = CON_getConsoleColor();
         CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
@@ -132,7 +139,14 @@ __attribute__((section(".text._start"))) noreturn void _start()
         CON_setConsoleColor(old_col);
     }
 
-    
+    // VMM
+    {
+        CON_puts("VMM Init\n");
+        if (!VMM_init())
+        {
+            _start_failure();
+        }
+    }
 
 
     // TODO: set up paging...
@@ -149,26 +163,14 @@ __attribute__((section(".text._start"))) noreturn void _start()
     // TODO: init other cpu cores...
 
 
-    init_descriptor_tables();
-
-    PIC_init();
-    ISR_init();
-    IRQ_init();
-    PIT_init(10);
+    
 
     // // TODO: set up kernel stack, EBP,ESP ... and align it
     // __asm__ volatile("mov esp, 0x9000");
     // __asm__ volatile("mov ebp, esp");
     __asm__("sti");
 
-    // VMM
-    {
-        CON_puts("VMM Init\n");
-        if (!VMM_init())
-        {
-            _start_failure();
-        }
-    }
+    
     main();
 }
 

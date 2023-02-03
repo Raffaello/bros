@@ -14,12 +14,14 @@
 //     void* ptr;
 // } PMM_mem_t;
 
-void PMM_init(const uint32_t tot_mem_KB, uint32_t* physical_mem_start);
+typedef uint32_t paddr_t; // physical address type
 
-void PMM_MemMap_init(const uint32_t physical_addr, const uint32_t size);
-void PMM_MemMap_deinit(const uint32_t physical_addr, const uint32_t size);
+void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start);
 
-void PMM_MemMap_deinit_kernel(const uint32_t paddr_start);
+void PMM_MemMap_init(const paddr_t physical_addr, const uint32_t size);
+void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size);
+
+void PMM_MemMap_deinit_kernel(const paddr_t paddr_start);
 // readonly
 uint32_t PMM_Blocks_used();
 uint32_t PMM_Blocks_free();

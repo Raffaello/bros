@@ -21,6 +21,7 @@
 //       forced to call some code to set up and i don't want it.
 //       there were some other errors with memory address etc.
 //       ASM quite straightforward how to do it.
+//       it was because of objdump .text section only... i guess.
 // CONS: I don't have the CODE_SEG from ASM accessible here.
 //       it might force to do IDT into ASM as well.
 //       prefer ASM anyway..
