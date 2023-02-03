@@ -23,6 +23,7 @@ SECTIONS
     .bss  : {
         /* bss = .; */
         *(.bss)
+        *(COMMON)
         __stack_start = .;
         . += STACK_SIZE;
         __stack_end = .;
