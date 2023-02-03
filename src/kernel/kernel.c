@@ -31,7 +31,7 @@
 
 noreturn void main()            __attribute__((section(".text.main")));
 noreturn void _start_entry()    __attribute__((section(".text._start_entry")));
-noreturn void _start_failure()   __attribute__((section(".text._start_failure")));
+noreturn void _start_failure()  __attribute__((section(".text._start_failure")));
 
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
  __attribute__((force_align_arg_pointer))

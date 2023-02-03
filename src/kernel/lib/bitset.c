@@ -29,7 +29,7 @@ bool bitset_find(const bitset32_t bitset, const uint32_t bitset_size, const size
     const uint32_t bss = bitset_size / BITSET_SIZE;
     for(uint32_t i = 0; i < bss; i++)
     {
-        // for each bit of a the bitset32_t (uint32_t)
+        // for each bit of the bitset32_t (uint32_t)
         for(int j = 0; j < BITSET_SIZE; j++)
         {
             const unsigned int bit = 1 << j;
