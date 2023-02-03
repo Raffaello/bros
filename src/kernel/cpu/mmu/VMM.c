@@ -70,11 +70,11 @@ bool VMM_init()
     for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
     {
         // PTE_t* page = &page_table->entries[i];
-        // page->p = 1;
-        // page->rw =1;
-        // page->frame = (i * 0x1000); // * PAGE_SIZE (4096) , physical addr
+        // page->p     = 1;
+        // page->rw    = 1;
+        // page->frame = (i << 12); // * PAGE_SIZE (4096) , physical addr
 
-        page_table->entries[i] = (i * 0x1000) | 3;
+        page_table->entries[i] = (PTE_t){((i << 12) | 3)};
 
     }
 
@@ -89,7 +89,6 @@ bool VMM_init()
     // PDE_t* entry = &_kernel_directory->entries[0];
     // entry->p = 1;
     // entry->rw = 1;
-    // // entry->us = 1;
     // entry->page_table = (uint32_t)page_table;
     _kernel_directory->entries[0] = (PDE_t)(page_table) | 3;
 
