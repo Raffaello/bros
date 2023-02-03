@@ -11,7 +11,6 @@
 #include <stdnoreturn.h>
 #include <stddef.h>
 
-// #include <cpu/mmu/paging.h>
 #include <cpu/mmu/PMM.h>
 #include <cpu/mmu/VMM.h>
 
@@ -34,18 +33,6 @@ noreturn void main()            __attribute__((section(".text.main")));
 noreturn void _start_entry()    __attribute__((section(".text._start_entry")));
 noreturn void _start_failure()   __attribute__((section(".text._start_failure")));
 
-__attribute__((section(".text._start")))
-__attribute__((naked))
-noreturn void  _start()
-{
-    // TODO remove the stack from the "kernel size",
-    // wasting space on disk for nothing
-    extern uint32_t __stack_end;
-
-    __asm__ volatile("mov esp, %0"::"i"(&__stack_end));
-    __asm__ volatile("jmp %0"::"i"(&_start_entry));
-}
-
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
  __attribute__((force_align_arg_pointer))
 __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
@@ -64,6 +51,7 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
     // 3. if not in the Kernel aspected address...
     boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
     const uint32_t* _sys_info_end_marker = SYS_INFO_END_MARKER_PTR(_sys_info);
+    extern void _start();
     const uint32_t* _startPtr = (uint32_t*)&_start;
     // self-relocating kernel checks
     extern uint32_t __end;

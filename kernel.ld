@@ -1,7 +1,5 @@
 OUTPUT_FORMAT(elf32-i386)
-/* OUTPUT_FORMAT(binary) */
-/* ENTRY(_start) */
-ENTRY(entry)
+ENTRY(_start_entry)
 PAGE_SIZE = 4096;
 STACK_SIZE = PAGE_SIZE * 1;
 SECTIONS
