@@ -35,7 +35,7 @@ typedef struct PDE_t
     uint32_t ign2       :   4;  // ignored
     uint32_t page_table :   20; // Physical address of 4-KByte aligned page table referenced by this entry
 
-} __attribute__((packed)) PDE_t;
+} __attribute__((aligned(4))) PDE_t;
 _Static_assert(sizeof(PDE_t) == sizeof(uint32_t));
 
 typedef struct PTE_t
