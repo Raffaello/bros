@@ -16,8 +16,8 @@
 static page_directory_t* _current_directory = NULL;
 
 //////// TEST ///////////
-uint32_t page_directory[1024] __attribute__((aligned(4096)));
-uint32_t first_page_table[1024] __attribute__((aligned(4096)));
+uint32_t* page_directory;
+uint32_t* first_page_table;
 
 
 void page_fault_handler(ISR_registers_t regs)
@@ -112,6 +112,11 @@ bool VMM_init()
 //     return true;
 
 
+page_directory = PMM_malloc(1024);
+memset(page_directory, 0,1024);
+first_page_table = PMM_malloc(1024);
+memset(first_page_table, 0,1024);
+
  ///// TEST //////
 for(int i = 0; i < 1024; i++)
 {
@@ -135,11 +140,12 @@ for(unsigned int i = 0; i < 1024; i++)
 
 // attributes: supervisor level, read/write, present
 page_directory[0] = ((unsigned int)first_page_table) | 3;
- __asm__ volatile("mov cr3, %0": : "a"(&page_directory));
+ __asm__ volatile("mov cr3, %0": : "a"(page_directory));
 
 VMM_enable_paging();
 
 return true;
+
 }
 
 bool VMM_switch_page_directory(page_directory_t* page_directory)
