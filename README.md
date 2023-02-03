@@ -124,7 +124,9 @@ The same thing of "storing the file on the filesystem (FAT12)" could have been d
 
  ### Memory Mapping
 
-The kernel running in protected mode (`PM`) is setting up paging (`PG`) of 4 KB size.
+The kernel runs in protected mode (`PM`) with paging (`PG`) of 4 KB size.
+
+> TODO ...
 
 
 

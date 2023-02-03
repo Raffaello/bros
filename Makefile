@@ -75,9 +75,9 @@ floppy:
 		--defsym=BIOS_BOOT_SEG=${BIOS_BOOT_SEG} \
 		--defsym=BOOT_RELOCATE_SEG=${BOOT_REL_SEG} \
 		--defsym=BOOT2_SEG=${BOOT2_SEG} \
-		-o build/boot.o src/bootloader/floppy.asm
-	${LD} ${AS_LFLAGS} -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG}
-	objcopy -O binary -j .text build/boot.out ${BIN_DIR}/boot.bin
+		-o ${BUILD_DIR}/boot.o src/bootloader/floppy.asm
+	${LD} ${AS_LFLAGS} -o ${BUILD_DIR}/boot.out ${BUILD_DIR}/boot.o -Ttext ${BOOT_REL_SEG}
+	objcopy -O binary -j .text ${BUILD_DIR}/boot.out ${BIN_DIR}/boot.bin
 
 boot2:
 	@mkdir -p build
@@ -85,9 +85,9 @@ boot2:
 		--defsym=KERNEL_SEG=${KERNEL_SEG} \
 		--defsym=FAT_BUFFER_SEG=${FAT_BUFFER_SEG} \
 		--defsym=SYS_INFO_SEG=${SYS_INFO_SEG} \
-		-o build/boot2.o src/bootloader/boot2.asm
-	${LD} ${AS_LFLAGS} -o build/boot2.out build/boot2.o -Ttext ${BOOT2_SEG}
-	objcopy -O binary -j .text build/boot2.out ${BIN_DIR}/boot2.bin
+		-o ${BUILD_DIR}/boot2.o src/bootloader/boot2.asm
+	${LD} ${AS_LFLAGS} -o ${BUILD_DIR}/boot2.out ${BUILD_DIR}/boot2.o -Ttext ${BOOT2_SEG}
+	objcopy -O binary -j .text ${BUILD_DIR}/boot2.out ${BIN_DIR}/boot2.bin
 
 .SECONDEXPANSION:
 $(OBJS): $$(patsubst $(BUILD_DIR)/%.o,$(SRC_DIR)/%.c,$$@)
@@ -122,9 +122,6 @@ gdb-kernel-debug: image
 		-ex 'layout reg' \
 		-ex 'break _start' \
 		-ex 'break *0x7c00' \
-		-ex 'b	src/kernel/cpu/mmu/VMM.c:96' \
-		-ex 'b	src/kernel/cpu/mmu/VMM.c:113' \
-		-ex 'b	src/kernel/cpu/mmu/VMM.c:117' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
 

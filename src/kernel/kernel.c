@@ -30,12 +30,25 @@
 #endif
 #define KERNEL_ADDR ((uint32_t*)(KERNEL_SEG))
 
-noreturn void main() __attribute__((section(".text.main")));
-noreturn void _start_failure() __attribute__((section(".text._start_failure")));
+noreturn void main()            __attribute__((section(".text.main")));
+noreturn void _start_entry()    __attribute__((section(".text._start_entry")));
+noreturn void _start_failure()   __attribute__((section(".text._start_failure")));
+
+__attribute__((section(".text._start")))
+__attribute__((naked))
+noreturn void  _start()
+{
+    // TODO remove the stack from the "kernel size",
+    // wasting space on disk for nothing
+    extern uint32_t __stack_end;
+
+    __asm__ volatile("mov esp, %0"::"i"(&__stack_end));
+    __asm__ volatile("jmp %0"::"i"(&_start_entry));
+}
 
 // Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
-// __attribute__((force_align_arg_pointer))
-__attribute__((section(".text._start"))) noreturn void _start()
+ __attribute__((force_align_arg_pointer))
+__attribute__((section(".text._start_entry"))) noreturn void _start_entry()
 {
     __asm__ ("cli");
     uint32_t _eax, _ebx;
@@ -51,8 +64,7 @@ __attribute__((section(".text._start"))) noreturn void _start()
     // 3. if not in the Kernel aspected address...
     boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
     const uint32_t* _sys_info_end_marker = SYS_INFO_END_MARKER_PTR(_sys_info);
-    extern void entry();
-    const uint32_t* _startPtr = (uint32_t*)&entry; //&_start;
+    const uint32_t* _startPtr = (uint32_t*)&_start;
     // self-relocating kernel checks
     extern uint32_t __end;
     extern const uint32_t __size;
@@ -165,15 +177,12 @@ __attribute__((section(".text._start"))) noreturn void _start()
     // TODO: init other cpu cores...
 
 
-    
-
     // // TODO: set up kernel stack, EBP,ESP ... and align it
     // __asm__ volatile("mov esp, 0x9000");
     // __asm__ volatile("mov ebp, esp");
     __asm__("sti");
-
-    
-    main();
+    __asm__ volatile("jmp %0"::"i"(&main));
+    for(;;);
 }
 
 
@@ -187,9 +196,7 @@ noreturn void _start_failure()
     while(1);
 }
 
-// Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
-// TODO remove later when manually aligned in _start
- __attribute__((force_align_arg_pointer))
+
 noreturn void main()
 {
     const char hello_msg[] = "*** HELLO FROM BROSKRNL.SYS ***";
