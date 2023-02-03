@@ -22,7 +22,8 @@ SRC_DIR=src/kernel
 BUILD_DIR=build
 BIN_DIR=bin
 
-SRC  = ${SRC_DIR}/kernel.c $(wildcard \
+SRC  = $(wildcard \
+	${SRC_DIR}/*.c \
 	${SRC_DIR}/lib/*.c \
 	${SRC_DIR}/cpu/*.c \
 	${SRC_DIR}/cpu/mmu//*.c \
@@ -126,6 +127,7 @@ gdb-kernel-debug: image
 		-ex 'break src/kernel/cpu/mmu/VMM.c:29' \
 		-ex 'break src/kernel/cpu/mmu/VMM.c:31' \
 		-ex 'break src/kernel/cpu/mmu/VMM.c:49' \
+		-ex 'b	src/kernel/cpu/mmu/VMM.c:60' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
 
