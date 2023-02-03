@@ -75,7 +75,8 @@ bool VMM_init()
         // page->frame = (i << 12); // * PAGE_SIZE (4096) , physical addr
 
         page_table->entries[i] = (PTE_t){((i << 12) | 3)};
-
+        // *page = (PTE_t){((i << 12) | 3)};
+       
     }
 
 //     for (int i = 0, frame = 0x100000, virt = 0xc0000000; i<PAGE_TABLE_ENTRIES; i++, frame+=PAGE_SIZE, virt+=PAGE_SIZE)
@@ -86,12 +87,13 @@ bool VMM_init()
 //         page_table->entries[PAGE_TABLE_INDEX(virt)] = page;
 //    }
 
-    // PDE_t* entry = &_kernel_directory->entries[0];
-    // entry->p = 1;
-    // entry->rw = 1;
-    // entry->page_table = (uint32_t)page_table;
-    _kernel_directory->entries[0] = (PDE_t)(page_table) | 3;
-
+    PDE_t* entry = &_kernel_directory->entries[0];
+    entry->p = 1;
+    entry->rw = 1;
+    entry->page_table = ((uint32_t)page_table) >> 12;
+    // _kernel_directory->entries[0] = ((PDE_t)page_table) | 3;
+    int t =( (uint32_t)page_table)|3;
+    t=t;
     // PDE_t* entry2 = &page_dir->entries[PAGE_DIR_INDEX(0)];
     // entry2->p = 1;
     // entry2->rw = 1;
