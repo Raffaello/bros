@@ -22,6 +22,8 @@
 #define PAGE_DIR_ENTRIES    1024
 #define PAGE_TABLE_ENTRIES  1024
 
+// TODO: i think is more performant just using uint32_t instead of struct...
+
 typedef struct PDE_t
 {
     uint32_t p          :   1;  // present bit to reference a page table
