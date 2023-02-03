@@ -64,6 +64,7 @@ bool VMM_init()
     {
         PTE_t page = {0};
         page.p = 1;
+        page.rw =1;
         page.frame = frame;
         // page_table2->entries[PAGE_TABLE_INDEX(virt)] = page;
         page_table->entries[PAGE_TABLE_INDEX(virt)] = page;
@@ -90,7 +91,7 @@ bool VMM_init()
 
     ISR_register_interrupt_handler(INT_Page_Fault, page_fault_handler);
     VMM_switch_page_directory(page_dir);
-    // VMM_enable_paging();
+    VMM_enable_paging();
 
     return true;
 }
@@ -108,14 +109,14 @@ bool VMM_switch_page_directory(page_directory_t* page_directory)
 
 inline void VMM_enable_paging()
 {
-    __asm__ volatile("mov ecx, cr0");
-    __asm__ volatile("or ecx, %0"::"a"(CR0_PG_MASK));
-    __asm__ volatile("mov cr0, ecx");
+    __asm__ volatile("mov eax, cr0");
+    __asm__ volatile("or eax, %0"::"i"(CR0_PG_MASK));
+    __asm__ volatile("mov cr0, eax");
 }
 
 inline void VMM_disable_paging()
 {
-    __asm__ volatile("mov ecx, cr0");
-    __asm__ volatile("or ecx, %0":: "a"(~CR0_PG_MASK));
-    __asm__ volatile("mov cr0, ecx");
+    __asm__ volatile("mov eax, cr0");
+    __asm__ volatile("or eax, %0":: "i"(~CR0_PG_MASK));
+    __asm__ volatile("mov cr0, eax");
 }
