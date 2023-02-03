@@ -194,5 +194,9 @@ noreturn void main()
 
     VGA_update_cursor(0, 24);
 
+// Page Fault Test
+    // intptr_t* t = (intptr_t*)0xFFFFFFFF;
+    // *t=0;
+
     while(1);
 }

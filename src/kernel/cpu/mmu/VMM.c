@@ -3,26 +3,52 @@
 #include <lib/string.h>
 #include <defs/interrupts.h>
 #include <lib/ISR_IRQ.h>
+#include <lib/conio.h>
 
 #define PAGE_SIZE   4096
 
-#define PAGE_DIR_INDEX(x) (((x) >> 22) & 0x3FF)
-#define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
-#define PAGE_GET_PHYSICAL_ADDR(x) (*x & ~0xFFF)
+// #define PAGE_DIR_INDEX(x) (((x) >> 22) & 0x3FF)
+// #define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
+// #define PAGE_GET_PHYSICAL_ADDR(x) (*x & ~0xFFF)
 
 #define CR0_PG_MASK 0x80000000
 
 static page_directory_t* _kernel_directory  = NULL;
 static page_directory_t* _current_directory = NULL;
 
+/****************************************************************************
+ * Error code bits:                                                         *
+ *                                                                          *
+ * bit 0  (P) is the Present flag.                                          *
+ * bit 1  (R/W) is the Read/Write flag.                                     *
+ * bit 2  (U/S) is the User/Supervisor flag.                                *
+ * bit 3  (RSVD) indicates if a reserved bit was set in a page-struct entry *
+ * bit 4  (I/D) Instruction/Data flag (1=instruction fetch, 0=data access)  *
+ * bit 5  (PK) indicates a protection-key violation                         *
+ * bit 6  (SS) indicates a shadow-stack access fault                        *
+ * bit 15 (SGX) indicates an SGX violaton                                   *
+ *                                                                          *
+ * The combination of these flags specify the details of                    *
+ * the page fault and indicate what action to take:                         *
+ *                                                                          *
+ * US RW  P - Description                                                   *
+ * 0  0  0 - Supervisory proc tried to read a non-present page entry        *
+ * 0  0  1 - Svis proc tried to read a page and caused a protection fault   *
+ * 0  1  0 - Svis proc tried to write to a non-present page entry           *
+ * 0  1  1 - Svis proc tried to write a page and caused a protection fault  *
+ * 1  0  0 - User process tried to read a non-present page entry            *
+ * 1  0  1 - U process tried to read a page and caused a protection fault   *
+ * 1  1  0 - U process tried to write to a non-present page entry           *
+ * 1  1  1 - U process tried to write a page and caused a protection fault  *
+ ***************************************************************************/
 void page_fault_handler(ISR_registers_t regs)
 {
     // A page fault has occurred.
     // The faulting address is stored in the CR2 register.
-    uint32_t faulting_address;
-    __asm__ volatile("mov %0, cr2" : "=r" (faulting_address));
+    uint32_t faulting_addr;
+    __asm__ volatile("mov %0, cr2" : "=r" (faulting_addr));
 
-    // TODO 
+    // TODO
     
     // The error code gives us details of what happened.
     // int present   = !(regs.err_code & 0x1); // Page not present
@@ -31,16 +57,7 @@ void page_fault_handler(ISR_registers_t regs)
     // int reserved = regs.err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
     // int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
 
-    // // Output an error message.
-    // monitor_write("Page fault! ( ");
-    // if (present) {monitor_write("present ");}
-    // if (rw) {monitor_write("read-only ");}
-    // if (us) {monitor_write("user-mode ");}
-    // if (reserved) {monitor_write("reserved ");}
-    // monitor_write(") at 0x");
-    // monitor_write_hex(faulting_address);
-    // monitor_write("\n");
-    // PANIC("Page fault");
+    CON_printf("PAGE FAULT addr: %X -- err_code=%X\n", faulting_addr, regs.err_code);
 }
 
 bool VMM_init()
@@ -56,7 +73,7 @@ bool VMM_init()
 
     memset(_kernel_directory, 0, sizeof(page_directory_t));
     memset(page_table, 0, sizeof(page_table_t));
- 
+
     // TODO: forgot to allocate some space for the stack ... just inside the linker at the moment
 
     // first 1MB
