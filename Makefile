@@ -11,7 +11,8 @@ KERNEL_SEG=0x1000
 # KERNEL_FILENAME="BROSKRNL.SYS"
 # FLOPPY_SIZE=1440
 FLOPPY_IMAGE_NAME="br-dos.img"
-SYS_INFO_SEG=0x600 # same as BOOT_REL_SEG as it won't be used anymore
+FAT_BUFFER_SEG=0x600 # same as BOOT_REL_SEG as it won't be used anymore
+SYS_INFO_SEG=0x600 # it will replace the FAT_BUFFER_SEG after the kernel is loaded.
 
 CC=gcc
 AS=as
@@ -19,11 +20,22 @@ LD=ld
 
 SRC_DIR=src/kernel
 BUILD_DIR=build
-# kernel.c must be the 1st in the list
-SRC  = ${SRC_DIR}/kernel.c $(wildcard ${SRC_DIR}/lib/*.c ${SRC_DIR}/cpu/*.c ${SRC_DIR}/bios/*.c wildcard ${SRC_DIR}/drivers/*.c)
+BIN_DIR=bin
+
+SRC  = $(wildcard \
+	${SRC_DIR}/*.c \
+	${SRC_DIR}/lib/*.c \
+	${SRC_DIR}/cpu/*.c \
+	${SRC_DIR}/cpu/mmu//*.c \
+	${SRC_DIR}/bios/*.c \
+	${SRC_DIR}/drivers/*.c)
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
 
-SRC_S  = $(wildcard ${SRC_DIR}/lib/*.S ${SRC_DIR}/cpu/*.S ${SRC_DIR}/drivers/*.S)
+SRC_S  = $(wildcard \
+	${SRC_DIR}/lib/*.S \
+	${SRC_DIR}/cpu/*.S \
+	${SRC_DIR}/cpu/mmu/*.S \
+	${SRC_DIR}/drivers/*.S)
 OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)
 
 INCLUDE_DIR=${SRC_DIR}
@@ -33,18 +45,19 @@ AS_LFLAGS+=-m elf_i386
 
 CFLAGS+=-Wall -Werror #-Wmissing-prototypes
 CFLAGS+=-masm=intel
-# CFLAGS+=-o2
+# CFLAGS+=-O2	# optimization are creating issues on the code
 CFLAGS+=-g
 CFLAGS+=-std=c17
-CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR}
+CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR} -MMD
 CFLAGS+=-nostartfiles -nostdlib
 CFLAGS+=-lgcc
 CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG} -DSYS_INFO_SEG=${SYS_INFO_SEG}
 
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
-# LFLAGS+=-Tlinker.ld # linker option definition file
-LFLAGS+=-Ttext ${KERNEL_SEG}
+LFLAGS+=-Tkernel.ld # linker option definition file
+# LFLAGS+=-Ttext ${KERNEL_SEG}
+LFLAGS+=--defsym=KERNEL_SEG=$(KERNEL_SEG)
 
 .PHONY: kernel $(OBJS)
 
@@ -58,15 +71,23 @@ all: floppy boot2 image kernel
 
 floppy:
 	@mkdir -p build
-	${AS} ${ASFLAGS} -o build/boot.o src/bootloader/floppy.asm
-	${LD} ${AS_LFLAGS} -o build/boot.out build/boot.o -Ttext ${BOOT_REL_SEG}
-	objcopy -O binary -j .text build/boot.out bin/boot.bin
+	${AS} ${ASFLAGS} \
+		--defsym=BIOS_BOOT_SEG=${BIOS_BOOT_SEG} \
+		--defsym=BOOT_RELOCATE_SEG=${BOOT_REL_SEG} \
+		--defsym=BOOT2_SEG=${BOOT2_SEG} \
+		-o ${BUILD_DIR}/boot.o src/bootloader/floppy.asm
+	${LD} ${AS_LFLAGS} -o ${BUILD_DIR}/boot.out ${BUILD_DIR}/boot.o -Ttext ${BOOT_REL_SEG}
+	objcopy -O binary -j .text ${BUILD_DIR}/boot.out ${BIN_DIR}/boot.bin
 
 boot2:
 	@mkdir -p build
-	${AS} ${ASFLAGS} -o build/boot2.o src/bootloader/boot2.asm
-	${LD} ${AS_LFLAGS} -o build/boot2.out build/boot2.o -Ttext ${BOOT2_SEG}
-	objcopy -O binary -j .text build/boot2.out bin/boot2.bin
+	${AS} ${ASFLAGS} \
+		--defsym=KERNEL_SEG=${KERNEL_SEG} \
+		--defsym=FAT_BUFFER_SEG=${FAT_BUFFER_SEG} \
+		--defsym=SYS_INFO_SEG=${SYS_INFO_SEG} \
+		-o ${BUILD_DIR}/boot2.o src/bootloader/boot2.asm
+	${LD} ${AS_LFLAGS} -o ${BUILD_DIR}/boot2.out ${BUILD_DIR}/boot2.o -Ttext ${BOOT2_SEG}
+	objcopy -O binary -j .text ${BUILD_DIR}/boot2.out ${BIN_DIR}/boot2.bin
 
 .SECONDEXPANSION:
 $(OBJS): $$(patsubst $(BUILD_DIR)/%.o,$(SRC_DIR)/%.c,$$@)
@@ -79,36 +100,36 @@ $(OBJS_S): $$(patsubst $(BUILD_DIR)/%.oS,$(SRC_DIR)/%.S,$$@)
 
 # Monolithic for now
 kernel: $(OBJS) ${OBJS_S}
-	# gcc -o2 -ffreestanding -nostartfiles -nostdlib kernel/kernel.c -o build/kernel.o
-	# gcc -m32 -g -ffreestanding -nostartfiles -nostdlib src/kernel/kernel.c -o build/kernel.o
-	# ${CC} $(CFLAGS) ${SRC} -o build/$(@F).o
-	
-	# ld -m elf_i386 -o build/kernel.out build/kernel.o #-Ttext ${KERNEL_SEG}
+	# ${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
+	# objcopy -O binary  -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
+	# ${LD} $(LFLAGS) -o ${BIN_DIR}/kernel.sys ${OBJS} ${OBJS_S}
 	${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
-	
-	objcopy -O binary -j .text build/kernel.out bin/kernel.sys
-
+	objcopy -O binary  -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
 
 image: floppy boot2 kernel
 	# Using 2 extra Reserved Sectors
-	mformat -i ${FLOPPY_IMAGE_NAME} -v BROS -B bin/boot.bin -R ${FAT_RESERVED_SECTORS} -f1440 -C
-	dd if=bin/boot2.bin of=${FLOPPY_IMAGE_NAME} conv=notrunc seek=1
-	mcopy -i ${FLOPPY_IMAGE_NAME} bin/kernel.sys ::/BROSKRNL.SYS
+	mformat -i ${FLOPPY_IMAGE_NAME} -v BROS -B ${BIN_DIR}/boot.bin -R ${FAT_RESERVED_SECTORS} -f1440 -C
+	dd if=${BIN_DIR}/boot2.bin of=${FLOPPY_IMAGE_NAME} conv=notrunc seek=1
+	mcopy -i ${FLOPPY_IMAGE_NAME} ${BIN_DIR}/kernel.sys ::/BROSKRNL.SYS
 	mattrib -i ${FLOPPY_IMAGE_NAME} +r +h +s -a /BROSKRNL.SYS
 	mdir -i ${FLOPPY_IMAGE_NAME} -a
 
 gdb-kernel-debug: image
 	qemu-system-i386 -fda ${FLOPPY_IMAGE_NAME} -S -s &
-	gdb build/kernel.out  \
+	gdb ${BUILD_DIR}/kernel.out \
 		-ex 'target remote localhost:1234' \
 		-ex 'layout src' \
 		-ex 'layout reg' \
 		-ex 'break _start' \
 		-ex 'break *0x7c00' \
+		-ex 'b src/kernel/cpu/mmu/VMM.c:74' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
 
+bochs-kerenl-debug: image
+	bochs-debugger -q -f bochs-debugger.rs
+
 clean:
-	rm bin/* -fv
-	rm build -fr	v
+	rm ${BIN_DIR}/* -fv
+	rm ${BUILD_DIR}/* -frv
 	rm ${FLOPPY_IMAGE_NAME} -fv

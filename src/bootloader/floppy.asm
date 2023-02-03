@@ -9,9 +9,10 @@
 
 .include "filesystems/FAT_bootsector.inc"
 
-BIOS_BOOT_SEG  = 0x7c00
-BOOT_RELOCATE_SEG = 0x600
-BOOT2_SEG = BIOS_BOOT_SEG # load the boot loader to segment
+# Moved into the Makefile
+# BIOS_BOOT_SEG  = 0x7c00
+# BOOT_RELOCATE_SEG = 0x600
+# BOOT2_SEG = BIOS_BOOT_SEG # load the boot loader to segment
 
 .global _start
 

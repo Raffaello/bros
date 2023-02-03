@@ -5,7 +5,8 @@
 #include <bios/vga.h>
 #include <lib/io.h>
 
-#define VGA_MEM_TEXT 0xb8000
+#define VGA_MEM_TEXT 0xB8000
+
 #define VGA_REG_CTRL 0x3D4
 #define VGA_REG_DATA 0x3D5
 
@@ -69,6 +70,24 @@ void VGA_disable_cursor()
 {
     outb(VGA_REG_CTRL, 0x0A);
     outb(VGA_REG_DATA, 0x20);
+}
+
+int VGA_get_cursor_offset()
+{
+    int offset;
+    // reg 14: is the high byte of the cursor's offset
+    // reg 15: is the low byte of the cursor's offset
+    // Once the internal register has been selected , we may read or
+    // write a byte on the data register .
+    outb(VGA_REG_CTRL, 14);
+    offset = inb(VGA_REG_DATA) << 8;
+    outb(VGA_REG_CTRL, 15);
+    offset += inb(VGA_REG_DATA);
+
+    // Since the cursor offset reported by the VGA hardware is the
+    // number of characters, it should be mul by two to convert it to
+    // a character cell offset.
+    return offset;
 }
 
 void VGA_update_cursor(const int x, const int y)

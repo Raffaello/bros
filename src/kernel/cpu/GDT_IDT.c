@@ -21,6 +21,7 @@
 //       forced to call some code to set up and i don't want it.
 //       there were some other errors with memory address etc.
 //       ASM quite straightforward how to do it.
+//       it was because of objdump .text section only... i guess.
 // CONS: I don't have the CODE_SEG from ASM accessible here.
 //       it might force to do IDT into ASM as well.
 //       prefer ASM anyway..
@@ -141,7 +142,7 @@ static void GDT_init()
 #define IDT_DPL_RING3       3   // both bits
 
 //interrupt descriptor table
-static struct IDT_descriptor_t  idtd[MAX_INTERRUPTS];
+static struct /*__attribute__((aligned(16)))*/ IDT_descriptor_t  idtd[MAX_INTERRUPTS];
 static struct DT_register_t     idtr;
 
 static void IDT_load(const DT_register_t* dtr)
