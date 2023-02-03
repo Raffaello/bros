@@ -56,7 +56,8 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
     // self-relocating kernel checks
     extern uint32_t __end;
     extern const uint32_t __size;
-    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
+    extern const uint32_t code_main;
+    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&code_main);
 
     if(_eax != __BROS
         || _sys_info->begin_marker != SYS_INFO_BEGIN

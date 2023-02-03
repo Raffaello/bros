@@ -45,7 +45,7 @@ AS_LFLAGS+=-m elf_i386
 
 CFLAGS+=-Wall -Werror #-Wmissing-prototypes
 CFLAGS+=-masm=intel
-# CFLAGS+=-o2
+# CFLAGS+=-O2	# optimization are creating issues on the code
 CFLAGS+=-g
 CFLAGS+=-std=c17
 CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR} -MMD
@@ -122,6 +122,7 @@ gdb-kernel-debug: image
 		-ex 'layout reg' \
 		-ex 'break _start' \
 		-ex 'break *0x7c00' \
+		-ex 'b src/kernel/cpu/mmu/VMM.c:74' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
 
