@@ -19,7 +19,7 @@ void PMM_init(const uint32_t tot_mem_KB, uint32_t* physical_mem_start);
 void PMM_MemMap_init(const uint32_t physical_addr, const uint32_t size);
 void PMM_MemMap_deinit(const uint32_t physical_addr, const uint32_t size);
 
-void PMM_MemMap_deinit_kernel(const uint32_t paddr_start, const uint32_t paddr_end);
+void PMM_MemMap_deinit_kernel(const uint32_t paddr_start);
 // readonly
 uint32_t PMM_Blocks_used();
 uint32_t PMM_Blocks_free();

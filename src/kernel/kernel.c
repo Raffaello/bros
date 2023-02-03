@@ -51,17 +51,18 @@ __attribute__((section(".text._start"))) noreturn void _start()
     // 3. if not in the Kernel aspected address...
     boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
     const uint32_t* _sys_info_end_marker = SYS_INFO_END_MARKER_PTR(_sys_info);
-    // const uint32_t* _startPtr = (uint32_t*)&_start;
+    extern void entry();
+    const uint32_t* _startPtr = (uint32_t*)&entry; //&_start;
     // self-relocating kernel checks
     extern uint32_t __end;
-    // extern const uint32_t __size;
-    // const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
+    extern const uint32_t __size;
+    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
 
     if(_eax != __BROS
         || _sys_info->begin_marker != SYS_INFO_BEGIN
         || *_sys_info_end_marker != SYS_INFO_END
-        // || _startPtr != KERNEL_ADDR
-        // || kernel_size != (uint32_t)&__size
+        || _startPtr != KERNEL_ADDR
+        || kernel_size != (uint32_t)&__size
         || (uint32_t)&main <= (uint32_t)&_start_failure
         || (uint32_t)&main <= (uint32_t)&_start)
     {
@@ -124,21 +125,14 @@ __attribute__((section(".text._start"))) noreturn void _start()
         }
 
         // reserve the kernel memory area plus the PMM Bit set
-        PMM_MemMap_deinit_kernel((uint32_t)KERNEL_ADDR, (uint32_t)&__end);
+        PMM_MemMap_deinit_kernel(KERNEL_SEG);
 
         CON_setConsoleColor((con_col_t){.bg_col=VGA_COLOR_BLUE, .fg_col=VGA_COLOR_YELLOW});
         CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
         CON_setConsoleColor(old_col);
     }
 
-    // VMM
-    {
-        CON_puts("VMM Init\n");
-        if (!VMM_init())
-        {
-            _start_failure();
-        }
-    }
+    
 
 
     // TODO: set up paging...
@@ -165,7 +159,16 @@ __attribute__((section(".text._start"))) noreturn void _start()
     // // TODO: set up kernel stack, EBP,ESP ... and align it
     // __asm__ volatile("mov esp, 0x9000");
     // __asm__ volatile("mov ebp, esp");
-    // __asm__("sti");
+    __asm__("sti");
+
+    // VMM
+    {
+        CON_puts("VMM Init\n");
+        if (!VMM_init())
+        {
+            _start_failure();
+        }
+    }
     main();
 }
 

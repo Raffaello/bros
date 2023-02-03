@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <lib/string.h>
 
-#define PMM_BLOCKS_PER_BYTE  8
+#define PMM_BLOCKS_PER_BYTE 8
 // PAGE_SIZE
 #define PMM_BLOCK_SIZE      4096
 #define PMM_BLOCK_ALIGN     PMM_BLOCK_SIZE
@@ -13,6 +13,12 @@ static uint32_t     _PMM_max_blocks     = 0;
 static uint32_t     _PMM_used_blocks    = 0;
 static bitset32_t   _PMM_mem_map        = NULL;
 static uint32_t     _PMM_mem_map_size   = 0;
+
+
+static inline size_t _size2block(const size_t size)
+{
+    return (size / PMM_BLOCK_SIZE) + ((size % PMM_BLOCK_SIZE) ? 1 : 0);
+}
 
 
 void PMM_init(const uint32_t tot_mem_KB, uint32_t* physical_mem_start)
@@ -30,7 +36,7 @@ void PMM_init(const uint32_t tot_mem_KB, uint32_t* physical_mem_start)
 void PMM_MemMap_init(const uint32_t physical_addr, const uint32_t size)
 {
     uint32_t block_addr = physical_addr / PMM_BLOCK_SIZE;
-    const uint32_t blocks = size / PMM_BLOCK_SIZE;
+    const uint32_t blocks = _size2block(size);
 
     for(uint32_t i = 0; i < blocks; ++i)
     {
@@ -45,7 +51,7 @@ void PMM_MemMap_init(const uint32_t physical_addr, const uint32_t size)
 void PMM_MemMap_deinit(const uint32_t physical_addr, const uint32_t size)
 {
     uint32_t block_addr = physical_addr / PMM_BLOCK_SIZE;
-    const uint32_t blocks = size / PMM_BLOCK_SIZE;
+    const uint32_t blocks = _size2block(size);
 
     for(uint32_t i = 0; i < blocks; ++i)
     {
@@ -56,10 +62,11 @@ void PMM_MemMap_deinit(const uint32_t physical_addr, const uint32_t size)
     // TODO assert used blocks <= max blocks
 }
 
-void PMM_MemMap_deinit_kernel(const uint32_t paddr_start, const uint32_t paddr_end)
+void PMM_MemMap_deinit_kernel(const uint32_t paddr_start)
 {
-    // TODO: add also something for the stack!
-    PMM_MemMap_deinit(paddr_start, paddr_end + _PMM_mem_map_size - paddr_start);
+    extern uint32_t __end;
+    // TODO: add also something for the stack! (at the moment is defined in kernel.ld)
+    PMM_MemMap_deinit(paddr_start, ((uint32_t) &__end) + _PMM_mem_map_size - paddr_start);
 }
 
 inline uint32_t PMM_Blocks_used()
@@ -99,11 +106,6 @@ void PMM_free_blocks(void* ptr, const size_t num_blocks)
     for(size_t i = 0; i < num_blocks; i++)
         bitset_unset(_PMM_mem_map, pos + i);
     _PMM_used_blocks -= num_blocks;
-}
-
-static inline size_t _size2block(const size_t size)
-{
-    return (size / PMM_BLOCK_SIZE) + ((size % PMM_BLOCK_SIZE) ? 1 : 0);
 }
 
 void *PMM_malloc(const size_t size)

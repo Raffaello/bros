@@ -128,6 +128,8 @@ gdb-kernel-debug: image
 		-ex 'break src/kernel/cpu/mmu/VMM.c:31' \
 		-ex 'break src/kernel/cpu/mmu/VMM.c:49' \
 		-ex 'b	src/kernel/cpu/mmu/VMM.c:60' \
+		-ex 'b	src/kernel/cpu/mmu/VMM.c:92' \
+		-ex 'b	src/kernel/cpu/mmu/PMM.c:63' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
 
