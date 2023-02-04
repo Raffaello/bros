@@ -1,20 +1,24 @@
-# FAT12 Boot Sector
+# FAT12 Boot Sector Floppy
+# -------------------------------------------------------------------
+# TODO/NOTE:
+# Instead of this values,
+# probably the bootloader should read them from the memory itself
 
 .ifndef __BOOT_SECTOR__
 __BOOT_SECTOR__:
   # bsOEM = "--BROS--"    # OEM String (starting at offset 3)
-  _BytsPerSec = 512           # bytes per sector
-  _SecPerClus = 1             # sectors per cluster
-  _RsvdSecCnt = 4             # #of reserved sectors (2nd stage bootloader plus the boot sector 0 itself)
-  _NumFATs    = 2             # #of FAT copies
-  _RootEntCnt = 224           # size of root directory (512 FAT16)
-  _TotSec16   = 2880          # total # of sectors if over 32 MB
-  # media:        .byte  0xF0          # media Descriptor (F0=removible)
-  _FATSz16    = 9             # size of each FAT
-  _SecPerTrk  = 18            # sectors per track, 9 if 720KB Floppy
-  _NumHeads   = 2             # number of read-write heads
-  # HiddSec:      .int   0             # number of hidden sectors
-  # TotSec32:     .int   0             # # sectors for over 32 MB
+  _BytsPerSec = 512                     # bytes per sector
+  _SecPerClus = 1                       # sectors per cluster
+  _RsvdSecCnt = FAT_RESERVED_SECTORS    # #of reserved sectors (2nd stage bootloader plus the boot sector 0 itself)
+  _NumFATs    = 2                       # #of FAT copies
+  _RootEntCnt = 224                     # size of root directory (512 FAT16)
+  _TotSec16   = 2880                    # total # of sectors if over 32 MB
+  # media:        .byte  0xF0           # media Descriptor (F0=removible)
+  _FATSz16    = 9                       # size of each FAT
+  _SecPerTrk  = 18                      # sectors per track, 9 if 720KB Floppy
+  _NumHeads   = 2                       # number of read-write heads
+  # HiddSec:      .int   0              # number of hidden sectors
+  # TotSec32:     .int   0              # num sectors for over 32 MB
 
   # # --- END FAT12/16 compatibility with FAT32 ---
 
