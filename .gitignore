@@ -3,6 +3,7 @@ bin/*
 br-dos.img
 build/*
 BIOS_bootloader/build/*
+kernel/build/*
 
 # Bochs Debugger ini file
 bx_enh_dbg.ini
