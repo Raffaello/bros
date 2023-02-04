@@ -4,11 +4,16 @@ FLOPPY_IMAGE_NAME:=../${FLOPPY_IMAGE_NAME}
 
 SRC_DIR=src
 
+# NOTE: When working on fixing compiling optimization issues the below TODO could be resolved.
+# TODO: Furher sub-makefiles might be required to define optimizaions/options to compiler/linker
+#       also need to be later on expanded, listing each single file,
+#       so a further control at file level could be achieved.
+#       for now is ok in this way at the moment.
 SRC = $(wildcard \
 	${SRC_DIR}/*.c \
 	${SRC_DIR}/lib/*.c \
 	${SRC_DIR}/cpu/*.c \
-	${SRC_DIR}/cpu/mmu//*.c \
+	${SRC_DIR}/cpu/mmu/*.c \
 	${SRC_DIR}/bios/*.c \
 	${SRC_DIR}/drivers/*.c)
 
@@ -59,6 +64,7 @@ $(OBJS_S): $$(patsubst $(BUILD_DIR)/%.oS,$(SRC_DIR)/%.S,$$@)
 
 # Monolithic for now
 kernel: $(OBJS) ${OBJS_S}
+	@mkdir -p ${BIN_DIR}
 	# ${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
 	# objcopy -O binary  -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
 	# ${LD} $(LFLAGS) -o ${BIN_DIR}/kernel.sys ${OBJS} ${OBJS_S}

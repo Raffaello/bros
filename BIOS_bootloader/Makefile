@@ -1,4 +1,3 @@
-
 # BUILD_DIR:=${BUILD_DIR}
 BIN_DIR:=../${BIN_DIR}
 FLOPPY_IMAGE_NAME:=../${FLOPPY_IMAGE_NAME}
@@ -22,7 +21,6 @@ SYS_INFO_SEG=0x600 # it will replace the FAT_BUFFER_SEG after the kernel is load
 all: image
 
 clean:
-# 	rm ${BIN_DIR}/* -fv
 	rm ${BUILD_DIR}/* -frv
 
 floppy:
@@ -37,7 +35,7 @@ floppy:
 	objcopy -O binary -j .text ${BUILD_DIR}/boot.out ${BIN_DIR}/boot.bin
 
 boot2:
-	@mkdir -p build
+	@mkdir -p ${BUILD_DIR} ${BIN_DIR}
 	${AS} ${ASFLAGS} \
 		--defsym=KERNEL_SEG=${KERNEL_SEG} \
 		--defsym=FAT_BUFFER_SEG=${FAT_BUFFER_SEG} \
