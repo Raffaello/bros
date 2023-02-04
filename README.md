@@ -17,7 +17,7 @@ There are too many aspects to work on in a modern OS, that just requires years t
 
 Aware of that,
 
-The main goal of this project and its evolution is just for **learning** purposes.
+The main goal of this project and its evolution is just for **educational** purposes.
 
 ## The Bootloader
 
@@ -116,7 +116,7 @@ The kernel is a 32 bit executable and therefore need at least a `80386` CPU runn
 
 At its very entry point, it performs some validation checks, it has been loaded correctly from the bootloader and retrieving some information passed by the bootloader at some given memory location.
 
- It will also perform the re-initialization of protected memory and interrupts as a per Intel specs, also setting up the `PIC` and the `PIT`.
+ It performs the re-initialization of protected memory and interrupts as a per Intel specs, also setting up the `PIC` and the `PIT` and managing memory.
 
  **NOTE:**
 
@@ -125,6 +125,11 @@ The same thing of "storing the file on the filesystem (FAT12)" could have been d
  ### Memory Mapping
 
 The kernel runs in protected mode (`PM`) with paging (`PG`) of 4 KB size.
+
+
+At the moment is using a simple bitset to track the physical memory usage, and using a simplest way to use the stack within a section of itself.
+
+It is using an identity paging for the first 4MB of RAM only at the moment.
 
 > TODO ...
 

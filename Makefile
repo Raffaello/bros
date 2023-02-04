@@ -1,8 +1,5 @@
+# *** Some "defines" *** #
 
-
-# TODO to pass these values to ASM need to convert them to .S files and compiling them wih GCC
-#      at that point these can be defined as "defines" from CLI
-#      otherwise use NASM/FASM (suggested NASM)
 FAT_RESERVED_SECTORS=4
 BIOS_BOOT_SEG=0x7C00
 BOOT_REL_SEG=0x600
@@ -18,6 +15,7 @@ CC=gcc
 AS=as
 LD=ld
 
+BOOTLOADER_DIR=bootloader
 SRC_DIR=src/kernel
 BUILD_DIR=build
 BIN_DIR=bin
@@ -40,7 +38,7 @@ OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)
 
 INCLUDE_DIR=${SRC_DIR}
 
-ASFLAGS+=--fatal-warnings -n --32 -march=i386 -I src/bootloader
+ASFLAGS+=--fatal-warnings -n --32 -march=i386 -I ${BOOTLOADER_DIR}
 AS_LFLAGS+=-m elf_i386
 
 CFLAGS+=-Wall -Werror #-Wmissing-prototypes
@@ -75,7 +73,7 @@ floppy:
 		--defsym=BIOS_BOOT_SEG=${BIOS_BOOT_SEG} \
 		--defsym=BOOT_RELOCATE_SEG=${BOOT_REL_SEG} \
 		--defsym=BOOT2_SEG=${BOOT2_SEG} \
-		-o ${BUILD_DIR}/boot.o src/bootloader/floppy.asm
+		-o ${BUILD_DIR}/boot.o ${BOOTLOADER_DIR}/floppy.asm
 	${LD} ${AS_LFLAGS} -o ${BUILD_DIR}/boot.out ${BUILD_DIR}/boot.o -Ttext ${BOOT_REL_SEG}
 	objcopy -O binary -j .text ${BUILD_DIR}/boot.out ${BIN_DIR}/boot.bin
 
@@ -85,7 +83,7 @@ boot2:
 		--defsym=KERNEL_SEG=${KERNEL_SEG} \
 		--defsym=FAT_BUFFER_SEG=${FAT_BUFFER_SEG} \
 		--defsym=SYS_INFO_SEG=${SYS_INFO_SEG} \
-		-o ${BUILD_DIR}/boot2.o src/bootloader/boot2.asm
+		-o ${BUILD_DIR}/boot2.o ${BOOTLOADER_DIR}/boot2.asm
 	${LD} ${AS_LFLAGS} -o ${BUILD_DIR}/boot2.out ${BUILD_DIR}/boot2.o -Ttext ${BOOT2_SEG}
 	objcopy -O binary -j .text ${BUILD_DIR}/boot2.out ${BIN_DIR}/boot2.bin
 
