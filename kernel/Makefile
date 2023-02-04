@@ -37,7 +37,7 @@ CFLAGS+=-std=c17
 CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR} -MMD
 CFLAGS+=-nostartfiles -nostdlib
 CFLAGS+=-lgcc
-CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG} -DSYS_INFO_SEG=${SYS_INFO_SEG}
+CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
 
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
