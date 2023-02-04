@@ -9,7 +9,7 @@
 
 // int atoi(const char * str);
 
-// TODO generalize in itoa taking a base 
+// TODO generalize in itoa taking a base
 char* itoa10(uint16_t value, char* str);
 char* itoa16(uint16_t value, char* str);
 
