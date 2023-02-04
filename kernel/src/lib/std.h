@@ -1,3 +1,8 @@
+/************************************************
+ * C <stdlib.h> alike                           *
+ * the specific implementations are for e.g. in *
+ * arch/x86/lib/{*}.S                           *
+ ************************************************/
 #pragma once
 
 #include <stdint.h>

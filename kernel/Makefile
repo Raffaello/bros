@@ -20,7 +20,7 @@ SRC = $(wildcard \
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
 
 SRC_S  = $(wildcard \
-	${SRC_DIR}/lib/*.S \
+	${SRC_DIR}/arch/x86/lib/*.S \
 	${SRC_DIR}/arch/x86/*.S \
 	${SRC_DIR}/arch/x86/mmu/*.S \
 	${SRC_DIR}/drivers/*.S)

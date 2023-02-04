@@ -108,6 +108,8 @@ The actual memory mapping is:
 
 ## The Kernel (32 bits)
 
+> Arch x86 only at the moment
+
 The kernel is a file in the FAT12, so it is a physical file on the floppy image.
 
 The name must be `BROSKRNL.SYS` with Hidden, System, Read-Only attributes.
