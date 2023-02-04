@@ -1,12 +1,13 @@
 /* -*-Asm-*- */
 /* x86 specific code */
 
+#include <arch/x86/defs/asm.h>
+
 .code32
 .intel_syntax noprefix
 .text
 
-.globl memset
-memset:
+ASM_BEGIN(memset)
   # This could be done with 4,2,1 bytes stos
   push ebp
   mov ebp, esp
@@ -16,5 +17,4 @@ memset:
   rep stosb           # store AL into ES:EDI
   pop ebp
   ret
-.type memset, @function
-.size memset, .-memset
+ASM_END(memset)
