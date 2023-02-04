@@ -1,4 +1,5 @@
 /* -*-Asm-*- */
+/* x86 specific code */
 
 .code32
 .intel_syntax noprefix

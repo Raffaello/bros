@@ -1,4 +1,5 @@
 /* -*-Asm-*- */
+/* x86 specific code */
 
 # Interrupt Service Routines
 # Interrupts are defined in
