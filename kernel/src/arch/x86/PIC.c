@@ -1,4 +1,4 @@
-#include <drivers/PIC.h>
+#include <arch/x86/PIC.h>
 #include <stdint.h>
 #include <stdint.h>
 #include <lib/io.h>

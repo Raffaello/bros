@@ -2,8 +2,8 @@
 #include <bios/vga.h>
 #include <arch/x86/GDT_IDT.h>
 #include <lib/std.h>
-#include <drivers/PIC.h>
-#include <drivers/PIT.h>
+#include <arch/x86/PIC.h>
+#include <arch/x86/PIT.h>
 #include <lib/ISR_IRQ.h>
 #include <bios/boot_info.h>
 #include <lib/conio.h>

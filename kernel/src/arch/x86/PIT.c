@@ -1,4 +1,4 @@
-#include <drivers/PIT.h>
+#include <arch/x86/PIT.h>
 #include <lib/ISR_IRQ.h>
 #include <defs/IRQ.h>
 #include <lib/io.h>

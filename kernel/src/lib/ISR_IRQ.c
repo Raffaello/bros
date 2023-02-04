@@ -4,7 +4,7 @@
 #include <defs/interrupts.h>
 #include <defs/IRQ.h>
 #include <defs/PIC.h>
-#include <drivers/PIC.h>
+#include <arch/x86/PIC.h>
 
 #include <bios/vga.h>
 #include <lib/std.h>
