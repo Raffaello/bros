@@ -38,6 +38,7 @@ CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR} -MMD
 CFLAGS+=-nostartfiles -nostdlib
 CFLAGS+=-lgcc
 CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
+CFLAGS+=-fno-PIE # Github CI flags
 
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
