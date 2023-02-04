@@ -11,7 +11,19 @@
 // #define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
 // #define PAGE_GET_PHYSICAL_ADDR(x) (*x & ~0xFFF)
 
-#define CR0_PG_MASK 0x80000000
+// #define CR0_PG_MASK 0x80000000
+
+
+#define PTE_FRAME(x)    (x << 12)
+#define PTE_PRESENT     1
+#define PTE_WRITABLE    2
+#define PTE_USERMODE    4
+
+
+#define PDE_PRESENT     1
+#define PDE_WRITABLE    2
+#define PDE_USERMDODE   4
+
 
 static page_directory_t* _kernel_directory  = NULL;
 static page_directory_t* _current_directory = NULL;
@@ -66,7 +78,7 @@ bool VMM_init()
 
     _kernel_directory = PMM_malloc(sizeof(page_directory_t));
     
-    page_table_t*       page_table  = PMM_malloc(sizeof(page_table_t));
+    page_table_t* page_table  = PMM_malloc(sizeof(page_table_t));
 
     if(page_table == NULL || _kernel_directory == NULL)
         return false;
@@ -74,24 +86,16 @@ bool VMM_init()
     memset(_kernel_directory, 0, sizeof(page_directory_t));
     memset(page_table, 0, sizeof(page_table_t));
 
-    // TODO: forgot to allocate some space for the stack ... just inside the linker at the moment
+    // TODO: forgot to allocate some space for the stack ...
+    //       it is just inside the linker at the moment
 
-    // first 1MB
+    // first 1MB, identity
     for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
     {
-        PTE_t* page = &page_table->entries[i];
-        page->p     = 1;
-        page->rw    = 1;
-        page->frame = i; // * PAGE_SIZE (4096) , physical addr
-
-        // page_table->entries[i] = (PTE_t){((i << 12) | 3)};
+        page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
     }
 
-    PDE_t* entry = &_kernel_directory->entries[0];
-    entry->p = 1;
-    entry->rw = 1;
-    entry->page_table = ((uint32_t)page_table >> 12);
-    // _kernel_directory->entries[0] = ((PDE_t)page_table) | 3;
+    _kernel_directory->entries[0] = (PDE_t) page_table | PDE_PRESENT | PDE_WRITABLE;
 
     ISR_register_interrupt_handler(INT_Page_Fault, page_fault_handler);
     VMM_switch_page_directory(_kernel_directory);
