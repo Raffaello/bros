@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <bios/vga.h>
-#include <cpu/GDT_IDT.h>
+#include <arch/x86/GDT_IDT.h>
 #include <lib/std.h>
 #include <drivers/PIC.h>
 #include <drivers/PIT.h>
@@ -11,8 +11,8 @@
 #include <stdnoreturn.h>
 #include <stddef.h>
 
-#include <cpu/mmu/PMM.h>
-#include <cpu/mmu/VMM.h>
+#include <arch/x86/mmu/PMM.h>
+#include <arch/x86/mmu/VMM.h>
 
 /*
  * TODO:

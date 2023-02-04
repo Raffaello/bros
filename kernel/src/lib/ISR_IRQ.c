@@ -1,6 +1,6 @@
 #include <lib/ISR_IRQ.h>
 #include <stddef.h>
-#include <cpu/GDT_IDT.h>
+#include <arch/x86/GDT_IDT.h>
 #include <defs/interrupts.h>
 #include <defs/IRQ.h>
 #include <defs/PIC.h>

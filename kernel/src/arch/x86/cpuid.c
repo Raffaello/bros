@@ -1,4 +1,4 @@
-#include <cpu/cpuid.h>
+#include <arch/x86/cpuid.h>
 #include <stddef.h>
 
 void cpuid(CPU_Info_t *cpuid)
