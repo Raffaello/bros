@@ -15,7 +15,7 @@ CC=gcc
 AS=as
 LD=ld
 
-BOOTLOADER_DIR=bootloader
+BOOTLOADER_DIR=BIOS_bootloader/src
 SRC_DIR=src/kernel
 BUILD_DIR=build
 BIN_DIR=bin
