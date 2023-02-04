@@ -16,7 +16,7 @@ AS=as
 LD=ld
 
 BOOTLOADER_DIR=BIOS_bootloader/src
-SRC_DIR=src/kernel
+SRC_DIR=kernel/src
 BUILD_DIR=build
 BIN_DIR=bin
 
