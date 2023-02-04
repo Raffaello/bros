@@ -1,7 +1,7 @@
 #include <arch/x86/PIC.h>
 #include <stdint.h>
 #include <stdint.h>
-#include <lib/io.h>
+#include <arch/x86/io.h>
 #include <arch/x86/defs/PIC.h>
 
 //=========================================================
