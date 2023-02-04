@@ -21,7 +21,7 @@ DrvNum:           .byte  0
 
 .include "bios/PrintStringNewLine.inc"
 .include "bios/PrintStringDots.inc"
-.include "cpu/GDT.inc"
+.include "arch/x86/GDT.inc"
 .include "utils/GateA20.inc"
 .include "filesystems/FAT12.inc"
 .include "bios/PrintNumber.inc"

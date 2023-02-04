@@ -3,7 +3,7 @@
 **/
 
 #include <bios/vga.h>
-#include <lib/io.h>
+#include <arch/x86/io.h>
 
 #define VGA_MEM_TEXT 0xB8000
 

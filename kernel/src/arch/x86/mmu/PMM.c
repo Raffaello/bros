@@ -1,4 +1,4 @@
-#include <cpu/mmu/PMM.h>
+#include <arch/x86/mmu/PMM.h>
 #include <lib/bitset.h>
 #include <stddef.h>
 #include <lib/string.h>

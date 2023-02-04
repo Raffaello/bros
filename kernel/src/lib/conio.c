@@ -1,7 +1,7 @@
 #include <lib/conio.h>
 #include <bios/vga.h>
 #include <lib/string.h>
-#include <lib/std.h>
+#include <lib/stdlib.h>
 #include <stdarg.h>
 
 static uint8_t _col = 7;

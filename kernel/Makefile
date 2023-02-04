@@ -12,17 +12,17 @@ SRC_DIR=src
 SRC = $(wildcard \
 	${SRC_DIR}/*.c \
 	${SRC_DIR}/lib/*.c \
-	${SRC_DIR}/cpu/*.c \
-	${SRC_DIR}/cpu/mmu/*.c \
+	${SRC_DIR}/arch/x86/*.c \
+	${SRC_DIR}/arch/x86/mmu/*.c \
 	${SRC_DIR}/bios/*.c \
 	${SRC_DIR}/drivers/*.c)
 
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
 
 SRC_S  = $(wildcard \
-	${SRC_DIR}/lib/*.S \
-	${SRC_DIR}/cpu/*.S \
-	${SRC_DIR}/cpu/mmu/*.S \
+	${SRC_DIR}/arch/x86/lib/*.S \
+	${SRC_DIR}/arch/x86/*.S \
+	${SRC_DIR}/arch/x86/mmu/*.S \
 	${SRC_DIR}/drivers/*.S)
 
 OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)

@@ -1,18 +1,18 @@
 #include <stdint.h>
 #include <bios/vga.h>
-#include <cpu/GDT_IDT.h>
-#include <lib/std.h>
-#include <drivers/PIC.h>
-#include <drivers/PIT.h>
-#include <lib/ISR_IRQ.h>
+#include <arch/x86/GDT_IDT.h>
+#include <lib/stdlib.h>
+#include <arch/x86/PIC.h>
+#include <arch/x86/PIT.h>
+#include <arch/x86/ISR_IRQ.h>
 #include <bios/boot_info.h>
 #include <lib/conio.h>
 
 #include <stdnoreturn.h>
 #include <stddef.h>
 
-#include <cpu/mmu/PMM.h>
-#include <cpu/mmu/VMM.h>
+#include <arch/x86/mmu/PMM.h>
+#include <arch/x86/mmu/VMM.h>
 
 /*
  * TODO:

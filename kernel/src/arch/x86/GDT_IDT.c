@@ -1,4 +1,4 @@
-#include <cpu/GDT_IDT.h>
+#include <arch/x86/GDT_IDT.h>
 #include <bios/vga.h>
 
 #define GDT_MAX_DESCRIPTORS 3
@@ -31,7 +31,7 @@ extern void GDT_load_asm();
 #define CODE_SEL            0x8 // hardcoded, it depends on the GDT selector. for now keep it simple
 
 
-// extern void GDT_reload_segment(uint16_t codeSeg, uint16_t dataSeg); // defined in cpu/GDT_reload_segment.S
+// extern void GDT_reload_segment(uint16_t codeSeg, uint16_t dataSeg); // defined in arch/x86/GDT_reload_segment.S
 
 // /*__attribute__((aligned(16)))*/ static GDT_descriptor_t gdtd[GDT_MAX_DESCRIPTORS] = {
 //     {
