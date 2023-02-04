@@ -1,4 +1,4 @@
-#include <lib/ISR_IRQ.h>
+#include <arch/x86/ISR_IRQ.h>
 #include <stddef.h>
 #include <arch/x86/GDT_IDT.h>
 #include <arch/x86/defs/interrupts.h>

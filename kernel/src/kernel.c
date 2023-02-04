@@ -4,7 +4,7 @@
 #include <lib/std.h>
 #include <arch/x86/PIC.h>
 #include <arch/x86/PIT.h>
-#include <lib/ISR_IRQ.h>
+#include <arch/x86/ISR_IRQ.h>
 #include <bios/boot_info.h>
 #include <lib/conio.h>
 

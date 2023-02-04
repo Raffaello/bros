@@ -2,7 +2,7 @@
 #include <arch/x86/mmu/PMM.h>
 #include <lib/string.h>
 #include <arch/x86/defs/interrupts.h>
-#include <lib/ISR_IRQ.h>
+#include <arch/x86/ISR_IRQ.h>
 #include <lib/conio.h>
 
 #define PAGE_SIZE   4096

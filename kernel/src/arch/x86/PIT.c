@@ -1,5 +1,5 @@
 #include <arch/x86/PIT.h>
-#include <lib/ISR_IRQ.h>
+#include <arch/x86/ISR_IRQ.h>
 #include <arch/x86/defs/IRQ.h>
 #include <arch/x86/io.h>
 #include <lib/std.h>
