@@ -1,120 +1,33 @@
+# *** Some "defines" *** #
 
+export CC=gcc
+export AS=as
+export LD=ld
 
-# TODO to pass these values to ASM need to convert them to .S files and compiling them wih GCC
-#      at that point these can be defined as "defines" from CLI
-#      otherwise use NASM/FASM (suggested NASM)
-FAT_RESERVED_SECTORS=4
-BIOS_BOOT_SEG=0x7C00
-BOOT_REL_SEG=0x600
-BOOT2_SEG=${BIOS_BOOT_SEG}
-KERNEL_SEG=0x1000
-# KERNEL_FILENAME="BROSKRNL.SYS"
-# FLOPPY_SIZE=1440
-FLOPPY_IMAGE_NAME="br-dos.img"
-FAT_BUFFER_SEG=0x600 # same as BOOT_REL_SEG as it won't be used anymore
-SYS_INFO_SEG=0x600 # it will replace the FAT_BUFFER_SEG after the kernel is loaded.
+export BUILD_DIR=build
+export BIN_DIR=bin
 
-CC=gcc
-AS=as
-LD=ld
+export KERNEL_SEG=0x1000
+export KERNEL_FILENAME="BROSKRNL.SYS"
+export FLOPPY_IMAGE_NAME="br-dos.img"
 
-SRC_DIR=src/kernel
-BUILD_DIR=build
-BIN_DIR=bin
+BIOS_BL_DIR=BIOS_bootloader
+KERNEL_DIR=kernel
 
-SRC  = $(wildcard \
-	${SRC_DIR}/*.c \
-	${SRC_DIR}/lib/*.c \
-	${SRC_DIR}/cpu/*.c \
-	${SRC_DIR}/cpu/mmu//*.c \
-	${SRC_DIR}/bios/*.c \
-	${SRC_DIR}/drivers/*.c)
-OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
+.PHONY: kernel
 
-SRC_S  = $(wildcard \
-	${SRC_DIR}/lib/*.S \
-	${SRC_DIR}/cpu/*.S \
-	${SRC_DIR}/cpu/mmu/*.S \
-	${SRC_DIR}/drivers/*.S)
-OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)
+all: image
 
-INCLUDE_DIR=${SRC_DIR}
+bios_bootloader:
+	+$(MAKE) -C ${BIOS_BL_DIR} all
 
-ASFLAGS+=--fatal-warnings -n --32 -march=i386 -I src/bootloader
-AS_LFLAGS+=-m elf_i386
+kernel:
+	+$(MAKE) -C ${KERNEL_DIR} all
 
-CFLAGS+=-Wall -Werror #-Wmissing-prototypes
-CFLAGS+=-masm=intel
-# CFLAGS+=-O2	# optimization are creating issues on the code
-CFLAGS+=-g
-CFLAGS+=-std=c17
-CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR} -MMD
-CFLAGS+=-nostartfiles -nostdlib
-CFLAGS+=-lgcc
-CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG} -DSYS_INFO_SEG=${SYS_INFO_SEG}
-
-LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
-LFLAGS+=-nostdlib --nmagic
-LFLAGS+=-Tkernel.ld # linker option definition file
-# LFLAGS+=-Ttext ${KERNEL_SEG}
-LFLAGS+=--defsym=KERNEL_SEG=$(KERNEL_SEG)
-
-.PHONY: kernel $(OBJS)
-
-t:
-	echo ${SRC}
-	echo ${OBJS}
-	echo ${SRC_S}
-	echo ${OBJS_S}
-
-all: floppy boot2 image kernel
-
-floppy:
-	@mkdir -p build
-	${AS} ${ASFLAGS} \
-		--defsym=BIOS_BOOT_SEG=${BIOS_BOOT_SEG} \
-		--defsym=BOOT_RELOCATE_SEG=${BOOT_REL_SEG} \
-		--defsym=BOOT2_SEG=${BOOT2_SEG} \
-		-o ${BUILD_DIR}/boot.o src/bootloader/floppy.asm
-	${LD} ${AS_LFLAGS} -o ${BUILD_DIR}/boot.out ${BUILD_DIR}/boot.o -Ttext ${BOOT_REL_SEG}
-	objcopy -O binary -j .text ${BUILD_DIR}/boot.out ${BIN_DIR}/boot.bin
-
-boot2:
-	@mkdir -p build
-	${AS} ${ASFLAGS} \
-		--defsym=KERNEL_SEG=${KERNEL_SEG} \
-		--defsym=FAT_BUFFER_SEG=${FAT_BUFFER_SEG} \
-		--defsym=SYS_INFO_SEG=${SYS_INFO_SEG} \
-		-o ${BUILD_DIR}/boot2.o src/bootloader/boot2.asm
-	${LD} ${AS_LFLAGS} -o ${BUILD_DIR}/boot2.out ${BUILD_DIR}/boot2.o -Ttext ${BOOT2_SEG}
-	objcopy -O binary -j .text ${BUILD_DIR}/boot2.out ${BIN_DIR}/boot2.bin
-
-.SECONDEXPANSION:
-$(OBJS): $$(patsubst $(BUILD_DIR)/%.o,$(SRC_DIR)/%.c,$$@)
-	@mkdir -p ${@D}
-	${CC} $(CFLAGS) -c $^ -o $@
-
-$(OBJS_S): $$(patsubst $(BUILD_DIR)/%.oS,$(SRC_DIR)/%.S,$$@)
-	@mkdir -p ${@D}
-	${CC} $(CFLAGS) $^ -o $@
-
-# Monolithic for now
-kernel: $(OBJS) ${OBJS_S}
-	# ${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
-	# objcopy -O binary  -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
-	# ${LD} $(LFLAGS) -o ${BIN_DIR}/kernel.sys ${OBJS} ${OBJS_S}
-	${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
-	objcopy -O binary  -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
-
-image: floppy boot2 kernel
-	# Using 2 extra Reserved Sectors
-	mformat -i ${FLOPPY_IMAGE_NAME} -v BROS -B ${BIN_DIR}/boot.bin -R ${FAT_RESERVED_SECTORS} -f1440 -C
-	dd if=${BIN_DIR}/boot2.bin of=${FLOPPY_IMAGE_NAME} conv=notrunc seek=1
-	mcopy -i ${FLOPPY_IMAGE_NAME} ${BIN_DIR}/kernel.sys ::/BROSKRNL.SYS
-	mattrib -i ${FLOPPY_IMAGE_NAME} +r +h +s -a /BROSKRNL.SYS
+image: bios_bootloader kernel
 	mdir -i ${FLOPPY_IMAGE_NAME} -a
 
-gdb-kernel-debug: image
+gdb-kernel-debug:
 	qemu-system-i386 -fda ${FLOPPY_IMAGE_NAME} -S -s &
 	gdb ${BUILD_DIR}/kernel.out \
 		-ex 'target remote localhost:1234' \
@@ -122,14 +35,15 @@ gdb-kernel-debug: image
 		-ex 'layout reg' \
 		-ex 'break _start' \
 		-ex 'break *0x7c00' \
-		-ex 'b src/kernel/cpu/mmu/VMM.c:74' \
+		-ex 'b ${KERNEL_DIR}/src/cpu/mmu/VMM.c:74' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
 
-bochs-kerenl-debug: image
+bochs-debug:
 	bochs-debugger -q -f bochs-debugger.rs
 
 clean:
+	+$(MAKE) -C ${BIOS_BL_DIR} clean
+	+$(MAKE) -C ${KERNEL_DIR} clean
 	rm ${BIN_DIR}/* -fv
-	rm ${BUILD_DIR}/* -frv
 	rm ${FLOPPY_IMAGE_NAME} -fv

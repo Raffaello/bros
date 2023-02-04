@@ -1,7 +1,8 @@
 bin/*
-!bin/.gitkeep
 br-dos.img
-build/*
+# build/*
+BIOS_bootloader/build/*
+kernel/build/*
 
 # Bochs Debugger ini file
 bx_enh_dbg.ini
