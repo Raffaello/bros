@@ -3,8 +3,8 @@
 BIN_DIR:=../${BIN_DIR}
 FLOPPY_IMAGE_NAME:=../${FLOPPY_IMAGE_NAME}
 
-BOOTLOADER_SRC=./src
-ASFLAGS+=--fatal-warnings -n --32 -march=i386 -I ${BOOTLOADER_SRC}
+SRC=./src
+ASFLAGS+=--fatal-warnings -n --32 -march=i386 -I ${SRC}
 AS_LFLAGS+=-m elf_i386
 
 # SRC=floppy.asm boot2.asm
@@ -32,7 +32,7 @@ floppy:
 		--defsym=BOOT_RELOCATE_SEG=${BOOT_REL_SEG} \
 		--defsym=BOOT2_SEG=${BOOT2_SEG} \
 		--defsym=FAT_RESERVED_SECTORS=${FAT_RESERVED_SECTORS} \
-		-o ${BUILD_DIR}/boot.o ${BOOTLOADER_SRC}/floppy.asm
+		-o ${BUILD_DIR}/boot.o ${SRC}/floppy.asm
 	${LD} ${AS_LFLAGS} -o ${BUILD_DIR}/boot.out ${BUILD_DIR}/boot.o -Ttext ${BOOT_REL_SEG}
 	objcopy -O binary -j .text ${BUILD_DIR}/boot.out ${BIN_DIR}/boot.bin
 
@@ -43,7 +43,7 @@ boot2:
 		--defsym=FAT_BUFFER_SEG=${FAT_BUFFER_SEG} \
 		--defsym=SYS_INFO_SEG=${SYS_INFO_SEG} \
 		--defsym=FAT_RESERVED_SECTORS=${FAT_RESERVED_SECTORS} \
-		-o ${BUILD_DIR}/boot2.o ${BOOTLOADER_SRC}/boot2.asm
+		-o ${BUILD_DIR}/boot2.o ${SRC}/boot2.asm
 	${LD} ${AS_LFLAGS} -o ${BUILD_DIR}/boot2.out ${BUILD_DIR}/boot2.o -Ttext ${BOOT2_SEG}
 	objcopy -O binary -j .text ${BUILD_DIR}/boot2.out ${BIN_DIR}/boot2.bin
 

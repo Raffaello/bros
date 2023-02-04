@@ -1,7 +1,6 @@
 bin/*
-!bin/.gitkeep
 br-dos.img
-build/*
+# build/*
 BIOS_bootloader/build/*
 kernel/build/*
 
