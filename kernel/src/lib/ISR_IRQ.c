@@ -1,9 +1,9 @@
 #include <lib/ISR_IRQ.h>
 #include <stddef.h>
 #include <arch/x86/GDT_IDT.h>
-#include <defs/interrupts.h>
-#include <defs/IRQ.h>
-#include <defs/PIC.h>
+#include <arch/x86/defs/interrupts.h>
+#include <arch/x86/defs/IRQ.h>
+#include <arch/x86/defs/PIC.h>
 #include <arch/x86/PIC.h>
 
 #include <bios/vga.h>

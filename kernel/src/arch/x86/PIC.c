@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdint.h>
 #include <lib/io.h>
-#include <defs/PIC.h>
+#include <arch/x86/defs/PIC.h>
 
 //=========================================================
 //***              Controller Registers                 ***

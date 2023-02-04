@@ -1,7 +1,7 @@
 /* -*-Asm-*- */
 
 # Interrupt Request Routines
-# IRQ are defined in defs/IRQ.h
+# IRQ are defined in arch/x86/defs/IRQ.h
 
 .code32
 .intel_syntax noprefix

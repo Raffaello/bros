@@ -1,7 +1,7 @@
 #include <arch/x86/mmu/VMM.h>
 #include <arch/x86/mmu/PMM.h>
 #include <lib/string.h>
-#include <defs/interrupts.h>
+#include <arch/x86/defs/interrupts.h>
 #include <lib/ISR_IRQ.h>
 #include <lib/conio.h>
 

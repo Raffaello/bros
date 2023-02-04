@@ -3,7 +3,7 @@
 
 # Interrupt Service Routines
 # Interrupts are defined in
-# #include <defs/interrupts.h>
+# #include <arch/x86/defs/interrupts.h>
 
 .code32
 .intel_syntax noprefix
