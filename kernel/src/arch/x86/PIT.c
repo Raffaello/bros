@@ -2,7 +2,7 @@
 #include <arch/x86/ISR_IRQ.h>
 #include <arch/x86/defs/IRQ.h>
 #include <arch/x86/io.h>
-#include <lib/std.h>
+#include <lib/stdlib.h>
 #include <bios/vga.h>
 
 #define PIT_FREQ    1193180

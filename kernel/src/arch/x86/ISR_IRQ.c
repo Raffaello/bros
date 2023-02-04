@@ -7,7 +7,7 @@
 #include <arch/x86/PIC.h>
 
 #include <bios/vga.h>
-#include <lib/std.h>
+#include <lib/stdlib.h>
 
 static ISR_Handler_t isr_handlers[INT_TOTAL];
 

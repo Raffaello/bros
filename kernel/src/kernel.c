@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <bios/vga.h>
 #include <arch/x86/GDT_IDT.h>
-#include <lib/std.h>
+#include <lib/stdlib.h>
 #include <arch/x86/PIC.h>
 #include <arch/x86/PIT.h>
 #include <arch/x86/ISR_IRQ.h>
