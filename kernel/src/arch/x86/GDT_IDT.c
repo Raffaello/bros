@@ -175,11 +175,8 @@ void IDT_set_gate(const uint8_t numInt, IDT_Handler idt_func)
     IDT_set_IDT_handler(&idtd[numInt], IDT_GATE_INT32, IDT_DPL_RING0, CODE_SEL, idt_func);
 }
 
-static void IDT_init(/*uint16_t codeSel*/)
+static void IDT_init()
 {
-    // TODO: not sure now how to segment memory and install interrupt handler..
-    //       so for now just basic settings for the function to almost work.
-
     // set up idtr for processor
     idtr.size = sizeof(IDT_descriptor_t) * MAX_INTERRUPTS - 1;
     idtr.offset	= (uint32_t)&idtd[0];
