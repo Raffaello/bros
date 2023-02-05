@@ -1,8 +1,16 @@
+/******************************
+ *** Descriptor Tables      ***
+ ***------------------------***
+ *** 32 bits                ***
+ *** GDT, IDT               ***
+ ******************************/
 #pragma once
 
 #include <stdint.h>
 
 #pragma pack(push, 1)
+
+// TODO: use integer instead of structs
 
 /**
  * used for both GDT and IDT

@@ -32,8 +32,9 @@ extern void GDT_load_asm();
 
 
 // extern void GDT_reload_segment(uint16_t codeSeg, uint16_t dataSeg); // defined in arch/x86/GDT_reload_segment.S
+// extern void GDT_reload_segments(); // defined in arch/x86/GDT_reload_segment.S
 
-// /*__attribute__((aligned(16)))*/ static GDT_descriptor_t gdtd[GDT_MAX_DESCRIPTORS] = {
+// __attribute__((aligned(16))) static GDT_descriptor_t gdtd[GDT_MAX_DESCRIPTORS] = {
 //     {
 //         .limit          = 0,
 //         .base_lo        = 0,
@@ -66,7 +67,6 @@ extern void GDT_load_asm();
 // {
 //     __asm__("cli");
 //     __asm__ volatile("lgdt %0" : : "m"(*dtr));
-//     // __asm__("sti");
 // }
 
 // static void GDT_set_descriptor(GDT_descriptor_t* gdtd, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags)
@@ -119,7 +119,7 @@ static void GDT_init()
 
     // GDT_load(&gdtr);
     
-    // GDT_reload_segment(codeSeg, dataSeg);
+    // GDT_reload_segments();
 
     GDT_load_asm();
 }

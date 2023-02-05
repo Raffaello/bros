@@ -1,9 +1,11 @@
 /* -*-Asm-*- */
 
+#include <arch/x86/defs/asm.h>
 
 .code32
 .intel_syntax noprefix
 .text
+
 GDT:
 # NULL Descriptor
   .quad 0
@@ -38,21 +40,31 @@ GDT_TOC:
 .equ GDT_CODE_SEG, GDT_CODE - GDT
 .equ GDT_DATA_SEG, GDT_DATA - GDT
 
-.globl GDT_load_asm
-GDT_load_asm:
+ASM_BEGIN(GDT_load_asm)
   cli
   lgdt [GDT_TOC]
 reloadSegments:
    # Reload CS register containing code selector:
    JMP   GDT_CODE_SEG:reload_CS
 reload_CS:
-   # Reload data segment registers:
-   MOV   AX, GDT_DATA_SEG
-   MOV   DS, AX
-   MOV   ES, AX
-   MOV   FS, AX
-   MOV   GS, AX
-   MOV   SS, AX
+  # Reload data segment registers:
+  MOV   AX, GDT_DATA_SEG
+  MOV   DS, AX
+  MOV   ES, AX
+  MOV   FS, AX
+  MOV   GS, AX
+  MOV   SS, AX
   ret
-.type GDT_load_asm, @function
-.size GDT_load_asm, .-GDT_load_asm
+ASM_END(GDT_load_asm)
+
+# ASM_BEGIN(GDT_reload_segments)
+#     jmp 0x8:GDT_reload_segments_CS
+# GDT_reload_segments_CS:
+#     mov ax, 0x10 # data segment
+#     mov ds, ax
+#     mov es, ax
+#     mov fs, ax
+#     mov gs, ax
+#     mov ss, ax
+#     ret
+# ASM_END(GDT_reload_segments)
