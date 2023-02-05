@@ -186,9 +186,8 @@ LoadFile_parsed:
                       # DS:SI has the clusters number in FORMAT
                       # instead of using CX, here i could have looped until SI < DI
                       # CX is guarantee to have at least 1 here
-
 LoadFile_readClusters:
-  push cx             # store if for later
+  push cx             # store it for later
 # in use SI, AX, CX
   lodsw               # AX as a cluster value
   # Convert Cluster to CHS
@@ -201,6 +200,10 @@ LoadFile_readClusters:
   mul dx                  # the mul could be skipped as it is 1
   call LBA2CHS
 
+  # TODO these 3 instruction could be replaced
+  #      with 1 mov using BP instead...
+  #      using a fixed position for tmp variables...
+  #      for e.g +4 loop counter +8 mem seg ...
   pop ax              # restore loop counter in ax
   pop bx              # restore Memory Segment
   push ax             # store loop counter

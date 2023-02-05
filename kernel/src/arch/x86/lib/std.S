@@ -5,8 +5,9 @@
 .intel_syntax noprefix
 .text
 
-.globl itoa10
-itoa10:
+#include <arch/x86/defs/asm.h>
+
+ASM_BEGIN(itoa10)
   # return value in eax
   push ebp
   push ebx
@@ -40,10 +41,9 @@ itoa10_store_loop:
   pop ebx
   pop ebp
   ret
-.type itoa10, @function
-.size itoa10, .-itoa10
+ASM_END(itoa10)
 
-.globl itoa16
+ASM_BEGIN(itoa16)
 itoa16:
   # return value in eax
   push ebp
@@ -83,5 +83,4 @@ itao16_store_loop_stosb:
   pop ebx
   pop ebp
   ret
-.type itoa16, @function
-.size itoa16, .-itoa16
+ASM_END(itoa16)

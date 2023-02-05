@@ -20,7 +20,6 @@ static inline size_t _size2block(const size_t size)
     return (size / PMM_BLOCK_SIZE) + ((size % PMM_BLOCK_SIZE) ? 1 : 0);
 }
 
-
 void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start)
 {
     _PMM_tot_mem = tot_mem_KB;
@@ -45,7 +44,6 @@ void PMM_MemMap_init(const paddr_t physical_addr, const uint32_t size)
     }
 
     // TODO assert used blocks <= max blocks (underflow)
-
 }
 
 void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size)
@@ -101,8 +99,8 @@ void *PMM_malloc_blocks(const size_t num_blocks)
 
 void PMM_free_blocks(void* ptr, const size_t num_blocks)
 {
-    // TODO assert used blocks > size
-    // if (_PMM_used_blocks < size)
+    // TODO assert used blocks > num_blocks
+    // if (_PMM_used_blocks < num_blocks)
     //     return;
 
     unsigned int pos = ((unsigned int) ptr) / PMM_BLOCK_SIZE;

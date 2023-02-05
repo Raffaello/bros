@@ -21,7 +21,7 @@ all: image
 bios_bootloader:
 	+$(MAKE) -C ${BIOS_BL_DIR} all
 
-kernel:
+kernel: # bios_bootloader
 	+$(MAKE) -C ${KERNEL_DIR} all
 
 image: bios_bootloader kernel

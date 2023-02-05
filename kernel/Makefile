@@ -73,7 +73,8 @@ kernel: $(OBJS) ${OBJS_S}
 	objcopy -O binary  -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
 
 image: kernel
-	mcopy -i ${FLOPPY_IMAGE_NAME} ${BIN_DIR}/kernel.sys ::/${KERNEL_FILENAME}
+	-mattrib -i ${FLOPPY_IMAGE_NAME} -r -h -s -a /${KERNEL_FILENAME}
+	mcopy -o -i ${FLOPPY_IMAGE_NAME} -D o ${BIN_DIR}/kernel.sys ::/${KERNEL_FILENAME}
 	mattrib -i ${FLOPPY_IMAGE_NAME} +r +h +s -a /${KERNEL_FILENAME}
 
 clean:
