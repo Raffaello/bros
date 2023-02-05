@@ -174,6 +174,7 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
 }
 
 
+// TODO create a kernel panic
 noreturn void _start_failure()
 {
     const char fail_msg[] = "Kernel load failure";

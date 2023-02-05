@@ -146,6 +146,7 @@ TODO: test it with VirtualBox.
 - GCC
 - AS (GNU GAS)
 - make
+- dd
 - qemu / bochs
 - mtools (mformat, mcopy, mdir, mattrib)
 

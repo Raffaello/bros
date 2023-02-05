@@ -87,7 +87,7 @@ bool VMM_init()
     memset(page_table, 0, sizeof(page_table_t));
 
     // TODO: forgot to allocate some space for the stack ...
-    //       it is just inside the linker at the moment
+    //       it is just defined inside the linker at the moment
 
     // first 1MB, identity
     for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
