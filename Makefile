@@ -29,7 +29,7 @@ image: bios_bootloader kernel
 
 gdb-kernel-debug:
 	qemu-system-i386 -fda ${FLOPPY_IMAGE_NAME} -S -s &
-	gdb ${BUILD_DIR}/kernel.out \
+	gdb ${KERNEL_DIR}/${BUILD_DIR}/kernel.out \
 		-ex 'target remote localhost:1234' \
 		-ex 'layout src' \
 		-ex 'layout reg' \

@@ -1,6 +1,6 @@
 #include <arch/x86/ISR_IRQ.h>
 #include <stddef.h>
-#include <arch/x86/GDT_IDT.h>
+#include <arch/x86/descriptors.h>
 #include <arch/x86/defs/interrupts.h>
 #include <arch/x86/defs/IRQ.h>
 #include <arch/x86/defs/PIC.h>
@@ -9,7 +9,7 @@
 #include <bios/vga.h>
 #include <lib/stdlib.h>
 
-static ISR_Handler_t isr_handlers[INT_TOTAL];
+static ISR_Handler_t isr_handlers[MAX_INTERRUPTS];
 
 void ISR_UniversalHandler(ISR_registers_t r)
 {
