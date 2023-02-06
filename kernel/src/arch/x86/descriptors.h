@@ -27,10 +27,9 @@
  *   reserved (zero)        21          
  *   Big                    22          0=? 1=?
  *   Granularity            23          granularity=0, the segment range from 1 byte - 1 MByte, in byte increments.
-                                        granularity=1, the segment range from 4 KBytes to 4 GBytes, in 4-KByte
-increments.
+ *                                      granularity=1, the segment range from 4 KBytes to 4 GBytes, in 4-KByte increments.
  *   Base 31:24             24..31      
- * 
+ *
  * NOTES:
  * - An expand-down segment has maximum size when the segment limit is 0
  * - Only segment selectors of writable data segments can be loaded into the SS register.
