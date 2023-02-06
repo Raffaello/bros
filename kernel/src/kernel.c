@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <bios/vga.h>
-#include <arch/x86/GDT_IDT.h>
+#include <arch/x86/descriptors.h>
 #include <lib/stdlib.h>
 #include <arch/x86/PIC.h>
 #include <arch/x86/PIT.h>
@@ -37,7 +37,6 @@ noreturn void _start_failure()  __attribute__((section(".text._start_failure")))
  __attribute__((force_align_arg_pointer))
 __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
 {
-    __asm__ ("cli");
     uint32_t _eax, _ebx;
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));

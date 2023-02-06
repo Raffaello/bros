@@ -25,9 +25,9 @@ SECTIONS
         /* bss = .; */
         *(.bss)
         *(COMMON)
-        __stack_start = .;
+        /* __stack_start = .;
         . += STACK_SIZE;
-        __stack_end = .;
+        __stack_end = .; */
         . = ALIGN(PAGE_SIZE);
     }
     __end = .;
