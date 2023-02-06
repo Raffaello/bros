@@ -17,7 +17,7 @@
  *   base 23:16             0..7        byte
  *   Accessed               8           
  *   Writable               9           
- *   Expansion direction    10         0=? 1=? 
+ *   Expansion direction    10         0=up 1=down
  *   zero                   11          
  *   one                    12          
  *   DPL                    13..14      0=kernel, 1,2 = drivers, 3=user app
