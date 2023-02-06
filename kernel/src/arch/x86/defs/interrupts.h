@@ -56,4 +56,5 @@ Exception#  Description	Error                           Code?
 
 // #define INT_RESERVED_TOTAL                  (INT_RESERVED_END - INT_RESERVED_START + 1)
 // #define INT_TOTAL                           (255 - INT_RESERVED_TOTAL)
-#define INT_TOTAL                           255
+// #define INT_TOTAL                           256
+#define MAX_INTERRUPTS  256
