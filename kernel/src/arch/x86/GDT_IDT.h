@@ -16,12 +16,12 @@
  * used for both GDT and IDT
  * 32 bits mode
  **/
-// typedef struct DT_register_t
-// {
-//     uint16_t    size;
-//     uint32_t    offset;
-// } __attribute__((packed)) DT_register_t;
-// _Static_assert(sizeof(DT_register_t) == 2+4);
+typedef struct DT_register_t
+{
+    uint16_t    size;
+    uint32_t    offset;
+} __attribute__((packed)) DT_register_t;
+_Static_assert(sizeof(DT_register_t) == 2+4);
 
 // typedef struct GDT_descriptor_t
 // {
