@@ -89,7 +89,7 @@ ACPI_NVS       4
 
 The actual memory mapping is:
 
-1. The Boot sector is loaded by the BIOS at the default location `0x7C00` and self-relocating at `0x600` (like a MBR would do).
+1. The Boot sector is loaded by the BIOS at the default location `0x7C00` and self-relocating at `0x600`.
 
 2. The 2nd stage Boot is loaded at `0x7C00`, at the original boot memory location.
 
