@@ -82,7 +82,7 @@ static inline void GDT_load(const DT_register_t* dtr)
     __asm__ volatile ("lgdt %0":: "m"(*dtr));
 }
 
-__attribute((naked))
+__attribute__((naked))
 static void GDT_reload_segments()
 {
     __asm__ volatile(
