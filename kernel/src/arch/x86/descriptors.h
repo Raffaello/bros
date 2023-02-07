@@ -8,8 +8,6 @@
 
 #include <stdint.h>
 
-#pragma pack(push, 1)
-
 /***
  * Data-Segment Descriptor (GDT)
  *   segment limit          0..15       word
@@ -91,6 +89,8 @@
  * 
  */
 
+typedef uint64_t GDT_descriptor_t;
+
 /**
  * used for GDT and IDT
  * 32 bits mode
@@ -112,7 +112,6 @@ typedef struct IDT_descriptor_t
 
 } __attribute__((packed)) IDT_descriptor_t;
 _Static_assert(sizeof(IDT_descriptor_t) == 8);
-#pragma pack(pop)
 
 // Interrupt handler function type definition
 typedef void ((*IDT_Handler)(void));
