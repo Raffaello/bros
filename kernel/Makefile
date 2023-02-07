@@ -70,7 +70,7 @@ kernel: $(OBJS) ${OBJS_S}
 	# objcopy -O binary  -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
 	# ${LD} $(LFLAGS) -o ${BIN_DIR}/kernel.sys ${OBJS} ${OBJS_S}
 	${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
-	objcopy -O binary  -j .text ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
+	objcopy -O binary ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
 
 image: kernel
 	-mattrib -i ${FLOPPY_IMAGE_NAME} -r -h -s -a /${KERNEL_FILENAME}
