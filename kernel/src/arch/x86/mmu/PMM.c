@@ -39,7 +39,7 @@ void PMM_MemMap_init(const paddr_t physical_addr, const uint32_t size)
 
     for(uint32_t i = 0; i < blocks; ++i)
     {
-        bitset_unset(_PMM_mem_map, block_addr++);
+        bitset_clear(_PMM_mem_map, block_addr++);
         _PMM_used_blocks--;
     }
 
@@ -105,7 +105,7 @@ void PMM_free_blocks(void* ptr, const size_t num_blocks)
 
     unsigned int pos = ((unsigned int) ptr) / PMM_BLOCK_SIZE;
     for(size_t i = 0; i < num_blocks; i++)
-        bitset_unset(_PMM_mem_map, pos + i);
+        bitset_clear(_PMM_mem_map, pos + i);
     _PMM_used_blocks -= num_blocks;
 }
 

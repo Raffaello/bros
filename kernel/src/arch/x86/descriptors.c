@@ -7,38 +7,101 @@
  *----------------------*/
 #define MAX_GDT_DESCRIPTORS 5
                                                                  
-// #define GDT_LIMIT(x)            ((uint64_t) x & 0xFFFF) | ((uint64_t)(x & 0xF0000) << (48 - 16))
-// #define GDT_BASE(x)             ((uint64_t) (x & 0xFFFFFF) << 16) | ((uint64_t)(x & 0xFF000000) << (16 + 16))
-// #define GDT_ATTRIB_READABLE     ((uint64_t) 1 << 41)
-// #define GDT_ATTRIB_CONFORMING   ((uint64_t) 1 << 42)
-// #define GDT_ATTRIB_CODE         ((uint64_t) 3 << 43)
-// #define GDT_ATTRIB_DPL(x)       ((uint64_t) (x & 3) << 45)
-// #define GDT_ATTRIB_PRESENT      ((uint64_t) 1 << 47)
-// #define GDT_ATTRIB_AVAIL        ((uint64_t) 1 << 52)
-// #define GDT_DEFAULT32           ((uint64_t) 1 << 54)
-// #define GDT_GRANULARITY         ((uint64_t) 1 << 55)
+// const static GDT_descriptor_t gdtd[MAX_GDT_DESCRIPTORS] = {
+//     0x0000000000000000, // null
+//     0x00CF9A000000FFFF, // Kernel Code
+//     0x00CF92000000FFFF, // Kernel Data
+//     0x00CFFA000000FFFF, // User Code
+//     0x00CFF2000000FFFF  // User Data
+// };
 
+#define GDT_CODE_ATTR_READABLE      1 << 1
+#define GDT_CODE_ATTR_CONFORMING    1 << 2
+#define GDT_CODE_ATTR               3 << 3
+#define GDT_CODE_ATTR_DPL(x)        (x & 3) << 5
+#define GDT_CODE_ATTR_PRESENT       1 << 7
+// #define GDT_ATTR_AVAIL       
+#define GDT_CODE_DEFAULT32          1 << 6
+#define GDT_CODE_GRANULARITY        1 << 7
+
+#define GDT_DATA_ATTR_WRITABLE      1 << 1
+#define GDT_DATA_ATTR_EXPDOWN       1 << 2
+#define GDT_DATA_ATTR               2 << 3
+#define GDT_DATA_ATTR_DPL(x)        GDT_CODE_ATTR_DPL(x)
+#define GDT_DATA_ATTR_PRESENT       GDT_CODE_ATTR_PRESENT
+#define GDT_DATA_BIG                1 << 6           
+#define GDT_DATA_GRANULAIRTY        GDT_CODE_GRANULARITY
+
+#define GDT_DPL_KERNEL              0
+#define GDT_DPL_DRIVER1             1
+#define GDT_DPL_DRIVER2             2
+#define GDT_DPL_USER                3
 
 const static GDT_descriptor_t gdtd[MAX_GDT_DESCRIPTORS] = {
-    0x0000000000000000, // null
-    0x00CF9A000000FFFF, // Kernel Code
-    0x00CF92000000FFFF, // Kernel Data
-    0x00CFFA000000FFFF, // User Code
-    0x00CFF2000000FFFF  // User Data
+    {0}, // null-descriptor
+    {
+        .limit = 0xFFFF,
+        .base_lo = 0,
+        .base_mi = 0,
+        .attr = GDT_CODE_ATTR_READABLE | GDT_CODE_ATTR | GDT_CODE_ATTR_DPL(GDT_DPL_KERNEL) | GDT_CODE_ATTR_PRESENT, //0x9A,
+        .limit_attr = 0xF | GDT_CODE_DEFAULT32 | GDT_CODE_GRANULARITY
+    },
+    {
+        .limit = 0xFFFF,
+        .base_lo = 0,
+        .base_mi = 0,
+        .attr = GDT_DATA_ATTR_WRITABLE | GDT_DATA_ATTR | GDT_DATA_ATTR_DPL(GDT_DPL_KERNEL) | GDT_DATA_ATTR_PRESENT, //0x92,
+        .limit_attr = 0xF | GDT_DATA_BIG | GDT_DATA_GRANULAIRTY //0xCF
+    },
+    {
+        .limit = 0xFFFF,
+        .base_lo = 0,
+        .base_mi = 0,
+        .attr = GDT_CODE_ATTR_READABLE | GDT_CODE_ATTR | GDT_CODE_ATTR_DPL(GDT_DPL_USER) | GDT_CODE_ATTR_PRESENT, //0xFA,
+        .limit_attr = 0xF | GDT_CODE_DEFAULT32 | GDT_CODE_GRANULARITY
+    },
+    {
+        .limit = 0xFFFF,
+        .base_lo = 0,
+        .base_mi = 0,
+        .attr = GDT_DATA_ATTR_WRITABLE | GDT_DATA_ATTR | GDT_DATA_ATTR_DPL(GDT_DPL_USER) | GDT_DATA_ATTR_PRESENT, //0xF2,
+        .limit_attr =  0xF | GDT_DATA_BIG | GDT_DATA_GRANULAIRTY
+    }
 };
 
 #define GDT_KERNEL_CODE_SEL ((uint32_t)&gdtd[1] - (uint32_t)&gdtd[0])
 #define GDT_KERNEL_DATA_SEL ((uint32_t)&gdtd[2] - (uint32_t)&gdtd[0])
-
 
 const static struct DT_register_t gdtr = {
     .size   = sizeof(GDT_descriptor_t) * MAX_GDT_DESCRIPTORS - 1,
     .offset = (uint32_t)&gdtd[0]
 };
 
-static void GDT_load(const DT_register_t* dtr)
+static inline void GDT_load(const DT_register_t* dtr)
 {
     __asm__ volatile ("lgdt %0":: "m"(*dtr));
+}
+
+__attribute((naked))
+static void GDT_reload_segments()
+{
+    __asm__ volatile(
+        "jmp %0:__GDT_reload_segments\n"
+        "__GDT_reload_segments:\n"
+        "mov ax, %1\n"
+        "mov ds, ax\n"
+        "mov es, ax\n"
+        "mov fs, ax\n"
+        "mov gs, ax\n"
+        "mov ss, ax\n"
+        "ret"
+    ::"i"(GDT_KERNEL_CODE_SEL), "i"(GDT_KERNEL_DATA_SEL));
+}
+
+static inline void GDT_init()
+{
+    GDT_load(&gdtr);
+    GDT_reload_segments();
 }
 
 // ----------------------------------------------------------
@@ -55,7 +118,6 @@ static void GDT_load(const DT_register_t* dtr)
 #define IDT_DPL_RING1       1   // bit 1
 #define IDT_DPL_RING2       2   // bit 0
 #define IDT_DPL_RING3       3   // both bits
-
 
 
 //interrupt descriptor table
@@ -116,6 +178,6 @@ void init_descriptor_tables()
 {
     __asm__("cli");
 
-    GDT_load(&gdtr);
+    GDT_init();
     IDT_init();
 }
