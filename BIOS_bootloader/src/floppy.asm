@@ -78,7 +78,7 @@ main_relocated:
   lea  si, banner_msg
   call PrintString
 
-# Display Total Low Memory (it can be removed as it is not useful)
+# Get & Display Total Low Memory
   lea si, mem_msg
   call PrintString
   call GetMemorySize

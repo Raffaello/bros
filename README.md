@@ -152,6 +152,14 @@ for now a simple 1st 4MB identity paging. no real management happening yet
 
 > TODO, replace the bootloader stack with the "kernel stack"
 
+### Filesystem
+
+> TODO
+
+### Network
+
+> TODO
+
 ### Drivers
 
 > TODO
