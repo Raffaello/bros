@@ -3,10 +3,8 @@
 # it will then pop from the stack to display the number correctly as a string.
 # ***********************************
 
-# the code can generate DIV ERROR, (>=2560 for e.g)
-# but with interrupts disable should keep going and returning a wrong result (?)
-
-# Upgrade to div by 16 bits instead of 8 bits
+# Upgraded to div by 16 bits instead of 8 bits, using 16 bits input number.
+# this should guarantee no #DE exception (apart div by zero)
 
 .ifndef PrintNumber
 .include "bios/PrintChar.inc"
@@ -20,11 +18,10 @@ PrintNumber:
   xor cx, cx # storing number of digits
   mov bx, 10 # divides by 10
 PrintNumber_loop:
-  xor dx, dx # number high part
-  div bx    # DX:AX / 10 => AX = Quotient, DX= Remainder
+  xor dx, dx    # number high part
+  div bx        # DX:AX / 10 => AX = Quotient, DX= Remainder
   push dx
   inc cx
-  and ax, 0xFF
   jnz PrintNumber_loop
 PrintNumber_loop_print:
   # 1 digits is always guaranteed: 0
