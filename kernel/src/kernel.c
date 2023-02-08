@@ -117,7 +117,6 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
         volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
         for(int i = 0; i < _sys_info->num_mem_map_entries; i++)
         {
-            CON_printf("test");
             const char* mem_types[] = {
                 "Available",
                 "Reserved",
