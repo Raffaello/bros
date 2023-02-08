@@ -13,11 +13,11 @@ SECTIONS
         __code_main = .;
         *(.text.main)
         *(.text)
-        *(.rodata)
         . = ALIGN(PAGE_SIZE);
     }
     .data : {
         /* data = .; */
+        *(.rodata)
         *(.data)
         . = ALIGN(PAGE_SIZE);
     }

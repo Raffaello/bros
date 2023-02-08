@@ -11,9 +11,13 @@ export BUILD_TYPE := debug
 # using make's computed variables to select object and bin folders
 # depending on the build type
 BUILD_DIR.debug=build/debug
-BUILD_DIR.release=build/release
 BIN_DIR.debug=bin/debug
+# release
+BUILD_DIR.release=build/release
 BIN_DIR.release=bin/release
+# releae with debug info
+BUILD_DIR.reldbg=build/reldbg
+BIN_DIR.reldbg=bin/reldbg
 
 export BUILD_DIR=$(BUILD_DIR.$(BUILD_TYPE))
 export BIN_DIR=$(BIN_DIR.$(BUILD_TYPE))

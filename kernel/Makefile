@@ -43,6 +43,7 @@ CFLAGS+=-fno-PIE # Github CI flags
 
 CFLAGS.debug+=-g
 CFLAGS.release+=-O2
+CFLAGS.reldbg=$(CFLAGS.debug) $(CFLAGS.release)
 
 CFLAGS+=$(CFLAGS.$(BUILD_TYPE))
 
