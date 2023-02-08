@@ -4,10 +4,13 @@ on: [push]
 
 jobs:
   ubuntu-build:
+    strategy:
+      matrix:
+        BUILD_TYPE: ['', 'debug', 'release', 'reldbg']
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2.0.0
     - run: sudo apt-get -y install mtools
     - run: gcc -v
-    - run: make all
+    - run: make BUILD_TYPE=${{ matrix.BUILD_TYPE }} clean all
