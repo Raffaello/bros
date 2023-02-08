@@ -29,6 +29,8 @@ The first section of the boot-loader is passing the boot drive number in `AL` re
 
 So when jumping to the 2nd stage, that information is passed on through a CPU Register (`AL`).
 
+It also passes the total low memory in KB as the first value in the stack.
+
 ---
 
 The 2nd stage is searching the Kernel file in the FAT12 filesystem and loading it at `0x1000`.
