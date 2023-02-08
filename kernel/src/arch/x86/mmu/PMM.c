@@ -14,7 +14,6 @@ static uint32_t     _PMM_used_blocks    = 0;
 static bitset32_t   _PMM_mem_map        = NULL;
 static uint32_t     _PMM_mem_map_size   = 0;
 
-
 static inline size_t _size2block(const size_t size)
 {
     return (size / PMM_BLOCK_SIZE) + ((size % PMM_BLOCK_SIZE) ? 1 : 0);
@@ -65,8 +64,7 @@ void PMM_MemMap_deinit_kernel()
     extern uint32_t __size;
     extern uint32_t __code_start;
 
-    // TODO: add also something for the stack! (at the moment is defined in kernel.ld)
-
+    // TODO: add also something for the stack!
     PMM_MemMap_deinit((uint32_t)&__code_start, ((uint32_t) &__size) + _PMM_mem_map_size);
 }
 

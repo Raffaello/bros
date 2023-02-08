@@ -21,8 +21,11 @@ void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start);
 void PMM_MemMap_init(const paddr_t physical_addr, const uint32_t size);
 void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size);
 
+/*
+ * Mark the kernel memory as in use
+ */
 void PMM_MemMap_deinit_kernel();
-// readonly
+
 int PMM_Blocks_used();
 int PMM_Blocks_free();
 

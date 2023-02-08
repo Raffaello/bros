@@ -75,8 +75,6 @@ typedef struct page_directory_t
 } page_directory_t;
 _Static_assert(sizeof(page_directory_t) == PAGE_DIR_ENTRIES * sizeof(uint32_t));
 
-
-
 bool VMM_init();
 bool VMM_switch_page_directory(page_directory_t* page_directory);
 void VMM_enable_paging();
