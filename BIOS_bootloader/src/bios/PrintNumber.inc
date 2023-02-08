@@ -1,7 +1,10 @@
 # Print a number stored in AX
 # It uses the stack to store the digits
 # it will then pop from the stack to display the number correctly as a string.
-# It usse the PrintString function.
+# ***********************************
+
+# Upgraded to div by 16 bits instead of 8 bits, using 16 bits input number.
+# this should guarantee no #DE exception (apart div by zero)
 
 .ifndef PrintNumber
 .include "bios/PrintChar.inc"
@@ -13,19 +16,17 @@ PrintNumber:
   push bx
 
   xor cx, cx # storing number of digits
-  mov dl, 10 # divides by 10
+  mov bx, 10 # divides by 10
 PrintNumber_loop:
-  div dl     # AL = Quotient, AH = Remainder
-  # TODO: div error handling
-  push ax
+  xor dx, dx    # number high part
+  div bx        # DX:AX / 10 => AX = Quotient, DX= Remainder
+  push dx
   inc cx
-  and ax, 0xFF
   jnz PrintNumber_loop
 PrintNumber_loop_print:
   # 1 digits is always guaranteed: 0
   pop ax
-  mov al, ah
-  add al, '0'
+  add ax, '0'
   call PrintChar
   loop PrintNumber_loop_print
 
@@ -35,6 +36,8 @@ PrintNumber_loop_print:
   pop cx
   ret
 .endfunc
+
+# 2560 / 10, 256, 0 (#DE exception 256 greater than 255 can fit a 8 bit register)
 
 # 1000 / 10, 100, 0
 # 100 / 10, 10, 0
