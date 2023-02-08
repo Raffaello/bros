@@ -124,18 +124,54 @@ At its very entry point, it performs some validation checks, it has been loaded 
 
 The same thing of "storing the file on the filesystem (FAT12)" could have been done similarly for the bootloader (2nd stage), the boot sector loads the bootloader, but i prefered to exploit the FAT filesystem using few extra reserved sectors, instead to store the extra bootloader code as a file.
 
- ### Memory Mapping
+ ### Memory Management
 
-The kernel runs in protected mode (`PM`) with paging (`PG`) of 4 KB size.
+The Kernel runs in protected mode (`PM`) with paging (`PG`) of 4 KB size.
 
-
-At the moment is using a simple bitset to track the physical memory usage, and using a simplest way to use the stack within a section of itself.
+At the moment is using a simple bitset to track the physical memory usage, and using the stack set up by the bootloader at `0x1000-2`, just below where the kernel is loaded.
 
 It is using an identity paging for the first 4MB of RAM only at the moment.
 
 > TODO ...
 
+#### Physical Memory Management
 
+for now a simple silly bitset allocation and tracking. slow to find a free chunk, suscetible to fragmentation
+
+> TOOD improvements
+
+#### Virtual Memory Management
+
+for now a simple 1st 4MB identity paging. no real management happening yet
+
+> TODO
+
+#### Stack
+
+> TODO, replace the bootloader stack with the "kernel stack"
+
+### Drivers
+
+> TODO
+
+#### Keyboard
+
+> TODO
+
+### Scheduler
+
+> TODO
+
+### Processes
+
+> TODO
+
+### Shell
+
+> TODO
+
+
+---
 
 ## Usage
 

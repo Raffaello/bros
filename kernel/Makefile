@@ -34,7 +34,8 @@ CFLAGS+=-masm=intel
 # CFLAGS+=-O2	# optimization are creating issues on the code
 CFLAGS+=-g
 CFLAGS+=-std=c17
-CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR} -MMD
+CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR}
+# CFLAGS+= -MMD -MF
 CFLAGS+=-nostartfiles -nostdlib
 CFLAGS+=-lgcc
 CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
