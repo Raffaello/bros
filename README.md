@@ -23,11 +23,11 @@ The main goal of this project and its evolution is just for **educational** purp
 
 It boots from a FAT12 Boot sector (0).
 
-It is self-relocating to `0x600` memory region and chain loading the FAT extra Reserved Sectors in his previous address at `0x7C00` using BIOS interrupts for screen and disk I/O.
+It is self-relocating to `0x600` memory region and chain loading the FAT extra Reserved Sectors in its previous address at `0x7C00` using BIOS interrupts for screen and disk I/O.
 
-The first section of the boot-loader is passing the boot drive number in AL register.
+The first section of the boot-loader is passing the boot drive number in `AL` register.
 
-So when jumping to the 2nd stage, that information is passed on through a CPU Register (AL).
+So when jumping to the 2nd stage, that information is passed on through a CPU Register (`AL`).
 
 ---
 
@@ -66,7 +66,7 @@ MEM_MAP_ENTRIES mem_map_entries[num_mem_map_entries] // array of mem map entries
 uint32_t        end_marker;                          // 4 bytes magic marker to indicate end
 ```
 
-The `MEM_MAP_ENTRIES` are in the format of the BIOS INT 15h, AX=E820h.
+The `MEM_MAP_ENTRIES` are in the format of the BIOS `INT 15h`, `AX=E820h`.
 ```c
 uint32_t base_addr_lo;
 uint32_t base_addr_hi;
