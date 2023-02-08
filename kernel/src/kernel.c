@@ -181,7 +181,7 @@ noreturn void _start_failure()
     VGA_fill(VGA_COLOR_WHITE, VGA_COLOR_BLUE);
     VGA_WriteString(0,0, fail_msg, VGA_COLOR_WHITE);
     __asm__("hlt");
-    for(;;)
+    for(;;);
 }
 
 
