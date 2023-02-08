@@ -59,13 +59,13 @@ void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size)
     // TODO assert used blocks <= max blocks
 }
 
-void PMM_MemMap_deinit_kernel()
+void PMM_MemMap_deinit_kernel(const uint32_t code_start, const uint32_t code_size)
 {
-    extern uint32_t __size;
-    extern uint32_t __code_start;
+    // extern uint32_t __size;
+    // extern uint32_t __code_start;
 
     // TODO: add also something for the stack!
-    PMM_MemMap_deinit((uint32_t)&__code_start, ((uint32_t) &__size) + _PMM_mem_map_size);
+    PMM_MemMap_deinit(code_start, code_size + _PMM_mem_map_size);
 }
 
 inline int PMM_Blocks_used()

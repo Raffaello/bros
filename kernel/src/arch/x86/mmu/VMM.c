@@ -77,7 +77,7 @@ bool VMM_init()
     // TODO pass MemMap informations
 
     _kernel_directory = PMM_malloc(sizeof(page_directory_t));
-    
+
     page_table_t* page_table  = PMM_malloc(sizeof(page_table_t));
 
     if(page_table == NULL || _kernel_directory == NULL)

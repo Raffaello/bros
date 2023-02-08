@@ -6,11 +6,11 @@ STACK_SIZE = PAGE_SIZE * 1;
 SECTIONS
 {
     .text KERNEL_SEG : {
-        __code_start = .;
+        /* __code_start = .; */
         *(.text._start)
         *(.text._start_entry)
         *(.text._start_failure)
-        __code_main = .;
+        /* __code_main = .; */
         *(.text.main)
         *(.text)
         . = ALIGN(PAGE_SIZE);
@@ -31,5 +31,5 @@ SECTIONS
         . = ALIGN(PAGE_SIZE);
     }
     __end = .;
-    __size = __end - (__code_main);
+    /* __size = __end - (__code_main); */
 }

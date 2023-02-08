@@ -55,7 +55,8 @@ gdb-kernel-debug:
 		-ex 'layout reg' \
 		-ex 'break _start' \
 		-ex 'break *0x7c00' \
-		-ex 'b ${KERNEL_DIR}/src/kernel.c:100' \
+		-ex 'b ${KERNEL_DIR}/src/kernel.c:102' \
+		-ex 'b ${KERNEL_DIR}/src/kernel.c:121' \
 		-ex 'b ${KERNEL_DIR}/src/arch/x86/mmu/VMM.c:74' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'

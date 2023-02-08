@@ -22,6 +22,10 @@
  * and <stdnoreturn.h>. In addition, complex types, added in C99, 
  * are not required for freestanding implementations.
 */
+#if (!defined(DEBUG) && !defined(NDEBUG))
+#error "DEBUG or NDEBUG is not defined"
+#endif
+
 
 
 #ifndef KERNEL_SEG
@@ -53,11 +57,10 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
     extern void _start();
     const uint32_t* _startPtr = (uint32_t*)&_start;
     // self-relocating kernel checks
-    extern uint32_t __end;
+    extern const uint32_t __end;
     // extern const uint32_t __size;
-    // NOTE: with optimization there is a difference about alignment
-    // const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
-    
+    // NOTE: with optimization there is a difference about alignment main is 16 bytes aligned
+    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
 
     if(_eax != __BROS
         || _sys_info->begin_marker != SYS_INFO_BEGIN
@@ -76,7 +79,11 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
         CON_gotoXY(cur_offs % 80, cur_offs / 80);
         VGA_enable_cursor(0, 0);
         CON_setConsoleColor2(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
+#ifdef DEBUG
+        CON_puts("Console Init (DEBUG)\n");
+#else
         CON_puts("Console Init\n");
+#endif
     }
 
     // boot info sanitize
@@ -85,6 +92,8 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
         boot_info_sanitize(&tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
         _sys_info->tot_mem = tot_mem;
         CON_printf("Total Available Memory: %u MB\n", tot_mem/1024);
+        if (_sys_info->num_mem_map_entries < 1)
+            _start_failure();
     }
 
     CON_puts("Init DTs\n");
@@ -105,10 +114,11 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
         CON_puts("Memory Regions\n");
         con_col_t old_col = CON_getConsoleColor();
         CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
-        const boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
-
-        for(int i = 0; i < _sys_info->num_mem_map_entries; ++i)
+        volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
+        
+        for(int i = 0; i < (int)_sys_info->num_mem_map_entries; i++)
         {
+            CON_printf("test");
             const char* mem_types[] = {
                 "Available",
                 "Reserved",
@@ -138,7 +148,7 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
         }
 
         // reserve the kernel memory area plus the PMM Bit set
-        PMM_MemMap_deinit_kernel(KERNEL_SEG);
+        PMM_MemMap_deinit_kernel(KERNEL_SEG, kernel_size);
 
         CON_setConsoleColor((con_col_t){.bg_col=VGA_COLOR_BLUE, .fg_col=VGA_COLOR_YELLOW});
         CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
@@ -184,7 +194,6 @@ noreturn void _start_failure()
     __asm__("hlt");
     for(;;);
 }
-
 
 noreturn void main()
 {

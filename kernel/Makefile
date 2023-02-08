@@ -41,9 +41,9 @@ CFLAGS+=-lgcc
 CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
 CFLAGS+=-fno-PIE # Github CI flags
 
-CFLAGS.debug+=-g
-CFLAGS.release+=-O2
-CFLAGS.reldbg=$(CFLAGS.debug) $(CFLAGS.release)
+CFLAGS.debug+=-g -DDEBUG
+CFLAGS.release+=-O2 -DNDEBUG
+CFLAGS.reldbg=-g $(CFLAGS.release)
 
 CFLAGS+=$(CFLAGS.$(BUILD_TYPE))
 
