@@ -78,10 +78,11 @@ main_relocated:
   lea  si, banner_msg
   call PrintString
 
-# Display Total Low Memory (it can be removed as it is not useful)
+# Get & Display Total Low Memory
   lea si, mem_msg
   call PrintString
   call GetMemorySize
+  push ax               # store for later
   call PrintNumber
   lea si, kb_unit_msg
   call PrintStringNewLine
@@ -101,13 +102,14 @@ main_relocated:
   dec al                    # removing sector 0
   mov ch, 0                 # Cylinder 0
   mov dh, 0                 # Head 0
-  mov cl, 2                 # 2nd sector, 1 is boot sector (this one), next one is the 1st reserved sector
+  mov cl, 2                 # 2nd sector, 1 is boot sector (this one), next one is the 2nd reserved sector
   call DriveReadSectors
   lea si, ok_msg
   call PrintStringNewLine
 
   xor ax, ax
   mov al, DrvNum
+#   pop dx                    # memory in KB
   jmp BOOT2_SEG
 
   # End of loader, shouldn't reach here

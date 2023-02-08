@@ -22,6 +22,7 @@ PrintNumber_loop:
   div bx        # DX:AX / 10 => AX = Quotient, DX= Remainder
   push dx
   inc cx
+  test ax,ax    # if zero...
   jnz PrintNumber_loop
 PrintNumber_loop_print:
   # 1 digits is always guaranteed: 0

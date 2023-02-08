@@ -14,7 +14,6 @@ static uint32_t     _PMM_used_blocks    = 0;
 static bitset32_t   _PMM_mem_map        = NULL;
 static uint32_t     _PMM_mem_map_size   = 0;
 
-
 static inline size_t _size2block(const size_t size)
 {
     return (size / PMM_BLOCK_SIZE) + ((size % PMM_BLOCK_SIZE) ? 1 : 0);
@@ -60,22 +59,21 @@ void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size)
     // TODO assert used blocks <= max blocks
 }
 
-void PMM_MemMap_deinit_kernel()
+void PMM_MemMap_deinit_kernel(const uint32_t code_start, const uint32_t code_size)
 {
-    extern uint32_t __size;
-    extern uint32_t __code_start;
+    // extern uint32_t __size;
+    // extern uint32_t __code_start;
 
-    // TODO: add also something for the stack! (at the moment is defined in kernel.ld)
-
-    PMM_MemMap_deinit((uint32_t)&__code_start, ((uint32_t) &__size) + _PMM_mem_map_size);
+    // TODO: add also something for the stack!
+    PMM_MemMap_deinit(code_start, code_size + _PMM_mem_map_size);
 }
 
-inline uint32_t PMM_Blocks_used()
+inline int PMM_Blocks_used()
 {
     return _PMM_used_blocks;
 }
 
-inline uint32_t PMM_Blocks_free()
+inline int PMM_Blocks_free()
 {
     return _PMM_max_blocks - _PMM_used_blocks;
 }

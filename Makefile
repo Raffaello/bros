@@ -4,8 +4,23 @@ export CC=gcc
 export AS=as
 export LD=ld
 
-export BUILD_DIR=build
-export BIN_DIR=bin
+# override with `make BUILD=release`
+# default to debug build
+export BUILD_TYPE := debug
+
+# using make's computed variables to select object and bin folders
+# depending on the build type
+BUILD_DIR.debug=build/debug
+BIN_DIR.debug=bin/debug
+# release
+BUILD_DIR.release=build/release
+BIN_DIR.release=bin/release
+# releae with debug info
+BUILD_DIR.reldbg=build/reldbg
+BIN_DIR.reldbg=bin/reldbg
+
+export BUILD_DIR=$(BUILD_DIR.$(BUILD_TYPE))
+export BIN_DIR=$(BIN_DIR.$(BUILD_TYPE))
 
 export KERNEL_SEG=0x1000
 export KERNEL_FILENAME="BROSKRNL.SYS"
@@ -17,6 +32,11 @@ KERNEL_DIR=kernel
 .PHONY: kernel
 
 all: image
+
+t:
+	echo $(BUILD_TYPE)
+	echo $(BUILD_DIR)
+	echo $(BIN_DIR)
 
 bios_bootloader:
 	+$(MAKE) -C ${BIOS_BL_DIR} all
@@ -35,6 +55,8 @@ gdb-kernel-debug:
 		-ex 'layout reg' \
 		-ex 'break _start' \
 		-ex 'break *0x7c00' \
+		-ex 'b ${KERNEL_DIR}/src/kernel.c:102' \
+		-ex 'b ${KERNEL_DIR}/src/kernel.c:121' \
 		-ex 'b ${KERNEL_DIR}/src/arch/x86/mmu/VMM.c:74' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'

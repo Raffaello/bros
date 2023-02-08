@@ -77,7 +77,7 @@ bool VMM_init()
     // TODO pass MemMap informations
 
     _kernel_directory = PMM_malloc(sizeof(page_directory_t));
-    
+
     page_table_t* page_table  = PMM_malloc(sizeof(page_table_t));
 
     if(page_table == NULL || _kernel_directory == NULL)
@@ -86,8 +86,7 @@ bool VMM_init()
     memset(_kernel_directory, 0, sizeof(page_directory_t));
     memset(page_table, 0, sizeof(page_table_t));
 
-    // TODO: forgot to allocate some space for the stack ...
-    //       it is just defined inside the linker at the moment
+    // TODO: need to allocate some space for the stack too somewhere...
 
     // first 1MB, identity
     for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
@@ -98,7 +97,9 @@ bool VMM_init()
     _kernel_directory->entries[0] = (PDE_t) page_table | PDE_PRESENT | PDE_WRITABLE;
 
     ISR_register_interrupt_handler(INT_Page_Fault, page_fault_handler);
-    VMM_switch_page_directory(_kernel_directory);
+    if (!VMM_switch_page_directory(_kernel_directory))
+        return false;
+
     VMM_enable_paging();
 
     return true;

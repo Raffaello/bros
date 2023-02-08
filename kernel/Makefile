@@ -32,7 +32,7 @@ INCLUDE_DIR=${SRC_DIR}
 CFLAGS+=-Wall -Werror #-Wmissing-prototypes
 CFLAGS+=-masm=intel
 # CFLAGS+=-O2	# optimization are creating issues on the code
-CFLAGS+=-g
+# CFLAGS+=-pedantic
 CFLAGS+=-std=c17
 CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR}
 # CFLAGS+= -MMD -MF
@@ -40,6 +40,13 @@ CFLAGS+=-nostartfiles -nostdlib
 CFLAGS+=-lgcc
 CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
 CFLAGS+=-fno-PIE # Github CI flags
+
+CFLAGS.debug+=-g -DDEBUG
+CFLAGS.release+=-O2 -DNDEBUG
+CFLAGS.reldbg=-g $(CFLAGS.release)
+
+CFLAGS+=$(CFLAGS.$(BUILD_TYPE))
+
 
 LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
