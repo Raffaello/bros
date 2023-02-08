@@ -46,7 +46,7 @@ static void timer_callback(ISR_registers_t r)
     char buf[11]; // 4294967295
 
     _ticks++;
-    itoa10(_ticks, buf);
+    itoa(_ticks, buf, 10);
     VGA_WriteString(0,24, buf, VGA_COLOR_BRIGHT_GREEN);
 }
 
@@ -86,5 +86,7 @@ void sleep(const unsigned int ticks_)
     unsigned long eticks;
 
     eticks = _ticks + ticks_;
-    while(_ticks < eticks);
+    while(_ticks < eticks) {
+        __asm__("hlt");
+    }
 }
