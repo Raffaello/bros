@@ -70,12 +70,12 @@ void PMM_MemMap_deinit_kernel()
     PMM_MemMap_deinit((uint32_t)&__code_start, ((uint32_t) &__size) + _PMM_mem_map_size);
 }
 
-inline uint32_t PMM_Blocks_used()
+inline int PMM_Blocks_used()
 {
     return _PMM_used_blocks;
 }
 
-inline uint32_t PMM_Blocks_free()
+inline int PMM_Blocks_free()
 {
     return _PMM_max_blocks - _PMM_used_blocks;
 }
