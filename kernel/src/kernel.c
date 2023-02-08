@@ -198,5 +198,5 @@ noreturn void main()
     // intptr_t* t = (intptr_t*)0xFFFFFFFF;
     // *t=0;
 
-    for(;;)
+    for(;;);
 }
