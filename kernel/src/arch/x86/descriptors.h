@@ -99,7 +99,7 @@ typedef struct GDT_descriptor_t
     uint8_t  attr;
     uint8_t  limit_attr;
     uint8_t  base_hi;
-} __attribute((packed)) GDT_descriptor_t;
+} __attribute__((packed)) GDT_descriptor_t;
 _Static_assert(sizeof(GDT_descriptor_t) == sizeof(uint64_t));
 
 /**
