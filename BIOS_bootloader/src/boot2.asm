@@ -31,6 +31,7 @@ DrvNum:           .byte  0
 main:
   # in AL has been passed the DrvNum, storing it
   mov DrvNum, al
+  # in the stack there is the tot low memory
   # Loading Kernel...
   
   # 1. read FAT Root Dir
@@ -40,7 +41,7 @@ main:
   call LoadRootDirectory
   lea si, ok_msg
   call PrintStringNewLine
-  
+
   # 2. find kernel file
   lea si, find_kernel_file_msg
   call PrintStringDots
@@ -92,6 +93,9 @@ load_fat:
   mov eax, 0x12345678           # begin_marker
   stosd
   call GetTotalMemorySize
+  xor edx,edx
+  pop dx                        # lower mem from 1st stage
+  add eax, edx
   stosd
   mov al, DrvNum                # boot_device
   stosb
