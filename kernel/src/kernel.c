@@ -71,7 +71,7 @@ __attribute__((section(".text._start_entry"))) noreturn void _start_entry()
 
     // Init VGA Console
     {
-        int cur_offs = VGA_get_cursor_offset();
+        const int cur_offs = VGA_get_cursor_offset();
         CON_gotoXY(cur_offs % 80, cur_offs / 80);
         VGA_enable_cursor(0, 0);
         CON_setConsoleColor2(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
@@ -181,7 +181,7 @@ noreturn void _start_failure()
     VGA_fill(VGA_COLOR_WHITE, VGA_COLOR_BLUE);
     VGA_WriteString(0,0, fail_msg, VGA_COLOR_WHITE);
     __asm__("hlt");
-    while(1);
+    for(;;);
 }
 
 
@@ -198,5 +198,5 @@ noreturn void main()
     // intptr_t* t = (intptr_t*)0xFFFFFFFF;
     // *t=0;
 
-    while(1);
+    for(;;);
 }

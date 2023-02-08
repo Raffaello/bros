@@ -8,8 +8,6 @@
 
 #include <stdint.h>
 
-#pragma pack(push, 1)
-
 /***
  * Data-Segment Descriptor (GDT)
  *   segment limit          0..15       word
@@ -25,7 +23,8 @@
  *   Limit 19:16            16..19      
  *   Available              20          
  *   reserved (zero)        21          
- *   Big                    22          0=? 1=?
+ *   Big                    22          0=SP 1=ESP, If expand-down data segment is the upper bound of the stack segment.
+                                        If the flag is set, the upper bound is FFFFFFFFH (4 GBytes); otherwise FFFFH (64 KBytes). 
  *   Granularity            23          granularity=0, the segment range from 1 byte - 1 MByte, in byte increments.
  *                                      granularity=1, the segment range from 4 KBytes to 4 GBytes, in 4-KByte increments.
  *   Base 31:24             24..31      
@@ -91,6 +90,18 @@
  * 
  */
 
+// typedef uint64_t GDT_descriptor_t;
+typedef struct GDT_descriptor_t
+{
+    uint16_t limit;
+    uint16_t base_lo;
+    uint8_t  base_mi;
+    uint8_t  attr;
+    uint8_t  limit_attr;
+    uint8_t  base_hi;
+} __attribute__((packed)) GDT_descriptor_t;
+_Static_assert(sizeof(GDT_descriptor_t) == sizeof(uint64_t));
+
 /**
  * used for GDT and IDT
  * 32 bits mode
@@ -112,7 +123,6 @@ typedef struct IDT_descriptor_t
 
 } __attribute__((packed)) IDT_descriptor_t;
 _Static_assert(sizeof(IDT_descriptor_t) == 8);
-#pragma pack(pop)
 
 // Interrupt handler function type definition
 typedef void ((*IDT_Handler)(void));

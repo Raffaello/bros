@@ -11,7 +11,7 @@ inline void bitset_set(bitset32_t bitset, const unsigned int bit)
     bitset[BITSET_INDEX(bit)] |= (1 << (BITSET_OFFSET(bit)));
 }
 
-inline void bitset_unset(bitset32_t bitset, const unsigned int bit)
+inline void bitset_clear(bitset32_t bitset, const unsigned int bit)
 {
     bitset[BITSET_INDEX(bit)] &= ~ (1 << (BITSET_OFFSET(bit)));
 }
