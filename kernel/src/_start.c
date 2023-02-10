@@ -97,7 +97,7 @@ noreturn void _start_init()
     const uint32_t* _startPtr = (uint32_t*)&_start;
     // self-relocating kernel checks
     extern const uint32_t __end;
-    // extern const uint32_t __size;
+    extern const uint32_t __size;
     // NOTE: with optimization there is a difference about alignment main is 16 bytes aligned
     extern void main();
     const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
@@ -106,7 +106,7 @@ noreturn void _start_init()
         || _sys_info->begin_marker != SYS_INFO_BEGIN
         || *_sys_info_end_marker != SYS_INFO_END
         || _startPtr != KERNEL_ADDR
-        // || kernel_size != (uint32_t)&__size
+        || kernel_size != (uint32_t)&__size
         || (uint32_t)&main <= (uint32_t)&_start_failure
         || (uint32_t)&main <= (uint32_t)&_start)
     {

@@ -5,7 +5,7 @@ PAGE_SIZE = 4096;
 STACK_SIZE = PAGE_SIZE * 1;
 SECTIONS
 {
-    .text KERNEL_SEG : {
+    .text KERNEL_SEG : ALIGN(16) {
         /* __code_start = .; */
         *(.text._start)
         *(.text._start_init)
@@ -13,7 +13,7 @@ SECTIONS
         *(.text._start_VGA_init)
         *(.text._start_boot_info)
         *(.text._start_PMM_init)
-        /* __code_main = .; */
+        __code_main = .;
         *(.text.main)
         *(.text)
         . = ALIGN(PAGE_SIZE);
@@ -34,5 +34,5 @@ SECTIONS
         . = ALIGN(PAGE_SIZE);
     }
     __end = .;
-    /* __size = __end - (__code_main); */
+    __size = __end - (__code_main);
 }
