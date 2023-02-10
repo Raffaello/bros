@@ -8,7 +8,7 @@ SECTIONS
     .text KERNEL_SEG : {
         /* __code_start = .; */
         *(.text._start)
-        *(.text._start_entry)
+        *(.text._start_init)
         *(.text._start_failure)
         /* __code_main = .; */
         *(.text.main)
@@ -25,9 +25,9 @@ SECTIONS
         /* bss = .; */
         *(.bss)
         *(COMMON)
-        /* __stack_start = .;
-        . += STACK_SIZE;
-        __stack_end = .; */
+        /* __stack_start = .; */
+        /* . += STACK_SIZE; */
+        /* __stack_end = .;  */
         . = ALIGN(PAGE_SIZE);
     }
     __end = .;
