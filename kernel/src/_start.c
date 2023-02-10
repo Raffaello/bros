@@ -26,6 +26,14 @@ noreturn void _start_init()     __attribute__((section(".text._start_init")))
 
 noreturn void _start_failure()  __attribute__((section(".text._start_failure")));
 
+void _start_VGA_init()          __attribute__((section(".text._start_VGA_init")));
+
+void _start_boot_info(boot_SYS_Info_t* _sys_info)
+                                __attribute__((section(".text._start_boot_info")));
+
+void _start_PMM_init(const boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
+                                __attribute__((section(".text._start_PMM_init")));
+
 /*
  * TODO:
  *  conforming freestanding implementation is only required to provide certain library facilities:
@@ -106,28 +114,9 @@ noreturn void _start_init()
     }
 
     // Init VGA Console
-    {
-        const int cur_offs = VGA_get_cursor_offset();
-        CON_gotoXY(cur_offs % 80, cur_offs / 80);
-        VGA_enable_cursor(0, 0);
-        CON_setConsoleColor2(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
-#ifdef DEBUG
-        CON_puts("Console Init (DEBUG)\n");
-#else
-        CON_puts("Console Init\n");
-#endif
-    }
+    _start_VGA_init();
 
-    // boot info sanitize
-    {
-        uint32_t tot_mem = _sys_info->tot_mem;
-        boot_info_sanitize(&tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
-        _sys_info->tot_mem = tot_mem;
-        CON_printf("Total Available Memory: %u MB\n", tot_mem/1024);
-        if (_sys_info->num_mem_map_entries < 1)
-            _start_failure();
-    }
-
+    /* before paging or interrupt can be done after paging too? */
     CON_puts("Init DTs\n");
     init_descriptor_tables();
     CON_puts("Init PIC\n");
@@ -138,61 +127,14 @@ noreturn void _start_init()
     IRQ_init();
     CON_puts("Init PIT\n");
     PIT_init(10);
-
+    // boot info sanitize
+    _start_boot_info(_sys_info);
     // PMM
-    {
-        CON_puts("Init PMM\n");
-        PMM_init(_sys_info->tot_mem, (paddr_t)&__end);
-        CON_puts("Memory Regions\n");
-        con_col_t old_col = CON_getConsoleColor();
-        CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
-        volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
-        for(int i = 0; i < _sys_info->num_mem_map_entries; i++)
-        {
-            const char* mem_types[] = {
-                "Available",
-                "Reserved",
-                "ACPI recl",
-                "ACPI nvs",
-                // "Bad"
-            };
-
-            const boot_MEM_MAP_Info_Entry_t memi = mem_map[i];
-            CON_printf(
-                "Mem Map %u: start=0x%X:%X --- length=0x%X:%X --- type=%u (%s)\n",
-                i,
-                memi.base_addr_hi,
-                memi.base_addr_lo,
-                memi.length_hi,
-                memi.length_lo,
-                memi.type,
-                mem_types[memi.type - 1]
-            );
-
-            if(memi.type == MEM_MAP_TYPE_AVAILABLE)
-            {
-                // Because 32 bits, the High part is always zero.
-                // can't address more the 4GB after all..
-                PMM_MemMap_init(memi.base_addr_lo, memi.length_lo);
-            }
-        }
-
-        // reserve the kernel memory area plus the PMM Bit set
-        PMM_MemMap_deinit_kernel(KERNEL_SEG, kernel_size);
-
-        CON_setConsoleColor((con_col_t){.bg_col=VGA_COLOR_BLUE, .fg_col=VGA_COLOR_YELLOW});
-        CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
-        CON_setConsoleColor(old_col);
-    }
-
+    _start_PMM_init(_sys_info, (paddr_t)&__end, kernel_size);
     // VMM
-    {
-        CON_puts("Init VMM\n");
-        if (!VMM_init())
-        {
-            _start_failure();
-        }
-    }
+    CON_puts("Init VMM\n");
+    if (!VMM_init())
+        _start_failure();
 
 
     // TODO: self-relocate the kernel
@@ -225,4 +167,73 @@ noreturn void _start_failure()
     VGA_WriteString(0,0, fail_msg, VGA_COLOR_WHITE);
     __asm__("hlt");
     for(;;);
+}
+
+void _start_VGA_init()
+{
+    const int cur_offs = VGA_get_cursor_offset();
+    CON_gotoXY(cur_offs % 80, cur_offs / 80);
+    VGA_enable_cursor(0, 0);
+    CON_setConsoleColor2(VGA_COLOR_BLACK, VGA_COLOR_GREEN);
+#ifdef DEBUG
+    CON_puts("Console Init (DEBUG)\n");
+#else
+    CON_puts("Console Init\n");
+#endif
+}
+
+void _start_boot_info(boot_SYS_Info_t* _sys_info)
+{
+    uint32_t tot_mem = _sys_info->tot_mem;
+    boot_info_sanitize(&tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
+    _sys_info->tot_mem = tot_mem;
+    CON_printf("Total Available Memory: %u MB\n", tot_mem/1024);
+    if (_sys_info->num_mem_map_entries < 1)
+        _start_failure();
+}
+
+void _start_PMM_init(const boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
+{
+    CON_puts("Init PMM\n");
+    PMM_init(_sys_info->tot_mem, kernel_end);
+    CON_puts("Memory Regions\n");
+    con_col_t old_col = CON_getConsoleColor();
+    CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
+    volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
+    for(int i = 0; i < _sys_info->num_mem_map_entries; i++)
+    {
+        const char* mem_types[] = {
+            "Available",
+            "Reserved",
+            "ACPI recl",
+            "ACPI nvs",
+            // "Bad"
+        };
+
+        const boot_MEM_MAP_Info_Entry_t memi = mem_map[i];
+        CON_printf(
+            "Mem Map %u: start=0x%X:%X --- length=0x%X:%X --- type=%u (%s)\n",
+            i,
+            memi.base_addr_hi,
+            memi.base_addr_lo,
+            memi.length_hi,
+            memi.length_lo,
+            memi.type,
+            mem_types[memi.type - 1]
+        );
+
+        if(memi.type == MEM_MAP_TYPE_AVAILABLE)
+        {
+            // Because 32 bits, the High part is always zero.
+            // can't address more the 4GB after all..
+            PMM_MemMap_init(memi.base_addr_lo, memi.length_lo);
+        }
+    }
+
+    // reserve the kernel memory area plus the PMM Bit set
+    PMM_MemMap_deinit_kernel(KERNEL_SEG, kernel_size);
+
+    CON_setConsoleColor((con_col_t){.bg_col=VGA_COLOR_BLUE, .fg_col=VGA_COLOR_YELLOW});
+    CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
+    CON_setConsoleColor(old_col);
 }
