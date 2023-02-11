@@ -29,7 +29,7 @@ void _start_VGA_init()          __attribute__((section(".text._start_VGA_init"),
 void _start_boot_info(boot_SYS_Info_t* _sys_info)
                                 __attribute__((section(".text._start_boot_info"), weak));
 
-void _start_PMM_init(const boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
+void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
                                 __attribute__((section(".text._start_PMM_init"), weak));
 
 /*
@@ -59,7 +59,7 @@ noreturn void  _start()
     __asm__ ("cli");
 
 
-    // TODO relocate the kernel to where? 
+    // TODO relocate the kernel to where?
     //      need to have the memory map info before
     //      moving it around ... right?
 
@@ -187,7 +187,7 @@ void _start_boot_info(boot_SYS_Info_t* _sys_info)
         _start_failure();
 }
 
-void _start_PMM_init(const boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
+void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
 {
     CON_puts("Init PMM\n");
     PMM_init(_sys_info->tot_mem, kernel_end);
@@ -195,7 +195,7 @@ void _start_PMM_init(const boot_SYS_Info_t* _sys_info, const paddr_t kernel_end,
     con_col_t old_col = CON_getConsoleColor();
     CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
     volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
-    for(int i = 0; i < _sys_info->num_mem_map_entries; i++)
+    for(int i = 0, tot = _sys_info->num_mem_map_entries; i < tot; i++)
     {
         const char* mem_types[] = {
             "Available",
