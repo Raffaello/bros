@@ -54,7 +54,6 @@ void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const
 noreturn void  _start()
 {
     // extern uint32_t __stack_end;
-    // extern void _start_entry();
 
     __asm__ ("cli");
 
@@ -145,8 +144,6 @@ noreturn void _start_init()
 
 
     // // TODO: set up kernel stack, EBP,ESP ... and align it
-    // __asm__ volatile("mov esp, 0x9000");
-    // __asm__ volatile("mov ebp, esp");
     __asm__ volatile ("sti");
     __asm__ volatile ("jmp %0"::"i"(&main));
     for(;;);
