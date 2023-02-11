@@ -29,6 +29,10 @@ export FLOPPY_IMAGE_NAME="br-dos.img"
 BIOS_BL_DIR=BIOS_bootloader
 KERNEL_DIR=kernel
 
+ifneq ($(BUILD_TYPE), $(filter $(BUILD_TYPE), debug release reldbg))
+$(error BUILD_TYPE must be one of 'debug', 'release', 'reldbg')
+endif
+
 .PHONY: kernel
 
 all: image
@@ -37,6 +41,7 @@ t:
 	echo $(BUILD_TYPE)
 	echo $(BUILD_DIR)
 	echo $(BIN_DIR)
+	echo $(filter $(BUILD_TYPE), debug release reldbg)
 
 bios_bootloader:
 	+$(MAKE) -C ${BIOS_BL_DIR} all
@@ -55,8 +60,9 @@ gdb-kernel-debug:
 		-ex 'layout reg' \
 		-ex 'break _start' \
 		-ex 'break *0x7c00' \
-		-ex 'b ${KERNEL_DIR}/src/kernel.c:102' \
-		-ex 'b ${KERNEL_DIR}/src/kernel.c:121' \
+		-ex 'b ${KERNEL_DIR}/src/_start.c:103' \
+		-ex 'b ${KERNEL_DIR}/src/_start.c:192' \
+		-ex 'b ${KERNEL_DIR}/src/main.c:16' \
 		-ex 'b ${KERNEL_DIR}/src/arch/x86/mmu/VMM.c:74' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
