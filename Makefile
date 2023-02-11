@@ -29,6 +29,10 @@ export FLOPPY_IMAGE_NAME="br-dos.img"
 BIOS_BL_DIR=BIOS_bootloader
 KERNEL_DIR=kernel
 
+ifneq ($(BUILD_TYPE), $(filter $(BUILD_TYPE), debug release reldbg))
+$(error BUILD_TYPE must be one of 'debug', 'release', 'reldbg')
+endif
+
 .PHONY: kernel
 
 all: image
@@ -37,6 +41,7 @@ t:
 	echo $(BUILD_TYPE)
 	echo $(BUILD_DIR)
 	echo $(BIN_DIR)
+	echo $(filter $(BUILD_TYPE), debug release reldbg)
 
 bios_bootloader:
 	+$(MAKE) -C ${BIOS_BL_DIR} all
