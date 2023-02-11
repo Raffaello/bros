@@ -18,21 +18,19 @@
 #include <arch/x86/mmu/VMM.h>
 
 
-noreturn void  _start()         __attribute__((section(".text._start")))
-                                __attribute__((naked));
+noreturn void  _start()         __attribute__((section(".text._start"), naked, weak));
 
-noreturn void _start_init()     __attribute__((section(".text._start_init")))
-                                __attribute__((force_align_arg_pointer));
+noreturn void _start_init()     __attribute__((section(".text._start_init"), force_align_arg_pointer, weak));
 
-noreturn void _start_failure()  __attribute__((section(".text._start_failure")));
+noreturn void _start_failure()  __attribute__((section(".text._start_failure"), weak));
 
-void _start_VGA_init()          __attribute__((section(".text._start_VGA_init")));
+void _start_VGA_init()          __attribute__((section(".text._start_VGA_init"), weak));
 
 void _start_boot_info(boot_SYS_Info_t* _sys_info)
-                                __attribute__((section(".text._start_boot_info")));
+                                __attribute__((section(".text._start_boot_info"), weak));
 
 void _start_PMM_init(const boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
-                                __attribute__((section(".text._start_PMM_init")));
+                                __attribute__((section(".text._start_PMM_init"), weak));
 
 /*
  * TODO:
@@ -97,7 +95,7 @@ noreturn void _start_init()
     const uint32_t* _startPtr = (uint32_t*)&_start;
     // self-relocating kernel checks
     extern const uint32_t __end;
-    extern const uint32_t __size;
+    // extern const uint32_t __size;
     // NOTE: with optimization there is a difference about alignment main is 16 bytes aligned
     extern void main();
     const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
@@ -106,10 +104,7 @@ noreturn void _start_init()
         || _sys_info->begin_marker != SYS_INFO_BEGIN
         || *_sys_info_end_marker != SYS_INFO_END
         || _startPtr != KERNEL_ADDR
-        || kernel_size != (uint32_t)&__size
-        || (uint32_t)&main <= (uint32_t)&_start_failure
-        || (uint32_t)&main <= (uint32_t)&_start)
-    {
+    ) {
          _start_failure();
     }
 
@@ -152,8 +147,8 @@ noreturn void _start_init()
     // // TODO: set up kernel stack, EBP,ESP ... and align it
     // __asm__ volatile("mov esp, 0x9000");
     // __asm__ volatile("mov ebp, esp");
-    __asm__("sti");
-    __asm__ volatile("jmp %0"::"i"(&main));
+    __asm__ volatile ("sti");
+    __asm__ volatile ("jmp %0"::"i"(&main));
     for(;;);
 }
 

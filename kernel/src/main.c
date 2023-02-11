@@ -5,7 +5,7 @@
 #include <lib/stdlib.h>
 
 
-noreturn void main()    __attribute__((section(".text.main")));
+noreturn void main()    __attribute__((section(".text.main"), __aligned__(16)));
 
 
 noreturn void main()
