@@ -17,8 +17,6 @@ void VGA_fill(const uint8_t fg_col, const uint8_t bg_col)
 {
     uint8_t *video_mem = (uint8_t*) VGA_MEM_TEXT;
     const register uint8_t v = (bg_col << 4) | fg_col;
-    // TODO: using with eax=0 and rep movsd, shouldn't be faster?
-    // TODO: besides this imply vga mode 3 :) ok for now
     for(int i = 0; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;) {
         video_mem[i++]=0;
         video_mem[i++]=v;
@@ -26,16 +24,8 @@ void VGA_fill(const uint8_t fg_col, const uint8_t bg_col)
 }
 
 
-void VGA_clear()
+inline void VGA_clear()
 {
-    // uint8_t *video_mem = (uint8_t*) 0xb8000;
-    // // TODO: using with eax=0 and rep movsd, shouldn't be faster?
-    // // TODO: besides this imply vga mode 3 :) ok for now
-    // for(int i = 0; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;) {
-    //     video_mem[i++]=0;
-    //     video_mem[i++]=VGA_COLOR_GRAY;
-    // }
-
     VGA_fill(VGA_COLOR_GRAY, VGA_COLOR_BLACK);
 }
 

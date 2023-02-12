@@ -63,7 +63,6 @@ void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size)
         _PMM_used_blocks++;
     }
 
-    // TODO assert used blocks <= max blocks
     if(_PMM_used_blocks > _PMM_max_blocks)
         KERNEL_PANIC("PMM_MemMap_deinit too many used blocks");
 }
@@ -107,8 +106,8 @@ void *PMM_malloc_blocks(const size_t num_blocks)
 void PMM_free_blocks(void* ptr, const size_t num_blocks)
 {
     // TODO assert used blocks > num_blocks
-    // if (_PMM_used_blocks < num_blocks)
-    //     return;
+    if (_PMM_used_blocks < num_blocks)
+        KERNEL_PANIC("PMM_free_blocks");
 
     unsigned int pos = ((unsigned int) ptr) / PMM_BLOCK_SIZE;
     for(size_t i = 0; i < num_blocks; i++)
