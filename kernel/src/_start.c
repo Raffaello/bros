@@ -1,7 +1,7 @@
 /*
  * the code generated from the functions in this file are "disposable"
  * used only once as entry point, afterwards the code could be reclaimed.
- *
+ * this is the kernel bootstrap phase
 */
 
 #include <stddef.h>
@@ -24,7 +24,6 @@ noreturn void _start_init();
 void _start_VGA_init();
 void _start_boot_info(volatile boot_SYS_Info_t* _sys_info);
 void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size);
-// bool _start_VMM_init(boot_SYS_Info_t* _sys_info);
 
 /*
  * TODO:
@@ -45,6 +44,8 @@ void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_e
 #endif
 #define KERNEL_ADDR ((uint32_t*)(KERNEL_SEG))
 
+// TODO: this function can be merged with the other _start_init
+//       i don't think there is nothing to do ...
 __attribute__((section(".text._start"), naked, weak))
 noreturn void  _start()
 {
@@ -58,7 +59,7 @@ noreturn void  _start()
     //      moving it around ... right?
 
     // TODO so the same is for setting up the stack.
-    //      also the stack could benefit of its own selector
+    //      also the stack could benefit of its own selector?
 
 
     // TODO move the minimum requirement here before jumping
