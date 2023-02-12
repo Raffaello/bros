@@ -182,7 +182,7 @@ void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const
     con_col_t old_col = CON_getConsoleColor();
     CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
     volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
-    // NOTE: optimzier if not get the tot_entries in a int variables, replace them with zero
+    // NOTE: optimzier without int tot_entries, replace the value in struct with zero..
     const int tot_entries = _sys_info->num_mem_map_entries;
     for(int i = 0; i < tot_entries; i++)
     {

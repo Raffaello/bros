@@ -105,7 +105,6 @@ void *PMM_malloc_blocks(const size_t num_blocks)
 
 void PMM_free_blocks(void* ptr, const size_t num_blocks)
 {
-    // TODO assert used blocks > num_blocks
     if (_PMM_used_blocks < num_blocks)
         KERNEL_PANIC("PMM_free_blocks");
 
