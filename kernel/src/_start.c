@@ -99,14 +99,14 @@ noreturn void _start_init()
     const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
 
     if(_eax != __BROS)
-        kernel_panic("EAX error");
+        KERNEL_PANIC("EAX error");
     if(_startPtr != KERNEL_ADDR)
-        kernel_panic("KERNEL_ADDR error");
+        KERNEL_PANIC("KERNEL_ADDR error");
 
     if(_sys_info->begin_marker != SYS_INFO_BEGIN
         || *_sys_info_end_marker != SYS_INFO_END
     ) {
-        kernel_panic("SYS_INFO error");
+        KERNEL_PANIC("SYS_INFO error");
     }
 
     // Init VGA Console
@@ -130,7 +130,7 @@ noreturn void _start_init()
     // VMM
     CON_puts("Init VMM\n");
     if (!VMM_init())
-        kernel_panic("VMM error");
+        KERNEL_PANIC("VMM error");
 
 
     // TODO: self-relocate the kernel
@@ -171,7 +171,7 @@ void _start_boot_info(boot_SYS_Info_t* _sys_info)
     _sys_info->tot_mem = tot_mem;
     CON_printf("Total Available Memory: %u MB\n", tot_mem/1024);
     if (_sys_info->num_mem_map_entries < 1)
-        kernel_panic("SYS_INFO entries error");
+        KERNEL_PANIC("SYS_INFO entries error");
 }
 
 void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)

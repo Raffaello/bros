@@ -2,4 +2,6 @@
 
 #include <stdnoreturn.h>
 
-noreturn void kernel_panic(const char* err_msg);
+#define KERNEL_PANIC(err_msg) panic(err_msg, __FILE__, __LINE__)
+
+noreturn void panic(const char* err_msg, const char* filename, int line);
