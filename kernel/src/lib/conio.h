@@ -33,6 +33,8 @@ void CON_puts(const char str[]);
 void CON_newline();
 
 /*
- * basic printf alike functionality
+ * basic printf alike functionality,
+ * move to stdlib
+ * // TODO sprintf
 */
 void CON_printf(const char* fmt, ...);

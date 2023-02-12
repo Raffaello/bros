@@ -11,6 +11,7 @@
 typedef uint32_t* bitset32_t;
 _Static_assert(sizeof(bitset32_t) == 4);
 
+// TODO in bitset_t/parameter also add the size so it can perform a check.
 void bitset_set(bitset32_t bitset, const unsigned int bit);
 void bitset_clear(bitset32_t bitset, const unsigned int bit);
 bool bitset_test(bitset32_t bitset, const unsigned int bit);

@@ -32,6 +32,5 @@ int PMM_Blocks_free();
 void *PMM_malloc_blocks(const size_t num_blocks);
 void PMM_free_blocks(void* ptr, const size_t num_blocks);
 
-// TODO: with -O2 return NULL
 void *PMM_malloc(const size_t size);
 void PMM_free(void* ptr, const size_t size);

@@ -16,13 +16,12 @@
 #include <arch/x86/descriptors.h>
 #include <arch/x86/mmu/PMM.h>
 #include <arch/x86/mmu/VMM.h>
+#include <sys/panic.h>
 
 
 noreturn void  _start()         __attribute__((section(".text._start"), naked, weak));
 
 noreturn void _start_init()     __attribute__((section(".text._start_init"), force_align_arg_pointer, weak));
-
-noreturn void _start_failure()  __attribute__((section(".text._start_failure"), weak));
 
 void _start_VGA_init()          __attribute__((section(".text._start_VGA_init"), weak));
 
@@ -99,12 +98,15 @@ noreturn void _start_init()
     extern void main();
     const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
 
-    if(_eax != __BROS
-        || _sys_info->begin_marker != SYS_INFO_BEGIN
+    if(_eax != __BROS)
+        KERNEL_PANIC("EAX error");
+    if(_startPtr != KERNEL_ADDR)
+        KERNEL_PANIC("KERNEL_ADDR error");
+
+    if(_sys_info->begin_marker != SYS_INFO_BEGIN
         || *_sys_info_end_marker != SYS_INFO_END
-        || _startPtr != KERNEL_ADDR
     ) {
-         _start_failure();
+        KERNEL_PANIC("SYS_INFO error");
     }
 
     // Init VGA Console
@@ -128,7 +130,7 @@ noreturn void _start_init()
     // VMM
     CON_puts("Init VMM\n");
     if (!VMM_init())
-        _start_failure();
+        KERNEL_PANIC("VMM error");
 
 
     // TODO: self-relocate the kernel
@@ -146,18 +148,6 @@ noreturn void _start_init()
     // // TODO: set up kernel stack, EBP,ESP ... and align it
     __asm__ volatile ("sti");
     __asm__ volatile ("jmp %0"::"i"(&main));
-    for(;;);
-}
-
-
-// TODO create a kernel panic
-noreturn void _start_failure()
-{
-    const char fail_msg[] = "Kernel load failure";
-    
-    VGA_fill(VGA_COLOR_WHITE, VGA_COLOR_BLUE);
-    VGA_WriteString(0,0, fail_msg, VGA_COLOR_WHITE);
-    __asm__("hlt");
     for(;;);
 }
 
@@ -181,7 +171,7 @@ void _start_boot_info(boot_SYS_Info_t* _sys_info)
     _sys_info->tot_mem = tot_mem;
     CON_printf("Total Available Memory: %u MB\n", tot_mem/1024);
     if (_sys_info->num_mem_map_entries < 1)
-        _start_failure();
+        KERNEL_PANIC("SYS_INFO entries error");
 }
 
 void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
@@ -192,14 +182,15 @@ void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const
     con_col_t old_col = CON_getConsoleColor();
     CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
     volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
-    for(int i = 0, tot = _sys_info->num_mem_map_entries; i < tot; i++)
+    // NOTE: optimzier without int tot_entries, replace the value in struct with zero..
+    const int tot_entries = _sys_info->num_mem_map_entries;
+    for(int i = 0; i < tot_entries; i++)
     {
         const char* mem_types[] = {
             "Available",
             "Reserved",
             "ACPI recl",
             "ACPI nvs",
-            // "Bad"
         };
 
         const boot_MEM_MAP_Info_Entry_t memi = mem_map[i];

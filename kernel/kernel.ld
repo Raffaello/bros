@@ -9,7 +9,6 @@ SECTIONS
         /* __code_start = .; */
         *(.text._start)
         *(.text._start_init)
-        *(.text._start_failure)
         *(.text._start_VGA_init)
         *(.text._start_boot_info)
         *(.text._start_PMM_init)

@@ -2,6 +2,7 @@
 #include <lib/bitset.h>
 #include <stddef.h>
 #include <lib/string.h>
+#include <sys/panic.h>
 
 #define PMM_BLOCKS_PER_BYTE 8
 // PAGE_SIZE
@@ -22,7 +23,7 @@ static inline size_t _size2block(const size_t size)
 void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start)
 {
     _PMM_tot_mem = tot_mem_KB;
-    _PMM_max_blocks = tot_mem_KB * 1024 / PMM_BLOCK_SIZE;
+    _PMM_max_blocks = tot_mem_KB * 1024 / PMM_BLOCK_SIZE; // there is no extra block in this case for the reminder
     _PMM_used_blocks = _PMM_max_blocks;
     _PMM_mem_map = (bitset32_t) physical_mem_start;
     _PMM_mem_map_size = _PMM_max_blocks / PMM_BLOCKS_PER_BYTE;
@@ -34,7 +35,11 @@ void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start)
 void PMM_MemMap_init(const paddr_t physical_addr, const uint32_t size)
 {
     uint32_t block_addr = physical_addr / PMM_BLOCK_SIZE;
-    const uint32_t blocks = _size2block(size);
+    // const uint32_t blocks = _size2block(size);
+    uint32_t blocks = (size / PMM_BLOCK_SIZE); // can't have the reminder as another block ..
+
+    if(blocks > _PMM_used_blocks)
+        blocks = _PMM_used_blocks;
 
     for(uint32_t i = 0; i < blocks; ++i)
     {
@@ -42,7 +47,9 @@ void PMM_MemMap_init(const paddr_t physical_addr, const uint32_t size)
         _PMM_used_blocks--;
     }
 
-    // TODO assert used blocks <= max blocks (underflow)
+    // TODO sprintf
+    if(_PMM_used_blocks > _PMM_max_blocks)
+        KERNEL_PANIC("PMM_MemMap_init used_blocks");
 }
 
 void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size)
@@ -56,7 +63,8 @@ void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size)
         _PMM_used_blocks++;
     }
 
-    // TODO assert used blocks <= max blocks
+    if(_PMM_used_blocks > _PMM_max_blocks)
+        KERNEL_PANIC("PMM_MemMap_deinit too many used blocks");
 }
 
 void PMM_MemMap_deinit_kernel(const uint32_t code_start, const uint32_t code_size)
@@ -97,9 +105,8 @@ void *PMM_malloc_blocks(const size_t num_blocks)
 
 void PMM_free_blocks(void* ptr, const size_t num_blocks)
 {
-    // TODO assert used blocks > num_blocks
-    // if (_PMM_used_blocks < num_blocks)
-    //     return;
+    if (_PMM_used_blocks < num_blocks)
+        KERNEL_PANIC("PMM_free_blocks");
 
     unsigned int pos = ((unsigned int) ptr) / PMM_BLOCK_SIZE;
     for(size_t i = 0; i < num_blocks; i++)
