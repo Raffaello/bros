@@ -4,29 +4,41 @@
 #include <lib/string.h>
 #include <sys/panic.h>
 
+// TODO: having a block size of 4096 if i have to allocate few bytes is a lot of waste...
+//       something is not ok ... it should be more fine granted
+//       instead of alloc 1 block at time so a minimum of 4096 bytes
+// ...
+// e.g. mem_map and mem_map_info can just use 1 block in common...
+
 #define PMM_BLOCKS_PER_BYTE 8
 // PAGE_SIZE
 #define PMM_BLOCK_SIZE      4096
 #define PMM_BLOCK_ALIGN     PMM_BLOCK_SIZE
 
-static uint32_t     _PMM_tot_mem        = 0; // should be size_t ?
-static uint32_t     _PMM_max_blocks     = 0;
-static uint32_t     _PMM_used_blocks    = 0;
-static bitset32_t   _PMM_mem_map        = NULL;
-static uint32_t     _PMM_mem_map_size   = 0;
+
+static uint8_t                      _PMM_boot_drive         = 0;
+static uint32_t                     _PMM_tot_mem            = 0; // should be size_t ?
+static uint32_t                     _PMM_max_blocks         = 0;
+static uint32_t                     _PMM_used_blocks        = 0;
+static bitset32_t                   _PMM_mem_map            = NULL;
+static uint32_t                     _PMM_mem_map_size       = 0;
+
+static PMM_mem_t*                   _PMM_mem_map_info       = NULL;
+static uint32_t                     _PMM_mem_map_info_length    = 0;
 
 static inline size_t _size2block(const size_t size)
 {
     return (size / PMM_BLOCK_SIZE) + ((size % PMM_BLOCK_SIZE) ? 1 : 0);
 }
 
-void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start)
+void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start, const uint8_t boot_drive)
 {
-    _PMM_tot_mem = tot_mem_KB;
-    _PMM_max_blocks = tot_mem_KB * 1024 / PMM_BLOCK_SIZE; // there is no extra block in this case for the reminder
-    _PMM_used_blocks = _PMM_max_blocks;
-    _PMM_mem_map = (bitset32_t) physical_mem_start;
-    _PMM_mem_map_size = _PMM_max_blocks / PMM_BLOCKS_PER_BYTE;
+    _PMM_boot_drive     = boot_drive;
+    _PMM_tot_mem        = tot_mem_KB;
+    _PMM_max_blocks     = tot_mem_KB * 1024 / PMM_BLOCK_SIZE; // there is no extra block in this case for the reminder
+    _PMM_used_blocks    = _PMM_max_blocks;
+    _PMM_mem_map        = (bitset32_t) physical_mem_start;
+    _PMM_mem_map_size   = _PMM_max_blocks / PMM_BLOCKS_PER_BYTE;
 
     // All Memory in use, as not known if it can be really used...
     memset(_PMM_mem_map, 0xF, _PMM_mem_map_size);
@@ -74,6 +86,21 @@ void PMM_MemMap_deinit_kernel(const uint32_t code_start, const uint32_t code_siz
 
     // TODO: add also something for the stack!
     PMM_MemMap_deinit(code_start, code_size + _PMM_mem_map_size);
+}
+
+void PMM_store_MemMapInfo(const uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* mem_map)
+{
+    _PMM_mem_map_info_length = num_entries;
+    _PMM_mem_map_info = PMM_malloc(sizeof(PMM_mem_t) * _PMM_mem_map_info_length);
+    if(_PMM_mem_map_info == NULL)
+        KERNEL_PANIC("PMM_store_MemMapInfo");
+
+    for(int i = 0; i < _PMM_mem_map_info_length; i++)
+    {
+        _PMM_mem_map_info[i].addr = mem_map[i].base_addr_lo;
+        _PMM_mem_map_info[i].length = mem_map[i].length_lo;
+        _PMM_mem_map_info[i].type = mem_map[i].type;
+    }
 }
 
 inline int PMM_Blocks_used()

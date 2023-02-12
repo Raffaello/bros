@@ -19,17 +19,12 @@
 #include <sys/panic.h>
 
 
-noreturn void  _start()         __attribute__((section(".text._start"), naked, weak));
-
-noreturn void _start_init()     __attribute__((section(".text._start_init"), force_align_arg_pointer, weak));
-
-void _start_VGA_init()          __attribute__((section(".text._start_VGA_init"), weak));
-
-void _start_boot_info(boot_SYS_Info_t* _sys_info)
-                                __attribute__((section(".text._start_boot_info"), weak));
-
-void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
-                                __attribute__((section(".text._start_PMM_init"), weak));
+noreturn void  _start();
+noreturn void _start_init();
+void _start_VGA_init();
+void _start_boot_info(volatile boot_SYS_Info_t* _sys_info);
+void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size);
+// bool _start_VMM_init(boot_SYS_Info_t* _sys_info);
 
 /*
  * TODO:
@@ -50,6 +45,7 @@ void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const
 #endif
 #define KERNEL_ADDR ((uint32_t*)(KERNEL_SEG))
 
+__attribute__((section(".text._start"), naked, weak))
 noreturn void  _start()
 {
     // extern uint32_t __stack_end;
@@ -72,8 +68,7 @@ noreturn void  _start()
     __asm__ volatile("jmp %0"::"i"(&_start_init));
 }
 
-// Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
- 
+__attribute__((section(".text._start_init"), force_align_arg_pointer, weak))
 noreturn void _start_init()
 {
     uint32_t _eax, _ebx;
@@ -151,6 +146,7 @@ noreturn void _start_init()
     for(;;);
 }
 
+__attribute__((section(".text._start_VGA_init"), weak))
 void _start_VGA_init()
 {
     const int cur_offs = VGA_get_cursor_offset();
@@ -164,7 +160,8 @@ void _start_VGA_init()
 #endif
 }
 
-void _start_boot_info(boot_SYS_Info_t* _sys_info)
+__attribute__((section(".text._start_boot_info"), weak))
+void _start_boot_info(volatile boot_SYS_Info_t* _sys_info)
 {
     uint32_t tot_mem = _sys_info->tot_mem;
     boot_info_sanitize(&tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
@@ -174,16 +171,17 @@ void _start_boot_info(boot_SYS_Info_t* _sys_info)
         KERNEL_PANIC("SYS_INFO entries error");
 }
 
-void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
+__attribute__((section(".text._start_PMM_init"), weak))
+void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
 {
+    const int tot_entries = _sys_info->num_mem_map_entries;
+    volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
+
     CON_puts("Init PMM\n");
-    PMM_init(_sys_info->tot_mem, kernel_end);
+    PMM_init(_sys_info->tot_mem, kernel_end, _sys_info->boot_drive);
     CON_puts("Memory Regions\n");
     con_col_t old_col = CON_getConsoleColor();
     CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
-    volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
-    // NOTE: optimzier without int tot_entries, replace the value in struct with zero..
-    const int tot_entries = _sys_info->num_mem_map_entries;
     for(int i = 0; i < tot_entries; i++)
     {
         const char* mem_types[] = {
@@ -215,8 +213,44 @@ void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const
 
     // reserve the kernel memory area plus the PMM Bit set
     PMM_MemMap_deinit_kernel(KERNEL_SEG, kernel_size);
+    PMM_store_MemMapInfo(_sys_info->num_mem_map_entries, mem_map);
 
     CON_setConsoleColor((con_col_t){.bg_col=VGA_COLOR_BLUE, .fg_col=VGA_COLOR_YELLOW});
     CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
     CON_setConsoleColor(old_col);
 }
+
+// __attribute__((section(".text._start_PMM_init"), weak))
+// bool _start_VMM_init(boot_SYS_Info_t* _sys_info)
+// {
+//     // TODO pass MemMap informations
+
+//     _kernel_directory = PMM_malloc(sizeof(page_directory_t));
+
+//     page_table_t* page_table  = PMM_malloc(sizeof(page_table_t));
+
+//     if(page_table == NULL || _kernel_directory == NULL)
+//         return false;
+
+//     memset(_kernel_directory, 0, sizeof(page_directory_t));
+//     memset(page_table, 0, sizeof(page_table_t));
+
+//     // TODO: need to allocate some space for the stack too somewhere...
+
+//     // first 1MB, identity
+//     for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
+//     {
+//         page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
+//     }
+
+//     _kernel_directory->entries[0] = (PDE_t) page_table | PDE_PRESENT | PDE_WRITABLE;
+
+//     ISR_register_interrupt_handler(INT_Page_Fault, page_fault_handler);
+//     if (!VMM_switch_page_directory(_kernel_directory))
+//         return false;
+
+//     VMM_enable_paging();
+
+//     return true;
+
+// }
