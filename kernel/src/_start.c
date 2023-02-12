@@ -1,7 +1,7 @@
 /*
  * the code generated from the functions in this file are "disposable"
  * used only once as entry point, afterwards the code could be reclaimed.
- *
+ * this is the kernel bootstrap phase
 */
 
 #include <stddef.h>
@@ -19,17 +19,11 @@
 #include <sys/panic.h>
 
 
-noreturn void  _start()         __attribute__((section(".text._start"), naked, weak));
-
-noreturn void _start_init()     __attribute__((section(".text._start_init"), force_align_arg_pointer, weak));
-
-void _start_VGA_init()          __attribute__((section(".text._start_VGA_init"), weak));
-
-void _start_boot_info(boot_SYS_Info_t* _sys_info)
-                                __attribute__((section(".text._start_boot_info"), weak));
-
-void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
-                                __attribute__((section(".text._start_PMM_init"), weak));
+noreturn void  _start();
+noreturn void _start_init();
+void _start_VGA_init();
+void _start_boot_info(volatile boot_SYS_Info_t* _sys_info);
+void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size);
 
 /*
  * TODO:
@@ -50,6 +44,9 @@ void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const
 #endif
 #define KERNEL_ADDR ((uint32_t*)(KERNEL_SEG))
 
+// TODO: this function can be merged with the other _start_init
+//       i don't think there is nothing to do ...
+__attribute__((section(".text._start"), naked, weak))
 noreturn void  _start()
 {
     // extern uint32_t __stack_end;
@@ -62,7 +59,7 @@ noreturn void  _start()
     //      moving it around ... right?
 
     // TODO so the same is for setting up the stack.
-    //      also the stack could benefit of its own selector
+    //      also the stack could benefit of its own selector?
 
 
     // TODO move the minimum requirement here before jumping
@@ -72,8 +69,7 @@ noreturn void  _start()
     __asm__ volatile("jmp %0"::"i"(&_start_init));
 }
 
-// Tell the compiler incoming stack alignment is not RSP%16==8 or ESP%16==12
- 
+__attribute__((section(".text._start_init"), force_align_arg_pointer, weak))
 noreturn void _start_init()
 {
     uint32_t _eax, _ebx;
@@ -151,6 +147,7 @@ noreturn void _start_init()
     for(;;);
 }
 
+__attribute__((section(".text._start_VGA_init"), weak))
 void _start_VGA_init()
 {
     const int cur_offs = VGA_get_cursor_offset();
@@ -164,7 +161,8 @@ void _start_VGA_init()
 #endif
 }
 
-void _start_boot_info(boot_SYS_Info_t* _sys_info)
+__attribute__((section(".text._start_boot_info"), weak))
+void _start_boot_info(volatile boot_SYS_Info_t* _sys_info)
 {
     uint32_t tot_mem = _sys_info->tot_mem;
     boot_info_sanitize(&tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
@@ -174,16 +172,17 @@ void _start_boot_info(boot_SYS_Info_t* _sys_info)
         KERNEL_PANIC("SYS_INFO entries error");
 }
 
-void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
+__attribute__((section(".text._start_PMM_init"), weak))
+void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
 {
+    const int tot_entries = _sys_info->num_mem_map_entries;
+    volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
+
     CON_puts("Init PMM\n");
-    PMM_init(_sys_info->tot_mem, kernel_end);
+    PMM_init(_sys_info->tot_mem, kernel_end, _sys_info->boot_drive);
     CON_puts("Memory Regions\n");
     con_col_t old_col = CON_getConsoleColor();
     CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
-    volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
-    // NOTE: optimzier without int tot_entries, replace the value in struct with zero..
-    const int tot_entries = _sys_info->num_mem_map_entries;
     for(int i = 0; i < tot_entries; i++)
     {
         const char* mem_types[] = {
@@ -215,8 +214,10 @@ void _start_PMM_init(boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const
 
     // reserve the kernel memory area plus the PMM Bit set
     PMM_MemMap_deinit_kernel(KERNEL_SEG, kernel_size);
+    PMM_store_MemMapInfo(_sys_info->num_mem_map_entries, mem_map);
 
     CON_setConsoleColor((con_col_t){.bg_col=VGA_COLOR_BLUE, .fg_col=VGA_COLOR_YELLOW});
     CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
     CON_setConsoleColor(old_col);
 }
+
