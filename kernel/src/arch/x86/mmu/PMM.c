@@ -2,6 +2,7 @@
 #include <lib/bitset.h>
 #include <stddef.h>
 #include <lib/string.h>
+#include <sys/panic.h>
 
 #define PMM_BLOCKS_PER_BYTE 8
 // PAGE_SIZE

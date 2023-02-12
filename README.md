@@ -130,7 +130,7 @@ The same thing of "storing the file on the filesystem (FAT12)" could have been d
 
 The Kernel runs in protected mode (`PM`) with paging (`PG`) of 4 KB size.
 
-At the moment is using a simple bitset to track the physical memory usage, and using the stack set up by the bootloader at `0x1000-2`, just below where the kernel is loaded.
+At the moment is using a simple bitset to track the physical memory usage, and using the stack set up by the bootloader at `0x1000`, just below where the kernel is loaded.
 
 It is using an identity paging for the first 4MB of RAM only at the moment.
 
