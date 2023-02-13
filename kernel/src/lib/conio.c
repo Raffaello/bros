@@ -116,9 +116,6 @@ int CON_printf(const char* fmt, ...)
 
     return i;
 
-    // TODO clean up
-
-
 }
 
 int  CON_sprintf(char* str, const char* fmt, ...)

@@ -62,7 +62,10 @@ gdb-kernel-debug:
 		-ex 'break *0x7c00' \
 		-ex 'b ${KERNEL_DIR}/src/_start.c:103' \
 		-ex 'b ${KERNEL_DIR}/src/_start.c:192' \
-		-ex 'b ${KERNEL_DIR}/src/lib/conio.c:192' \
+		-ex 'b ${KERNEL_DIR}/src/lib/conio.c:190' \
+		-ex 'b ${KERNEL_DIR}/src/lib/conio.c:113' \
+		-ex 'b ${KERNEL_DIR}/src/lib/conio.c:115' \
+		-ex 'b ${KERNEL_DIR}/src/lib/conio.c:140' \
 		-ex 'b ${KERNEL_DIR}/src/main.c:16' \
 		-ex 'b ${KERNEL_DIR}/src/arch/x86/mmu/VMM.c:74' \
 		-ex 'set disassembly-flavor intel' \

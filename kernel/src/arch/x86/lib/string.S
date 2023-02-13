@@ -9,27 +9,27 @@
 
 ASM_BEGIN(memset)
   # This could be done with 4,2,1 bytes stos
-#   push ebp
-#   mov ebp, esp
-  mov edi, [esp + 4]  # buf
-  mov eax, [esp + 8] # val
-  mov ecx, [esp + 12] # n
+  push edi
+  mov edi, [esp + 8]  # buf
+  mov eax, [esp + 12] # val
+  mov ecx, [esp + 16] # n
   rep stosb           # store AL into ES:EDI
+  pop edi
   mov eax, [esp + 4]
-#   pop ebp
   ret
 ASM_END(memset)
 
 
 ASM_BEGIN(memcpy)
   # This could be done with 4,2,1 bytes stos
-#   push ebp
-#   mov ebp, esp
-  mov eax, [esp + 4]   # dst
+  push esi
+  push edi
+  mov eax, [esp + 12]   # dst
   mov edi, eax
-  mov esi, [esp + 8] # src
-  mov ecx, [esp + 12] # n
+  mov esi, [esp + 16] # src
+  mov ecx, [esp + 20] # n
   rep movsb           # move DS:ESI into ES:EDI
-#   pop ebp
+  pop edi
+  pop esi
   ret
 ASM_END(memcpy)
