@@ -44,7 +44,7 @@ void *PMM_malloc(const size_t size);
 void PMM_free(void* ptr, const size_t size);
 
 /**
- * Alloc continuosly without align nor page size
+ * Alloc continuosly without align nor page size, can't be free.
+ * TODO: use a heap
  * */
-void *PMM_kmalloc(const size_t size);
-void PMM_kfree(void *ptr, const size_t size);
+void *PMM_malloc_linear(const size_t size);

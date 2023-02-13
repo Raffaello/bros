@@ -220,4 +220,3 @@ void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_e
     CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
     CON_setConsoleColor(old_col);
 }
-

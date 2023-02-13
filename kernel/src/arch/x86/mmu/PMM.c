@@ -53,7 +53,7 @@ void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start, const uint8
 
     _PMM_mem_map_size   = _PMM_max_blocks / PMM_MEM_MAP_BLOCKS_PER_BYTE;
     _PMM_mem_map        = (bitset32_t) physical_mem_start;
-    _PMM_cur_paddr      = physical_mem_start + _PMM_max_blocks;
+    _PMM_cur_paddr      = physical_mem_start + _PMM_mem_map_size;
 
     // All Memory in use, as not known if it can be really used...
     memset(_PMM_mem_map, 0xF, _PMM_mem_map_size);
@@ -105,7 +105,7 @@ void PMM_MemMap_deinit_kernel(const uint32_t code_start, const uint32_t code_siz
 void PMM_store_MemMapInfo(const uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* mem_map)
 {
     _PMM_mem_map_info_length = num_entries;
-    _PMM_mem_map_info = PMM_malloc(sizeof(PMM_mem_t) * _PMM_mem_map_info_length);
+    _PMM_mem_map_info = PMM_malloc_linear(sizeof(PMM_mem_t) * _PMM_mem_map_info_length);
     if(_PMM_mem_map_info == NULL)
         KERNEL_PANIC("PMM_store_MemMapInfo");
 
@@ -165,7 +165,7 @@ void PMM_free(void* ptr, const size_t size)
     PMM_free_blocks(ptr, _size2block(size));
 }
 
-void *PMM_kmalloc(const size_t size)
+void *PMM_malloc_linear(const size_t size)
 {
     // check if current block is allocated
     if(!bitset_test(_PMM_mem_map, _PMM_cur_paddr / PMM_BLOCK_SIZE))
@@ -182,10 +182,4 @@ void *PMM_kmalloc(const size_t size)
     _PMM_cur_paddr += size;
     
     return (void*) tmp;
-}
-
-void PMM_kfree(void *ptr, const size_t size)
-{
-
-    // how? need a heap and able to fragmenting the physical memory allocation
 }
