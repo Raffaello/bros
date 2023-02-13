@@ -11,7 +11,8 @@
 _Static_assert(sizeof(size_t) == sizeof(uint32_t));
 
 void* memset(void *buf, int val, size_t n);
-// void memcpy();
+void *memcpy(void *dst, const void * src, size_t n);
 // void memcmp();
 
 size_t strlen(const char *str);
+size_t strnlen(const char *str, const size_t max_length);
