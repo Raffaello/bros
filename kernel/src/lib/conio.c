@@ -107,7 +107,6 @@ int CON_printf(const char* fmt, ...)
     CON_puts(buf);
 
     return i;
-
 }
 
 int CON_sprintf(char* str, const char* fmt, ...)
@@ -124,7 +123,7 @@ int CON_sprintf(char* str, const char* fmt, ...)
 int CON_vsprintf(char* str, const char* fmt, va_list args)
 {
     size_t length   = 0;
-    // int base        = 0;
+    int base        = 0;
     // bool number     = false;
     const char* s = str;
 
@@ -174,29 +173,17 @@ int CON_vsprintf(char* str, const char* fmt, va_list args)
             // }
             case 'u':
             {
-                // base = 10;
+                base = 10;
                 // number = true;
-                // break;
-                unsigned u = va_arg (args, unsigned int);
-                char buf[12];
-                length = strlen(itoa(u, buf, 10));
-                memcpy(str, buf, length);
-                str += length;
-                continue;
+                break;
             }
             /*** display in hex ***/
             case 'X':
             case 'x':
             {
-                // base = 16;
+                base = 16;
                 // number = true;
-                // break;
-                int i = va_arg (args, int);
-                char buf[12];
-                length = strlen(itoa(i, buf, 16));
-                memcpy(str, buf, length);
-                str += length;
-                continue;
+                break;
             }
             default:
             {
@@ -205,16 +192,17 @@ int CON_vsprintf(char* str, const char* fmt, va_list args)
                 continue;
             }
         }
+
         // if(number)
-        // {
-        //     unsigned u = va_arg (args, unsigned int);
-        //     char buf[12];
-        //     itoa(u, buf, base);
-        //     length = strlen(buf);
-        //     memcpy(str, buf, length);
-        //     str += length;
-        //     continue;
-        // }
+        {
+            unsigned u = va_arg (args, unsigned int);
+            char buf[12];
+            itoa(u, buf, base);
+            length = strlen(buf);
+            memcpy(str, buf, length);
+            str += length;
+            continue;
+        }
     }
     *str++ = 0;
     return str - s;
