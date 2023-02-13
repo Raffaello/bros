@@ -41,7 +41,7 @@ void VGA_WriteString(const int x, const int y, const char str[], uint8_t col)
 {
     for(int i = 0;str[i] != 0; ++i)
     {
-        // TODO: does it work if end of line? or end of screen? etc...
+        // TODO: check end of screen?
         VGA_WriteChar(x+i, y, str[i], col);
     }
 }

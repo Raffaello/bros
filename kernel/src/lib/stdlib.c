@@ -26,7 +26,7 @@ static inline void strcpy_r(const char* src, char* dst, long size)
     dst[k] = 0;
 }
 
-char* itoa(unsigned int value, char * str, const uint8_t base)
+char* utoa(unsigned int value, char * str, const uint8_t base)
 {
     // if (base!=10 || base !=16)
     // {
@@ -55,6 +55,41 @@ char* itoa(unsigned int value, char * str, const uint8_t base)
     return str;
 }
 
+char* itoa(int value, char * str, const uint8_t base)
+{
+    // if (base!=10 || base !=16)
+    // {
+    //     str[0]=0;
+    //     return str;
+    // }
+
+    register int r = 0;
+    register int i = 0;
+    char buf[13];
+    const char *alphadigit = "0123456789ABCDEF";
+
+    if (value < 0)
+    {
+        buf[i++] = '-';
+        value = -value;
+    }
+    do
+    {
+        r = value % base;
+        value /= base;
+        buf[i++] = alphadigit[r];
+    } while(value > 0);
+    // strcpy reversed
+    buf[i--] = 0;
+    strcpy_r(buf, str, i);
+    // int k = 0;
+    // for(; k <= i; ++k)
+    //     str[k]=buf[i-k];
+    // str[k] = 0;
+
+    return str;
+}
+
 // 1000, 100, 0
 // 100, 10, 0
 // 10, 1, 0
@@ -66,7 +101,12 @@ char* ltoa(long value, char* str, const uint8_t base)
     register long i = 0;
     char buf[21]; //  9223372036854775807
     const char *alphadigit = "0123456789ABCDEF";
-    
+
+    if (value < 0)
+    {
+        buf[i++] = '-';
+        value = -value;
+    }
     do
     {
         r = value % base;

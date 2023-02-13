@@ -33,11 +33,9 @@ void CON_putc(const char ch);
 void CON_puts(const char str[]);
 void CON_newline();
 
-/*
- * basic printf alike functionality,
- * move to stdlib
- * // TODO sprintf
-*/
+/****************************************
+ * basic printf alike functionalities   *
+ ***************************************/
 int  CON_printf(const char* fmt, ...);
 int  CON_sprintf(char* str, const char* fmt, ...);
 int  CON_vsprintf(char* str, const char* fmt, va_list args);

@@ -4,6 +4,7 @@
 #include <lib/stdlib.h>
 #include <lib/ctype.h>
 
+#define BUF_SIZE 13
 
 static uint8_t _col = 7;
 static uint8_t _curX = 0;
@@ -126,6 +127,7 @@ int CON_vsprintf(char* str, const char* fmt, va_list args)
     int base        = 0;
     // bool number     = false;
     const char* s = str;
+    char buf[BUF_SIZE];
 
     for (; *fmt; ++fmt)
     {
@@ -163,14 +165,14 @@ int CON_vsprintf(char* str, const char* fmt, va_list args)
             
             case 'd':
             case 'i':
-            // TODO: just negate the number and print a '-' ...
-            // {
-            //     // TODO not supported, not able to print negative numbers
-            //     int i = va_arg (args, int);
-            //     char buf[12];
-            //     CON_puts(itoa10(i, buf));
-            //     continue;
-            // }
+            {
+                int i = va_arg (args, int);
+                itoa(i, buf, 10);
+                length = strnlen(buf, BUF_SIZE);
+                memcpy(str, buf, length);
+                str += length;
+                continue;
+            }
             case 'u':
             {
                 base = 10;
@@ -196,9 +198,8 @@ int CON_vsprintf(char* str, const char* fmt, va_list args)
         // if(number)
         {
             unsigned u = va_arg (args, unsigned int);
-            char buf[12];
-            itoa(u, buf, base);
-            length = strlen(buf);
+            utoa(u, buf, base);
+            length = strnlen(buf, BUF_SIZE);
             memcpy(str, buf, length);
             str += length;
             continue;
