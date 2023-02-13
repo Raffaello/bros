@@ -5,14 +5,6 @@
 #include <lib/ctype.h>
 
 
-#define ZEROPAD 1   /* pad with zero */
-#define SIGN    2   /* unsigned/signed long */
-#define PLUS    4   /* show plus */
-#define SPACE   8   /* space if plus */
-#define LEFT    16  /* left justified */
-#define SMALL   32  /* Must be 32 == 0x20 */
-#define SPECIAL 64  /* 0x */
-
 static uint8_t _col = 7;
 static uint8_t _curX = 0;
 static uint8_t _curY = 0;
@@ -57,7 +49,7 @@ con_col_t CON_getConsoleColor()
     return (con_col_t) { .bg_col = _col >> 4, .fg_col = _col & 0xF };
 }
 
-uint8_t   CON_getConsoleColor2()
+uint8_t CON_getConsoleColor2()
 {
     return _col;
 }
@@ -118,7 +110,7 @@ int CON_printf(const char* fmt, ...)
 
 }
 
-int  CON_sprintf(char* str, const char* fmt, ...)
+int CON_sprintf(char* str, const char* fmt, ...)
 {
     va_list args;
     int i;
@@ -128,7 +120,6 @@ int  CON_sprintf(char* str, const char* fmt, ...)
     va_end(args);
     return i;
 }
-
 
 int CON_vsprintf(char* str, const char* fmt, va_list args)
 {
@@ -185,24 +176,18 @@ int CON_vsprintf(char* str, const char* fmt, va_list args)
             {
                 // base = 10;
                 // number = true;
+                // break;
                 unsigned u = va_arg (args, unsigned int);
                 char buf[12];
                 length = strlen(itoa(u, buf, 10));
                 memcpy(str, buf, length);
                 str += length;
-                // for(int i = 0; i<length; ++i)
-                //     *str++=buf[i];
                 continue;
             }
             /*** display in hex ***/
             case 'X':
             case 'x':
             {
-                // int i = va_arg (args, int);
-                // char buf[12];
-                // CON_puts(itoa(i, buf, 16));
-                // continue;
-
                 // base = 16;
                 // number = true;
                 // break;
@@ -211,8 +196,6 @@ int CON_vsprintf(char* str, const char* fmt, va_list args)
                 length = strlen(itoa(i, buf, 16));
                 memcpy(str, buf, length);
                 str += length;
-                // for(int i = 0; i<length; ++i)
-                //     *str++=buf[i];
                 continue;
             }
             default:

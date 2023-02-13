@@ -16,5 +16,5 @@ size_t strnlen(const char *str, const size_t max_length)
     while(str[len] != 0 && len < max_length)
         len++;
 
-    return (str[len] == 0) ? len : 0;
+    return len;
 }
