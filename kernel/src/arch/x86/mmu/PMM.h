@@ -32,8 +32,14 @@ void PMM_store_MemMapInfo(const uint32_t num_entries, const volatile boot_MEM_MA
 int PMM_Blocks_used();
 int PMM_Blocks_free();
 
-void *PMM_malloc_blocks(const size_t num_blocks);
-void PMM_free_blocks(void* ptr, const size_t num_blocks);
-
+/**
+ * Aligned page-size mem alloc from bytes.
+ * */
 void *PMM_malloc(const size_t size);
 void PMM_free(void* ptr, const size_t size);
+
+/**
+ * Alloc continuosly without align nor page size, can't be free.
+ * TODO: use a heap, this won't work as soon as free is used...
+ * */
+void *PMM_malloc_linear(const size_t size);
