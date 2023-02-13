@@ -19,11 +19,7 @@
 #define PMM_BLOCK_SIZE      4096
 #define PMM_BLOCK_ALIGN     PMM_BLOCK_SIZE
 
-/**
- * Aligned page-size memory alloc (block = page)
- * */
-// paddr_t _PMM_malloc_blocks(const size_t num_blocks);
-// void    _PMM_free_blocks(paddr_t ptr, const size_t num_blocks);
+
 
 static uint8_t      _PMM_boot_drive             = 0;
 static uint32_t     _PMM_tot_mem                = 0; // should be size_t ?
@@ -46,6 +42,34 @@ static inline void _PMM_used_blocks_panic(const char* msg)
 static inline size_t _size2block(const size_t size)
 {
     return (size / PMM_BLOCK_SIZE) + ((size % PMM_BLOCK_SIZE) ? 1 : 0);
+}
+
+static paddr_t _PMM_malloc_blocks(const size_t num_blocks)
+{
+    if (PMM_Blocks_free() < num_blocks)
+        return 0;
+
+    unsigned int pos;
+    if(!bitset_find(_PMM_mem_map, _PMM_mem_map_size, num_blocks, &pos))
+        return 0;
+    
+    for(size_t i = 0; i < num_blocks; ++i)
+        bitset_set(_PMM_mem_map, pos + i);
+
+    _PMM_used_blocks += num_blocks;
+
+    return pos * PMM_BLOCK_SIZE;
+}
+
+static void _PMM_free_blocks(paddr_t ptr, const size_t num_blocks)
+{
+    if (_PMM_used_blocks < num_blocks)
+        _PMM_used_blocks_panic("PMM_free_blocks");
+
+    unsigned int pos = ptr / PMM_BLOCK_SIZE;
+    for(size_t i = 0; i < num_blocks; i++)
+        bitset_clear(_PMM_mem_map, pos + i);
+    _PMM_used_blocks -= num_blocks;
 }
 
 void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start, const uint8_t boot_drive)
@@ -130,34 +154,6 @@ inline int PMM_Blocks_used()
 inline int PMM_Blocks_free()
 {
     return _PMM_max_blocks - _PMM_used_blocks;
-}
-
-static paddr_t _PMM_malloc_blocks(const size_t num_blocks)
-{
-    if (PMM_Blocks_free() < num_blocks)
-        return 0;
-
-    unsigned int pos;
-    if(!bitset_find(_PMM_mem_map, _PMM_mem_map_size, num_blocks, &pos))
-        return 0;
-    
-    for(size_t i = 0; i < num_blocks; ++i)
-        bitset_set(_PMM_mem_map, pos + i);
-
-    _PMM_used_blocks += num_blocks;
-
-    return pos * PMM_BLOCK_SIZE;
-}
-
-static void _PMM_free_blocks(paddr_t ptr, const size_t num_blocks)
-{
-    if (_PMM_used_blocks < num_blocks)
-        _PMM_used_blocks_panic("PMM_free_blocks");
-
-    unsigned int pos = ptr / PMM_BLOCK_SIZE;
-    for(size_t i = 0; i < num_blocks; i++)
-        bitset_clear(_PMM_mem_map, pos + i);
-    _PMM_used_blocks -= num_blocks;
 }
 
 void *PMM_malloc(const size_t size)
