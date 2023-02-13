@@ -7,6 +7,9 @@
 
 #include <stdint.h>
 
-// int atoi(const char * str);
+int atoi(const char * str);
 
+// TODO: this is utoa .. :)
 char* itoa(unsigned int value, char* str, const uint8_t base);
+char* ltoa(long value, char* str, const uint8_t base);
+

@@ -10,6 +10,9 @@
 // ...
 // e.g. mem_map and mem_map_info can just use 1 block in common...
 
+// TODO need a more efficient malloc that doesnt alloc a PAGE/BLOCK at time, too much memory wasteful
+//      especially for the internal kernel variables
+
 #define PMM_BLOCKS_PER_BYTE 8
 // PAGE_SIZE
 #define PMM_BLOCK_SIZE      4096

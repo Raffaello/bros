@@ -2,7 +2,8 @@
 #include <bios/vga.h>
 #include <lib/string.h>
 #include <lib/stdlib.h>
-#include <stdarg.h>
+#include <lib/ctype.h>
+
 
 static uint8_t _col = 7;
 static uint8_t _curX = 0;
@@ -48,7 +49,7 @@ con_col_t CON_getConsoleColor()
     return (con_col_t) { .bg_col = _col >> 4, .fg_col = _col & 0xF };
 }
 
-uint8_t   CON_getConsoleColor2()
+uint8_t CON_getConsoleColor2()
 {
     return _col;
 }
@@ -94,45 +95,75 @@ void CON_newline()
     _AdjscrollDrown();
 }
 
-void CON_printf(const char* fmt, ...)
+int CON_printf(const char* fmt, ...)
+{
+    char buf[256];
+    va_list args;
+    int i;
+
+    va_start(args, fmt);
+    i = CON_vsprintf(buf, fmt, args);
+    va_end(args);
+    CON_puts(buf);
+
+    return i;
+}
+
+int CON_sprintf(char* str, const char* fmt, ...)
 {
     va_list args;
+    int i;
+
     va_start(args, fmt);
+    i = CON_vsprintf(str, fmt, args);
+    va_end(args);
+    return i;
+}
+
+int CON_vsprintf(char* str, const char* fmt, va_list args)
+{
+    size_t length   = 0;
+    int base        = 0;
+    // bool number     = false;
+    const char* s = str;
+
     for (; *fmt; ++fmt)
     {
         if (*fmt != '%')
         {
-            CON_putc(*fmt);
+            *str++ = *fmt;
             continue;
         }
 
         ++fmt;
-
         switch (*fmt)
         {
             case '%':
             {
-                CON_putc('%');
+                *str++ = '%';
                 continue;
             }
             /*** characters ***/
             case 'c':
             {
                 char c = (char) va_arg (args, int);
-                CON_putc(c);
+                *str++ = c;
                 continue;
             }
             /*** string ***/
             case 's':
             {
                 const char* s = va_arg (args, char*);
-                CON_puts(s);
+                length = strlen(s);
+                memcpy(str, s, length);
+                str += length;
                 continue;
             }
             /*** integers ***/
             
             case 'd':
             case 'i':
+            // TODO: just negate the number and print a '-' ...
             // {
             //     // TODO not supported, not able to print negative numbers
             //     int i = va_arg (args, int);
@@ -142,28 +173,37 @@ void CON_printf(const char* fmt, ...)
             // }
             case 'u':
             {
-                unsigned u = va_arg (args, unsigned int);
-                char buf[12];
-                CON_puts(itoa(u, buf, 10));
-                continue;
+                base = 10;
+                // number = true;
+                break;
             }
             /*** display in hex ***/
             case 'X':
             case 'x':
             {
-                int i = va_arg (args, int);
-                char buf[12];
-                CON_puts(itoa(i, buf, 16));
-                continue;
+                base = 16;
+                // number = true;
+                break;
             }
             default:
             {
-                CON_putc('%');
-                CON_putc(*fmt);
+                *str++ = '%';
+                *str++ = *fmt;
                 continue;
             }
         }
-    }
 
-    va_end (args);
+        // if(number)
+        {
+            unsigned u = va_arg (args, unsigned int);
+            char buf[12];
+            itoa(u, buf, base);
+            length = strlen(buf);
+            memcpy(str, buf, length);
+            str += length;
+            continue;
+        }
+    }
+    *str++ = 0;
+    return str - s;
 }

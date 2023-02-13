@@ -9,3 +9,12 @@ size_t strlen(const char *str)
 
     return len;
 }
+
+size_t strnlen(const char *str, const size_t max_length)
+{
+    size_t len = 0;
+    while(str[len] != 0 && len < max_length)
+        len++;
+
+    return len;
+}

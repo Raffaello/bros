@@ -6,6 +6,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdarg.h>
 
 #define CON_WIDTH 80
 #define CON_HEIGHT 25
@@ -37,4 +38,6 @@ void CON_newline();
  * move to stdlib
  * // TODO sprintf
 */
-void CON_printf(const char* fmt, ...);
+int  CON_printf(const char* fmt, ...);
+int  CON_sprintf(char* str, const char* fmt, ...);
+int  CON_vsprintf(char* str, const char* fmt, va_list args);
