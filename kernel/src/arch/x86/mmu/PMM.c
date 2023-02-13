@@ -19,17 +19,22 @@
 #define PMM_BLOCK_SIZE      4096
 #define PMM_BLOCK_ALIGN     PMM_BLOCK_SIZE
 
+/**
+ * Aligned page-size memory alloc (block = page)
+ * */
+void *PMM_malloc_blocks(const size_t num_blocks);
+void PMM_free_blocks(void* ptr, const size_t num_blocks);
 
-static uint8_t                      _PMM_boot_drive         = 0;
-static uint32_t                     _PMM_tot_mem            = 0; // should be size_t ?
-static uint32_t                     _PMM_max_blocks         = 0;
-static uint32_t                     _PMM_used_blocks        = 0;
-static bitset32_t                   _PMM_mem_map            = NULL;
-static uint32_t                     _PMM_mem_map_size       = 0;
+static uint8_t      _PMM_boot_drive             = 0;
+static uint32_t     _PMM_tot_mem                = 0; // should be size_t ?
+static uint32_t     _PMM_max_blocks             = 0;
+static uint32_t     _PMM_used_blocks            = 0;
+static bitset32_t   _PMM_mem_map                = NULL;
+static uint32_t     _PMM_mem_map_size           = 0;
 
-static PMM_mem_t*                   _PMM_mem_map_info       = NULL;
-static uint32_t                     _PMM_mem_map_info_length    = 0;
-static paddr_t                      _PMM_cur_paddr          = 0;
+static PMM_mem_t*   _PMM_mem_map_info           = NULL;
+static uint32_t     _PMM_mem_map_info_length    = 0;
+static paddr_t      _PMM_cur_paddr              = 0;
 
 static inline void _PMM_used_blocks_panic(const char* msg)
 {
@@ -157,7 +162,9 @@ void PMM_free_blocks(void* ptr, const size_t num_blocks)
 
 void *PMM_malloc(const size_t size)
 {
-    return PMM_malloc_blocks(_size2block(size));
+    void* ptr = PMM_malloc_blocks(_size2block(size));
+    _PMM_cur_paddr = ((paddr_t) ptr) + size;
+    return ptr;
 }
 
 void PMM_free(void* ptr, const size_t size)
