@@ -10,7 +10,7 @@
 
 _Static_assert(sizeof(size_t) == sizeof(uint32_t));
 
-void* memset(void *buf, int val, size_t n);
+void *memset(void *buf, int val, size_t n);
 void *memcpy(void *dst, const void * src, size_t n);
 // void memcmp();
 

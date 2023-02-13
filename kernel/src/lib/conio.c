@@ -115,6 +115,10 @@ int CON_printf(const char* fmt, ...)
     CON_puts(buf);
 
     return i;
+
+    // TODO clean up
+
+
 }
 
 int  CON_sprintf(char* str, const char* fmt, ...)
@@ -132,7 +136,7 @@ int  CON_sprintf(char* str, const char* fmt, ...)
 int CON_vsprintf(char* str, const char* fmt, va_list args)
 {
     size_t length   = 0;
-    int base        = 0;
+    // int base        = 0;
     // bool number     = false;
     const char* s = str;
 
@@ -182,22 +186,37 @@ int CON_vsprintf(char* str, const char* fmt, va_list args)
             // }
             case 'u':
             {
-                base = 10;
+                // base = 10;
                 // number = true;
-                // unsigned u = va_arg (args, unsigned int);
-                // char buf[12];
-                // itoa(u, buf, base);
-                // length = strlen(buf);
-                // memcpy(str, buf, length);
-                // str += length;
+                unsigned u = va_arg (args, unsigned int);
+                char buf[12];
+                length = strlen(itoa(u, buf, 10));
+                memcpy(str, buf, length);
+                str += length;
+                // for(int i = 0; i<length; ++i)
+                //     *str++=buf[i];
                 continue;
             }
             /*** display in hex ***/
             case 'X':
             case 'x':
             {
-                base = 16;
+                // int i = va_arg (args, int);
+                // char buf[12];
+                // CON_puts(itoa(i, buf, 16));
+                // continue;
+
+                // base = 16;
                 // number = true;
+                // break;
+                int i = va_arg (args, int);
+                char buf[12];
+                length = strlen(itoa(i, buf, 16));
+                memcpy(str, buf, length);
+                str += length;
+                // for(int i = 0; i<length; ++i)
+                //     *str++=buf[i];
+                continue;
             }
             default:
             {
@@ -205,19 +224,18 @@ int CON_vsprintf(char* str, const char* fmt, va_list args)
                 *str++ = *fmt;
                 continue;
             }
-
-            // if(number)
-            {
-                unsigned u = va_arg (args, unsigned int);
-                char buf[12];
-                itoa(u, buf, base);
-                length = strlen(buf);
-                memcpy(str, buf, length);
-                str += length;
-                continue;
-            }
         }
+        // if(number)
+        // {
+        //     unsigned u = va_arg (args, unsigned int);
+        //     char buf[12];
+        //     itoa(u, buf, base);
+        //     length = strlen(buf);
+        //     memcpy(str, buf, length);
+        //     str += length;
+        //     continue;
+        // }
     }
-
+    *str++ = 0;
     return str - s;
 }

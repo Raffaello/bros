@@ -22,8 +22,8 @@ static inline void strcpy_r(const char* src, char* dst, long size)
     // size--;
     register long k = 0;
     for(; k <= size; ++k)
-        dst[k]=src[size-k];
-    dst[k]=0;
+        dst[k] = src[size - k];
+    dst[k] = 0;
 }
 
 char* itoa(unsigned int value, char * str, const uint8_t base)
@@ -49,10 +49,8 @@ char* itoa(unsigned int value, char * str, const uint8_t base)
     strcpy_r(buf, str, i);
     // int k = 0;
     // for(; k <= i; ++k)
-    // {
     //     str[k]=buf[i-k];
-    // }
-    // str[i] = 0;
+    // str[k] = 0;
 
     return str;
 }
