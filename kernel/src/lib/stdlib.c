@@ -47,10 +47,6 @@ char* utoa(unsigned int value, char * str, const uint8_t base)
     // strcpy reversed
     buf[i--] = 0;
     strcpy_r(buf, str, i);
-    // int k = 0;
-    // for(; k <= i; ++k)
-    //     str[k]=buf[i-k];
-    // str[k] = 0;
 
     return str;
 }
@@ -82,10 +78,6 @@ char* itoa(int value, char * str, const uint8_t base)
     // strcpy reversed
     buf[i--] = 0;
     strcpy_r(buf, str, i);
-    // int k = 0;
-    // for(; k <= i; ++k)
-    //     str[k]=buf[i-k];
-    // str[k] = 0;
 
     return str;
 }
@@ -116,10 +108,6 @@ char* ltoa(long value, char* str, const uint8_t base)
     // strcpy reversed
     buf[i--] = 0;
     strcpy_r(buf, str, i);
-    // int k = 0;
-    // for(; k <= i; ++k)
-    //     str[k]=buf[i-k];
-    // str[k] = 0;
-    
+
     return str;
 }
