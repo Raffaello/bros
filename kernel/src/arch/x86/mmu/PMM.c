@@ -22,8 +22,8 @@
 /**
  * Aligned page-size memory alloc (block = page)
  * */
-void *PMM_malloc_blocks(const size_t num_blocks);
-void PMM_free_blocks(void* ptr, const size_t num_blocks);
+// paddr_t _PMM_malloc_blocks(const size_t num_blocks);
+// void    _PMM_free_blocks(paddr_t ptr, const size_t num_blocks);
 
 static uint8_t      _PMM_boot_drive             = 0;
 static uint32_t     _PMM_tot_mem                = 0; // should be size_t ?
@@ -132,29 +132,29 @@ inline int PMM_Blocks_free()
     return _PMM_max_blocks - _PMM_used_blocks;
 }
 
-void *PMM_malloc_blocks(const size_t num_blocks)
+static paddr_t _PMM_malloc_blocks(const size_t num_blocks)
 {
     if (PMM_Blocks_free() < num_blocks)
-        return NULL;
+        return 0;
 
     unsigned int pos;
     if(!bitset_find(_PMM_mem_map, _PMM_mem_map_size, num_blocks, &pos))
-        return NULL;
+        return 0;
     
     for(size_t i = 0; i < num_blocks; ++i)
         bitset_set(_PMM_mem_map, pos + i);
 
     _PMM_used_blocks += num_blocks;
 
-    return (void*) (pos * PMM_BLOCK_SIZE);
+    return pos * PMM_BLOCK_SIZE;
 }
 
-void PMM_free_blocks(void* ptr, const size_t num_blocks)
+static void _PMM_free_blocks(paddr_t ptr, const size_t num_blocks)
 {
     if (_PMM_used_blocks < num_blocks)
-        KERNEL_PANIC("PMM_free_blocks");
+        _PMM_used_blocks_panic("PMM_free_blocks");
 
-    unsigned int pos = ((unsigned int) ptr) / PMM_BLOCK_SIZE;
+    unsigned int pos = ptr / PMM_BLOCK_SIZE;
     for(size_t i = 0; i < num_blocks; i++)
         bitset_clear(_PMM_mem_map, pos + i);
     _PMM_used_blocks -= num_blocks;
@@ -162,14 +162,14 @@ void PMM_free_blocks(void* ptr, const size_t num_blocks)
 
 void *PMM_malloc(const size_t size)
 {
-    void* ptr = PMM_malloc_blocks(_size2block(size));
-    _PMM_cur_paddr = ((paddr_t) ptr) + size;
-    return ptr;
+    paddr_t ptr = _PMM_malloc_blocks(_size2block(size));
+    _PMM_cur_paddr = ptr + size;
+    return (void*) ptr;
 }
 
 void PMM_free(void* ptr, const size_t size)
 {
-    PMM_free_blocks(ptr, _size2block(size));
+    _PMM_free_blocks((paddr_t) ptr, _size2block(size));
 }
 
 void *PMM_malloc_linear(const size_t size)
