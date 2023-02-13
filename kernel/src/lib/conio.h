@@ -1,5 +1,5 @@
 // **************************************
-// *** Console I/O (aka stdio.h)        *
+// *** Console I/O                      *
 // *** High-Level routines to deal with *
 // *** VGA Text Mode 3                  *
 // **************************************
