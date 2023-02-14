@@ -79,3 +79,10 @@ bool VMM_init();
 bool VMM_switch_page_directory(page_directory_t* page_directory);
 void VMM_enable_paging();
 void VMM_disable_paging();
+// TODO: VMM_alloc_page ? (alloc_Frame)
+//       free_page ... etc..
+// Frame allocation
+
+void VMM_frame_alloc(PTE_t* pte, bool isWritable, bool isUserMode);
+void VMM_frame_free(PTE_t* pte);
+void VMM_frame_get();

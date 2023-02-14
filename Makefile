@@ -65,6 +65,7 @@ gdb-kernel-debug:
 		-ex 'b ${KERNEL_DIR}/src/main.c:16' \
 		-ex 'b ${KERNEL_DIR}/src/arch/x86/mmu/PMM.c:171' \
 		-ex 'b ${KERNEL_DIR}/src/arch/x86/mmu/VMM.c:74' \
+		-ex 'b ${KERNEL_DIR}/src/arch/x86/mmu/VMM.c:131' \
 		-ex 'set disassembly-flavor intel' \
 		-ex 'continue'
 

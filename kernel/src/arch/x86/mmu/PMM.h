@@ -1,8 +1,15 @@
-/************************************
- * Physical Memory Manager          *
- *   continuos mem areas            *
- * susceptible to fragmentation     *
- ************************************/
+/************************************************************
+ * Physical Memory Manager                                  *
+ *   continuos mem areas                                    *
+ * susceptible to fragmentation                             *
+ * used with VMM and paging                                 *
+ *                                                          *
+ * TODO: the bitsets used here are more for paging          *
+ *       rather than for physical memory                    *
+ *       this bitset allocation is more for frames (paging) *
+ *       TODO: move in VMM instead                          *
+ *       and manage differently phisical memory             *
+ ************************************************************/
 #pragma once
 
 #include <stdint.h>
