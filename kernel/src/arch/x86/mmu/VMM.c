@@ -83,9 +83,9 @@ bool VMM_init()
 {
     // TODO pass MemMap informations
 
-    _kernel_directory = PMM_malloc(sizeof(page_directory_t));
+    _kernel_directory = PMM_malloc_aligned(sizeof(page_directory_t));
 
-    page_table_t* page_table  = PMM_malloc(sizeof(page_table_t));
+    page_table_t* page_table  = PMM_malloc_aligned(sizeof(page_table_t));
 
     if(page_table == NULL || _kernel_directory == NULL)
         return false;
@@ -98,7 +98,9 @@ bool VMM_init()
     // first 1MB identity (here are 4MB)
     for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
     {
-        page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
+        // page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
+        CON_printf("table %u\n", i);
+        VMM_frame_alloc(&page_table->entries[i], true, false);
     }
 
     _kernel_directory->entries[0] = (PDE_t) page_table | PDE_PRESENT | PDE_WRITABLE;
@@ -129,7 +131,7 @@ void VMM_frame_alloc(PTE_t* pte, bool isWritable, bool isUserMode)
         return;
 
     // TODO PMM to be reviewed, not ok
-    paddr_t frame = (paddr_t) PMM_malloc(PAGE_SIZE);
+    paddr_t frame = (paddr_t) PMM_malloc_aligned(PAGE_SIZE);
     if (frame == 0)
         KERNEL_PANIC("can't alloc frame");
 
@@ -145,12 +147,12 @@ void VMM_frame_free(PTE_t* pte)
     if(PTE_GET_FRAME(*pte) == 0)
         return;
     // TODO: PMM is not ok in this way.
-    PMM_free((void*)PTE_GET_FRAME(*pte), PAGE_SIZE);
+    PMM_free_aligned((void*)PTE_GET_FRAME(*pte), PAGE_SIZE);
     PTE_CLEAR_FRAME(*pte);
 }
 
 void VMM_frame_get(paddr_t addr, page_directory_t* page_dir)
 {
-    const uint32_t index = PDE_GET_INDEX(addr);
-    const uint32_t t_index = index / PAGE_DIR_ENTRIES;
+    // const uint32_t index = PDE_GET_INDEX(addr);
+    // const uint32_t t_index = index / PAGE_DIR_ENTRIES;
 }
