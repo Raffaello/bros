@@ -79,3 +79,18 @@ bool VMM_init();
 bool VMM_switch_page_directory(page_directory_t* page_directory);
 void VMM_enable_paging();
 void VMM_disable_paging();
+// TODO: VMM_alloc_page ? (alloc_Frame)
+//       free_page ... etc..
+// Frame allocation
+// TODO review PMM and VMM, the physical memory manager is not ok as it is now.
+// TODO VMM works in "BLOCKS" (PAGES) not physical memory.
+// TOOD: also after VMM alloc pages need to be used like physical memory even if it is linear memory,
+//       need a LMM?
+
+// anyway PMM is not ok as those malloc are more related to VMM
+// need a simpler strategy for PMM first
+// then enable paging, then tracking memory etc... (or tracking memory first, then..)
+
+void VMM_frame_alloc(PTE_t* pte, bool isWritable, bool isUserMode);
+void VMM_frame_free(PTE_t* pte);
+void VMM_frame_get();

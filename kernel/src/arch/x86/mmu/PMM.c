@@ -14,12 +14,21 @@
 // TODO need a more efficient malloc that doesnt alloc a PAGE/BLOCK at time, too much memory wasteful
 //      especially for the internal kernel variables
 
-#define PMM_MEM_MAP_BLOCKS_PER_BYTE 8
+
+// consider to have a 2nd level block malloc,
+// each PAGE/BLOCK of 4096, have a metadata at the beginning
+// that mark the start and size, maybe something at the end to mark the end as barrier.
+// in this way it can be more flexible even if wasting some memory, but it might
+// be simpler to dealloc, and fragment memory, maybe...
+
+
+#define PMM_MEM_MAP_BLOCK_PER_BYTE     8  // 8 blocks in 1 byte
+#define PMM_MEM_MAP_BLOCK_PER_BITSET   (PMM_MEM_MAP_BLOCK_PER_BYTE * sizeof(bitset32_t))   // one chunk of bitset is 32 blocks
 // PAGE_SIZE
 #define PMM_BLOCK_SIZE      4096
 #define PMM_BLOCK_ALIGN     PMM_BLOCK_SIZE
 
-
+_Static_assert(PMM_MEM_MAP_BLOCK_PER_BITSET == 32);
 
 static uint8_t      _PMM_boot_drive             = 0;
 static uint32_t     _PMM_tot_mem                = 0; // should be size_t ?
@@ -51,7 +60,7 @@ static paddr_t _PMM_malloc_blocks(const size_t num_blocks)
 
     unsigned int pos;
     if(!bitset_find(_PMM_mem_map, _PMM_mem_map_size, num_blocks, &pos))
-        return 0;
+        return 0; // this should be an error as it is supposed to find 1
     
     for(size_t i = 0; i < num_blocks; ++i)
         bitset_set(_PMM_mem_map, pos + i);
@@ -78,9 +87,16 @@ void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start, const uint8
     _PMM_tot_mem        = tot_mem_KB;
     _PMM_max_blocks     = tot_mem_KB * 1024 / PMM_BLOCK_SIZE; // there is no extra block in this case for the reminder
     _PMM_used_blocks    = _PMM_max_blocks;
-    
 
-    _PMM_mem_map_size   = _PMM_max_blocks / PMM_MEM_MAP_BLOCKS_PER_BYTE;
+    _PMM_mem_map_size   = _PMM_max_blocks / PMM_MEM_MAP_BLOCK_PER_BYTE;
+    if(_PMM_mem_map_size % PMM_MEM_MAP_BLOCK_PER_BYTE)
+        _PMM_mem_map_size++;
+
+    // align bitset mem_map size, the extra bits won't be used.
+    _PMM_mem_map_size  = _PMM_mem_map_size +
+        + PMM_MEM_MAP_BLOCK_PER_BITSET
+        - _PMM_mem_map_size % PMM_MEM_MAP_BLOCK_PER_BITSET;
+
     _PMM_mem_map        = (bitset32_t) physical_mem_start;
     _PMM_cur_paddr      = physical_mem_start + _PMM_mem_map_size;
 
@@ -134,7 +150,7 @@ void PMM_MemMap_deinit_kernel(const uint32_t code_start, const uint32_t code_siz
 void PMM_store_MemMapInfo(const uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* mem_map)
 {
     _PMM_mem_map_info_length = num_entries;
-    _PMM_mem_map_info = PMM_malloc_linear(sizeof(PMM_mem_t) * _PMM_mem_map_info_length);
+    _PMM_mem_map_info = PMM_malloc(sizeof(PMM_mem_t) * _PMM_mem_map_info_length);
     if(_PMM_mem_map_info == NULL)
         KERNEL_PANIC("PMM_store_MemMapInfo");
 
@@ -156,29 +172,29 @@ inline int PMM_Blocks_free()
     return _PMM_max_blocks - _PMM_used_blocks;
 }
 
-void *PMM_malloc(const size_t size)
+void *PMM_malloc_aligned(const size_t size)
 {
     paddr_t ptr = _PMM_malloc_blocks(_size2block(size));
     _PMM_cur_paddr = ptr + size;
     return (void*) ptr;
 }
 
-void PMM_free(void* ptr, const size_t size)
+void PMM_free_aligned(void* ptr, const size_t size)
 {
     _PMM_free_blocks((paddr_t) ptr, _size2block(size));
 }
 
-void *PMM_malloc_linear(const size_t size)
+void *PMM_malloc(const size_t size)
 {
     // check if current block is allocated
     if(!bitset_test(_PMM_mem_map, _PMM_cur_paddr / PMM_BLOCK_SIZE))
-        return PMM_malloc(size);
+        return PMM_malloc_aligned(size);
     
     // already allocated so reuse the same block (page)
     size_t avail = _PMM_cur_paddr % PMM_BLOCK_SIZE;
     paddr_t tmp = _PMM_cur_paddr;
     // mark next block(s) allocated
-    if(size > avail && PMM_malloc(size - avail) == NULL)
+    if(size > avail && PMM_malloc_aligned(size - avail) == NULL)
         _PMM_used_blocks_panic("PMM_kmalloc no more free memory");
     
     // size here is <= avail, or if greater next block(s) are allocated
