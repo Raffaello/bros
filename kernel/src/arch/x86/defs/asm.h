@@ -4,7 +4,7 @@
 #pragma once
 
 #define ASM_BEGIN(x) \
-    .globl x; \
+    .global x; \
     x:
 
 #define ASM_END(x) \
