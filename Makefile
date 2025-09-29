@@ -33,7 +33,7 @@ ifneq ($(BUILD_TYPE), $(filter $(BUILD_TYPE), debug release reldbg))
 $(error BUILD_TYPE must be one of 'debug', 'release', 'reldbg')
 endif
 
-.PHONY: kernel
+.PHONY: kernel bios_bootloader
 
 all: image
 
@@ -42,6 +42,7 @@ t:
 	echo $(BUILD_DIR)
 	echo $(BIN_DIR)
 	echo $(filter $(BUILD_TYPE), debug release reldbg)
+	echo ${FLOPPY_IMAGE_NAME}
 
 bios_bootloader:
 	+$(MAKE) -C ${BIOS_BL_DIR} all
@@ -74,5 +75,6 @@ bochs-debug:
 clean:
 	+$(MAKE) -C ${BIOS_BL_DIR} clean
 	+$(MAKE) -C ${KERNEL_DIR} clean
-	rm ${BIN_DIR}/* -fv
+	rm $-rf{BIN_DIR}/* -rfv
+	rm ${BUILD_DIR}/* -rfv
 	rm ${FLOPPY_IMAGE_NAME} -fv

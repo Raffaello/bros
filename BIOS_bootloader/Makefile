@@ -20,6 +20,8 @@ SYS_INFO_SEG=0x600 # it will replace the FAT_BUFFER_SEG after the kernel is load
 
 all: image
 
+.PHONY: all image
+
 clean:
 	rm ${BUILD_DIR}/* -frv
 
