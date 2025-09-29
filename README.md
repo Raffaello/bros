@@ -105,7 +105,7 @@ The actual memory mapping is:
     so after have scanned the linked list of the file, the FAT table can be disposed and it is replaced by the kernel itself.
 
 
-3. Finaly the kernel is loaded at `0x1000`, after that is executed.
+3. Finally the kernel is loaded at `0x1000`, after that is executed.
 
 
 ## The Kernel (32 bits)
@@ -124,7 +124,7 @@ At its very entry point, it performs some validation checks, it has been loaded 
 
  **NOTE:**
 
-The same thing of "storing the file on the filesystem (FAT12)" could have been done similarly for the bootloader (2nd stage), the boot sector loads the bootloader, but i prefered to exploit the FAT filesystem using few extra reserved sectors, instead to store the extra bootloader code as a file.
+The same thing of "storing the file on the filesystem (FAT12)" could have been done similarly for the bootloader (2nd stage), the boot sector loads the bootloader, but i preferred to exploit the FAT filesystem using few extra reserved sectors, instead to store the extra bootloader code as a file.
 
  ### Memory Management
 
@@ -138,9 +138,9 @@ It is using an identity paging for the first 4MB of RAM only at the moment.
 
 #### Physical Memory Management
 
-for now a simple silly bitset allocation and tracking. slow to find a free chunk, suscetible to fragmentation
+for now a simple silly bitset allocation and tracking. slow to find a free chunk, susceptible to fragmentation
 
-> TOOD improvements
+> TODO improvements
 
 #### Virtual Memory Management
 

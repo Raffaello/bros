@@ -5,7 +5,7 @@ FLOPPY_IMAGE_NAME:=../${FLOPPY_IMAGE_NAME}
 SRC_DIR=src
 
 # NOTE: When working on fixing compiling optimization issues the below TODO could be resolved.
-# TODO: Furher sub-makefiles might be required to define optimizaions/options to compiler/linker
+# TODO: Further sub-makefiles might be required to define optimizations/options to compiler/linker
 #       also need to be later on expanded, listing each single file,
 #       so a further control at file level could be achieved.
 #       for now is ok in this way at the moment.
