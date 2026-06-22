@@ -54,7 +54,7 @@ image: bios_bootloader kernel
 	mdir -i ${FLOPPY_IMAGE_NAME} -a
 
 gdb-kernel-debug:
-	qemu-system-i386 -fda ${FLOPPY_IMAGE_NAME} -S -s &
+	qemu-system-i386 -drive file=${FLOPPY_IMAGE_NAME},if=floppy,format=raw -S -s &
 	gdb ${KERNEL_DIR}/${BUILD_DIR}/kernel.out \
 		-ex 'target remote localhost:1234' \
 		-ex 'layout src' \
