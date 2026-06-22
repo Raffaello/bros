@@ -6,7 +6,8 @@ RUN dnf -y install \
     gdb \
     mtools \
     qemu \
-    bochs
+    bochs \
+    bochs-debugger
 
 WORKDIR /code
 
