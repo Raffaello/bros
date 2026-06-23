@@ -149,7 +149,7 @@ main32:
   mov ds, ax
   mov ss, ax
   mov es, ax
-  mov esp, 0x1000               # stack start below the loaded kernel
+  mov esp, KERNEL_SEG              # stack start below the loaded kernel
   # Store kernel parameters
   mov eax, 0x42524F53           # Bootloader Magic value
   mov ebx, SYS_INFO_SEG         # System Info struct address
