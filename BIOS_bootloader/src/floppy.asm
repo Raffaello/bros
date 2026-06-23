@@ -30,7 +30,7 @@ bootsector:
   RootEntCnt:      .word  _RootEntCnt  # size of root directory (512 FAT16)
   TotSec16:        .word  _TotSec16    # total # of sectors if over 32 MB
   media:           .byte  0xF0         # media Descriptor (F0=removable)
-  FATSz16:         .word  9            # size of each FAT
+  FATSz16:         .word  _FATSz16     # size of each FAT
   SecPerTrk:       .word  _SecPerTrk   # sectors per track, 18 if 1.44MB Floppy
   NumHeads:        .word  _NumHeads    # number of read-write heads
   HiddenSec:       .int   0            # number of hidden sectors

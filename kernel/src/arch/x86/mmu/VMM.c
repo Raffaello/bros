@@ -20,9 +20,9 @@
 #define PTE_USERMODE 4
 
 
-#define PDE_PRESENT   1
-#define PDE_WRITABLE  2
-#define PDE_USERMDODE 4
+#define PDE_PRESENT  1
+#define PDE_WRITABLE 2
+#define PDE_USERMODE 4
 
 
 static page_directory_t* _kernel_directory  = NULL;
