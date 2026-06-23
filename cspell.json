@@ -108,6 +108,7 @@
         "TERMINALCOUNT",
         "textconfig",
         "Tkernel",
+        "Ttext",
         "UEFI",
         "utoa",
         "VGABIOS",
