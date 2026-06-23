@@ -22,19 +22,19 @@ _start:
 # OEM Parameter Block
 .org 0x3                            # Ensure the BPB starts at the correct place
 bootsector:
-  OEM:          .ascii  "--BROS--"    # OEM String (starting at offset 3)
-  BytsPerSec:   .word  _BytsPerSec  # bytes per sector
-  SecPerClus:   .byte  _SecPerClus  # sectors per cluster
-  RsvdSecCnt:   .word  _RsvdSecCnt  # #of reserved sectors (2nd stage bootloader)
-  NumFATs:      .byte  _NumFATs     # #of FAT copies
-  RootEntCnt:   .word  _RootEntCnt  # size of root directory (512 FAT16)
-  TotSec16:     .word  _TotSec16    # total # of sectors if over 32 MB
-  media:        .byte  0xF0         # media Descriptor (F0=removible)
-  FATSz16:      .word  9            # size of each FAT
-  SecPerTrk:    .word  _SecPerTrk   # sectors per track, 18 if 1.44MB Floppy
-  NumHeads:     .word  _NumHeads    # number of read-write heads
-  HiddSec:      .int   0            # number of hidden sectors
-  TotSec32:     .int   0            # # sectors for over 32 MB
+  OEM:             .ascii  "--BROS--"    # OEM String (starting at offset 3)
+  BytesPerSec:     .word  _BytesPerSec  # bytes per sector
+  SecPerCluster:   .byte  _SecPerCluster  # sectors per cluster
+  RsvdSecCnt:      .word  _RsvdSecCnt  # #of reserved sectors (2nd stage bootloader)
+  NumFATs:         .byte  _NumFATs     # #of FAT copies
+  RootEntCnt:      .word  _RootEntCnt  # size of root directory (512 FAT16)
+  TotSec16:        .word  _TotSec16    # total # of sectors if over 32 MB
+  media:           .byte  0xF0         # media Descriptor (F0=removable)
+  FATSz16:         .word  9            # size of each FAT
+  SecPerTrk:       .word  _SecPerTrk   # sectors per track, 18 if 1.44MB Floppy
+  NumHeads:        .word  _NumHeads    # number of read-write heads
+  HiddenSec:       .int   0            # number of hidden sectors
+  TotSec32:        .int   0            # # sectors for over 32 MB
 
   # --- END FAT12/16 compatibility with FAT32 ---
 
@@ -120,7 +120,7 @@ bootFailure:
   call BootFailure
 
 # PROGRAM DATA
-banner_msg:       .asciz "\r\n     #### |-=*.*=-| BROS FAT Bootlader |-=*.*=-| ####\r\n\r\n"
+banner_msg:       .asciz "\r\n    #### |-=*.*=-| BROS FAT Bootloader |-=*.*=-| ####\r\n\r\n"
 mem_msg:          .asciz "Real Mode Free Memory (BIOS): "
 kb_unit_msg:      .asciz "KB"
 read_rsv_sec_msg: .asciz "Reading Reserved Sectors"

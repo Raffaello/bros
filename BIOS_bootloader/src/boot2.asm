@@ -75,7 +75,7 @@ load_fat:
 
   # pop dx  # dx
   # pop cx  # cx
-  pop ax  # bx (Numluster)
+  pop ax  # bx (Num cluster)
   # pop ax  # ax Restore Kernel RootDir Index
   # -- #
   mov bx, KERNEL_SEG
@@ -173,4 +173,4 @@ ok_msg:                 .asciz "OK"
 pmode_msg:              .asciz "Enabling Protected Mode and starting Kernel"
 press_a_key_msg:        .asciz "Press any key."
 
-.fill ((_BytsPerSec * (_RsvdSecCnt - 1)) -(. - _start)), 1, 0
+.fill ((_BytesPerSec * (_RsvdSecCnt - 1)) -(. - _start)), 1, 0

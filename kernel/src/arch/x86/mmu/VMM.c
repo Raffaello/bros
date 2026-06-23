@@ -5,7 +5,7 @@
 #include <arch/x86/ISR_IRQ.h>
 #include <lib/conio.h>
 
-#define PAGE_SIZE   4096
+#define PAGE_SIZE 4096
 
 // #define PAGE_DIR_INDEX(x) (((x) >> 22) & 0x3FF)
 // #define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
@@ -14,15 +14,15 @@
 // #define CR0_PG_MASK 0x80000000
 
 
-#define PTE_FRAME(x)    (x << 12)
-#define PTE_PRESENT     1
-#define PTE_WRITABLE    2
-#define PTE_USERMODE    4
+#define PTE_FRAME(x) (x << 12)
+#define PTE_PRESENT  1
+#define PTE_WRITABLE 2
+#define PTE_USERMODE 4
 
 
-#define PDE_PRESENT     1
-#define PDE_WRITABLE    2
-#define PDE_USERMDODE   4
+#define PDE_PRESENT   1
+#define PDE_WRITABLE  2
+#define PDE_USERMDODE 4
 
 
 static page_directory_t* _kernel_directory  = NULL;
@@ -38,7 +38,7 @@ static page_directory_t* _current_directory = NULL;
  * bit 4  (I/D) Instruction/Data flag (1=instruction fetch, 0=data access)  *
  * bit 5  (PK) indicates a protection-key violation                         *
  * bit 6  (SS) indicates a shadow-stack access fault                        *
- * bit 15 (SGX) indicates an SGX violaton                                   *
+ * bit 15 (SGX) indicates an SGX violation                                  *
  *                                                                          *
  * The combination of these flags specify the details of                    *
  * the page fault and indicate what action to take:                         *
@@ -58,10 +58,10 @@ void page_fault_handler(ISR_registers_t regs)
     // A page fault has occurred.
     // The faulting address is stored in the CR2 register.
     uint32_t faulting_addr;
-    __asm__ volatile("mov %0, cr2" : "=r" (faulting_addr));
+    __asm__ volatile("mov %0, cr2" : "=r"(faulting_addr));
 
     // TODO
-    
+
     // The error code gives us details of what happened.
     // int present   = !(regs.err_code & 0x1); // Page not present
     // int rw = regs.err_code & 0x2;           // Write operation?
@@ -78,9 +78,9 @@ bool VMM_init()
 
     _kernel_directory = PMM_malloc(sizeof(page_directory_t));
 
-    page_table_t* page_table  = PMM_malloc(sizeof(page_table_t));
+    page_table_t* page_table = PMM_malloc(sizeof(page_table_t));
 
-    if(page_table == NULL || _kernel_directory == NULL)
+    if (page_table == NULL || _kernel_directory == NULL)
         return false;
 
     memset(_kernel_directory, 0, sizeof(page_directory_t));
@@ -107,11 +107,11 @@ bool VMM_init()
 
 bool VMM_switch_page_directory(page_directory_t* page_directory)
 {
-    if(page_directory == NULL)
+    if (page_directory == NULL)
         return false;
 
     _current_directory = page_directory;
-    __asm__ volatile("mov cr3, %0": : "a"(page_directory));
+    __asm__ volatile("mov cr3, %0" : : "a"(page_directory));
 
     return true;
 }

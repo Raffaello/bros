@@ -6,7 +6,7 @@
  *** 32 bit paging only for now (PAE later?)                            ***
  *** 2 Level paging only 4KB pages                                      ***
  *** TODO:                                                              ***
- *** opimizing page size on process based with 3 level paging e.g.:     ***
+ *** optimizing page size on process based with 3 level paging e.g.:    ***
  *** mix 4k, 2MB and 1GB pages. No need to use uniform page size.       ***
  *** So a process having 9MB of data can get 4 2MB pages and            ***
  *** the rest with 4k pages.                                            ***
@@ -19,8 +19,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define PAGE_DIR_ENTRIES    1024
-#define PAGE_TABLE_ENTRIES  1024
+#define PAGE_DIR_ENTRIES   1024
+#define PAGE_TABLE_ENTRIES 1024
 
 // NOTE: It is more performant just using uint32_t instead of structs...
 
@@ -42,15 +42,15 @@
 
 // typedef struct PTE_t
 // {
-//     uint32_t p          : 1;     // Present bit (must be 1, 0 otheerwise OS can use it for swap)
+//     uint32_t p          : 1;     // Present bit (must be 1, 0 otherwise OS can use it for swap)
 //     uint32_t rw         : 1;     // if 0 write may not be allowed
 //     uint32_t us         : 1;     // if 0 User mode not allowed to access the page referenced by this entry.
 //     uint32_t pwt        : 1;     // Page level Write Through
 //     uint32_t pcd        : 1;     // Page level Cache Disabled
 //     uint32_t a          : 1;     // Accessed?
 //     uint32_t d          : 1;     // Dirty?
-//     uint32_t pat        : 1;     // if PAT supported, otherwise reseverd (must be 0)
-//     uint32_t g          : 1;     // Global; if CR3.PGE=1 determines wheter the translation is global. Otherwise ignored
+//     uint32_t pat        : 1;     // if PAT supported, otherwise reserved (must be 0)
+//     uint32_t g          : 1;     // Global; if CR3.PGE=1 determines whether the translation is global. Otherwise ignored
 //     uint32_t ignored    : 3;     // ignored
 //     uint32_t frame      : 20;    // Physical address of 4KB page referenced by this entry.
 // } __attribute__((aligned(4))) PTE_t;
@@ -63,16 +63,18 @@ typedef struct page_table_t
 {
     PTE_t entries[PAGE_TABLE_ENTRIES];
 } page_table_t;
+
 _Static_assert(sizeof(page_table_t) == PAGE_TABLE_ENTRIES * sizeof(uint32_t));
 
 typedef struct page_directory_t
 {
-    PDE_t  entries[PAGE_DIR_ENTRIES];
-    
+    PDE_t entries[PAGE_DIR_ENTRIES];
+
     // page_table_t* page_tables[PAGE_TABLE_ENTRIES];
     // uint32_t page_table_physical[1024];
     // uint32_t physical_addr;
 } page_directory_t;
+
 _Static_assert(sizeof(page_directory_t) == PAGE_DIR_ENTRIES * sizeof(uint32_t));
 
 bool VMM_init();

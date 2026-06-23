@@ -5,4 +5,4 @@
 
 #include <stdbool.h>
 
-bool isdigit(const char ch); // not like C-standard definition
+bool isdigit(const char ch);    // not like C-standard definition

@@ -96,7 +96,7 @@ The actual memory mapping is:
 2. The 2nd stage Boot is loaded at `0x7C00`, at the original boot memory location.
 
 
-    This step uses the `0x1000` location for loading the Fat Root Directory, then the FAT and finaly the kernel.
+    This step uses the `0x1000` location for loading the Fat Root Directory, then the FAT and finally the kernel.
 
     The stack during the bootloader process is set to start from `0x600-2` = `0x5FE`
 
@@ -205,7 +205,7 @@ TODO: test it with VirtualBox.
 
 - to run using `qemu`: `qemu-system-i386 -fda br-dos.img` or similar.
 - to run with  `bochs`: `bochs -q -f bochs.rs` or similar.
-- to run with `bochs` debbugger: `bochs-debugger -q -f bochs.rs` or similar
+- to run with `bochs` debugger: `bochs-debugger -q -f bochs.rs` or similar
 
 To debug can be used `gdb`: `target remote localhost:1234`
 

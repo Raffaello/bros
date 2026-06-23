@@ -15,7 +15,7 @@ BIN_DIR.debug=bin/debug
 # release
 BUILD_DIR.release=build/release
 BIN_DIR.release=bin/release
-# releae with debug info
+# release with debug info
 BUILD_DIR.reldbg=build/reldbg
 BIN_DIR.reldbg=bin/reldbg
 

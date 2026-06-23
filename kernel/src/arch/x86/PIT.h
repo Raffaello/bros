@@ -10,11 +10,11 @@
 void PIT_init(const uint32_t freq);
 
 /**
- * freq is in Herz, if 0 no changes.
+ * freq is in Hertz, if 0 no changes.
  */
 void PIT_set_timer_freq(const uint32_t freq);
 
 /* This will continuously loop until the given time has
-*  been reached */
+ *  been reached */
 // TODO: shouldn't be here.... rather a "stdlib" or something
 void sleep(const unsigned int ticks_);

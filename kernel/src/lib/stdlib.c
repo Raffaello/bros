@@ -2,11 +2,11 @@
 #include <lib/ctype.h>
 #include <stddef.h>
 
-int atoi (const char * str)
+int atoi(const char* str)
 {
     register int res = 0;
- 
-    for(size_t i = 0; isdigit(str[i]); ++i)
+
+    for (size_t i = 0; isdigit(str[i]); ++i)
         res = res * 10 + str[i] - '0';
 
     return res;
@@ -21,12 +21,12 @@ static inline void strcpy_r(const char* src, char* dst, long size)
 {
     // size--;
     register long k = 0;
-    for(; k <= size; ++k)
+    for (; k <= size; ++k)
         dst[k] = src[size - k];
     dst[k] = 0;
 }
 
-char* utoa(unsigned int value, char * str, const uint8_t base)
+char* utoa(unsigned int value, char* str, const uint8_t base)
 {
     // if (base!=10 || base !=16)
     // {
@@ -36,14 +36,15 @@ char* utoa(unsigned int value, char * str, const uint8_t base)
 
     register int r = 0;
     register int i = 0;
-    char buf[12];
-    const char *alphadigit = "0123456789ABCDEF";
+    char         buf[12];
+    const char*  alphadigit = "0123456789ABCDEF";
     do
     {
-        r = value % base;
-        value /= base;
-        buf[i++] = alphadigit[r];
-    } while(value > 0);
+        r         = value % base;
+        value    /= base;
+        buf[i++]  = alphadigit[r];
+    }
+    while (value > 0);
     // strcpy reversed
     buf[i--] = 0;
     strcpy_r(buf, str, i);
@@ -51,7 +52,7 @@ char* utoa(unsigned int value, char * str, const uint8_t base)
     return str;
 }
 
-char* itoa(int value, char * str, const uint8_t base)
+char* itoa(int value, char* str, const uint8_t base)
 {
     // if (base!=10 || base !=16)
     // {
@@ -61,20 +62,21 @@ char* itoa(int value, char * str, const uint8_t base)
 
     register int r = 0;
     register int i = 0;
-    char buf[13];
-    const char *alphadigit = "0123456789ABCDEF";
+    char         buf[13];
+    const char*  alphadigit = "0123456789ABCDEF";
 
     if (value < 0)
     {
         buf[i++] = '-';
-        value = -value;
+        value    = -value;
     }
     do
     {
-        r = value % base;
-        value /= base;
-        buf[i++] = alphadigit[r];
-    } while(value > 0);
+        r         = value % base;
+        value    /= base;
+        buf[i++]  = alphadigit[r];
+    }
+    while (value > 0);
     // strcpy reversed
     buf[i--] = 0;
     strcpy_r(buf, str, i);
@@ -91,20 +93,21 @@ char* ltoa(long value, char* str, const uint8_t base)
 {
     register long r = 0;
     register long i = 0;
-    char buf[21]; //  9223372036854775807
-    const char *alphadigit = "0123456789ABCDEF";
+    char          buf[21];    // 9223372036854775807
+    const char*   alphadigit = "0123456789ABCDEF";
 
     if (value < 0)
     {
         buf[i++] = '-';
-        value = -value;
+        value    = -value;
     }
     do
     {
-        r = value % base;
-        value /= base;
-        buf[i++] = alphadigit[r];
-    } while(value > 0);
+        r         = value % base;
+        value    /= base;
+        buf[i++]  = alphadigit[r];
+    }
+    while (value > 0);
     // strcpy reversed
     buf[i--] = 0;
     strcpy_r(buf, str, i);
