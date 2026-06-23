@@ -2,7 +2,7 @@
  * the code generated from the functions in this file are "disposable"
  * used only once as entry point, afterwards the code could be reclaimed.
  * this is the kernel bootstrap phase
-*/
+ */
 
 #include <stddef.h>
 #include <stdint.h>
@@ -19,20 +19,20 @@
 #include <sys/panic.h>
 
 
-noreturn void  _start();
+noreturn void _start();
 noreturn void _start_init();
-void _start_VGA_init();
-void _start_boot_info(volatile boot_SYS_Info_t* _sys_info);
-void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size);
+void          _start_VGA_init();
+void          _start_boot_info(volatile boot_SYS_Info_t* _sys_info);
+void          _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size);
 
 /*
  * TODO:
  *  conforming freestanding implementation is only required to provide certain library facilities:
  *  those in <float.h>, <limits.h>, <stdarg.h>, and <stddef.h>; since AMD1, also those in <iso646.h>;
- *  since C99, also those in <stdbool.h> and <stdint.h>; and since C11, also those in <stdalign.h> 
- * and <stdnoreturn.h>. In addition, complex types, added in C99, 
+ *  since C99, also those in <stdbool.h> and <stdint.h>; and since C11, also those in <stdalign.h>
+ * and <stdnoreturn.h>. In addition, complex types, added in C99,
  * are not required for freestanding implementations.
-*/
+ */
 
 #if (!defined(DEBUG) && !defined(NDEBUG))
 #error "DEBUG or NDEBUG is not defined"
@@ -40,18 +40,19 @@ void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_e
 
 
 #ifndef KERNEL_SEG
-    #error KERNEL_SEG define missing
+#error KERNEL_SEG define missing
 #endif
-#define KERNEL_ADDR ((uint32_t*)(KERNEL_SEG))
+#define KERNEL_ADDR ((uint32_t*) (KERNEL_SEG))
 
 // TODO: this function can be merged with the other _start_init
 //       i don't think there is nothing to do ...
 __attribute__((section(".text._start"), naked, weak))
-noreturn void  _start()
+noreturn void
+_start()
 {
     // extern uint32_t __stack_end;
 
-    __asm__ ("cli");
+    __asm__("cli");
 
 
     // TODO relocate the kernel to where?
@@ -66,11 +67,12 @@ noreturn void  _start()
     //      somewhere else.
 
     // __asm__ volatile("mov esp, %0"::"i"(&__stack_end));
-    __asm__ volatile("jmp %0"::"i"(&_start_init));
+    __asm__ volatile("jmp %0" ::"i"(&_start_init));
 }
 
 __attribute__((section(".text._start_init"), force_align_arg_pointer, weak))
-noreturn void _start_init()
+noreturn void
+_start_init()
 {
     uint32_t _eax, _ebx;
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
@@ -78,30 +80,29 @@ noreturn void _start_init()
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmultichar"
-    uint32_t __BROS = (uint32_t)('BROS');
+    uint32_t __BROS = (uint32_t) ('BROS');
 #pragma GCC diagnostic pop
     // 1. check boot sector EAX value
     // 2. point to EBX SYS_INFO struct
     // 3. if not in the Kernel aspected address...
-    boot_SYS_Info_t* _sys_info = (boot_SYS_Info_t*) _ebx;
-    const uint32_t* _sys_info_end_marker = SYS_INFO_END_MARKER_PTR(_sys_info);
-    extern void _start();
-    const uint32_t* _startPtr = (uint32_t*)&_start;
+    boot_SYS_Info_t* _sys_info            = (boot_SYS_Info_t*) _ebx;
+    const uint32_t*  _sys_info_end_marker = SYS_INFO_END_MARKER_PTR(_sys_info);
+    extern void      _start();
+    const uint32_t*  _startPtr = (uint32_t*) &_start;
     // self-relocating kernel checks
     extern const uint32_t __end;
     // extern const uint32_t __size;
     // NOTE: with optimization there is a difference about alignment main is 16 bytes aligned
-    extern void main();
-    const uint32_t kernel_size = (uint32_t)&__end - (uint32_t)(&main);
+    extern void    main();
+    const uint32_t kernel_size = (uint32_t) &__end - (uint32_t) (&main);
 
-    if(_eax != __BROS)
+    if (_eax != __BROS)
         KERNEL_PANIC("EAX error");
-    if(_startPtr != KERNEL_ADDR)
+    if (_startPtr != KERNEL_ADDR)
         KERNEL_PANIC("KERNEL_ADDR error");
 
-    if(_sys_info->begin_marker != SYS_INFO_BEGIN
-        || *_sys_info_end_marker != SYS_INFO_END
-    ) {
+    if (_sys_info->begin_marker != SYS_INFO_BEGIN || *_sys_info_end_marker != SYS_INFO_END)
+    {
         KERNEL_PANIC("SYS_INFO error");
     }
 
@@ -122,7 +123,7 @@ noreturn void _start_init()
     // boot info sanitize
     _start_boot_info(_sys_info);
     // PMM
-    _start_PMM_init(_sys_info, (paddr_t)&__end, kernel_size);
+    _start_PMM_init(_sys_info, (paddr_t) &__end, kernel_size);
     // VMM
     CON_puts("Init VMM\n");
     if (!VMM_init())
@@ -142,13 +143,13 @@ noreturn void _start_init()
 
 
     // // TODO: set up kernel stack, EBP,ESP ... and align it
-    __asm__ volatile ("sti");
-    __asm__ volatile ("jmp %0"::"i"(&main));
-    for(;;);
+    __asm__ volatile("sti");
+    __asm__ volatile("jmp %0" ::"i"(&main));
+    for (;;)
+        ;
 }
 
-__attribute__((section(".text._start_VGA_init"), weak))
-void _start_VGA_init()
+__attribute__((section(".text._start_VGA_init"), weak)) void _start_VGA_init()
 {
     const int cur_offs = VGA_get_cursor_offset();
     CON_gotoXY(cur_offs % 80, cur_offs / 80);
@@ -161,29 +162,27 @@ void _start_VGA_init()
 #endif
 }
 
-__attribute__((section(".text._start_boot_info"), weak))
-void _start_boot_info(volatile boot_SYS_Info_t* _sys_info)
+__attribute__((section(".text._start_boot_info"), weak)) void _start_boot_info(volatile boot_SYS_Info_t* _sys_info)
 {
     uint32_t tot_mem = _sys_info->tot_mem;
     boot_info_sanitize(&tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
     _sys_info->tot_mem = tot_mem;
-    CON_printf("Total Available Memory: %u MB\n", tot_mem/1024);
+    CON_printf("Total Available Memory: %u MB\n", tot_mem / 1024);
     if (_sys_info->num_mem_map_entries < 1)
         KERNEL_PANIC("SYS_INFO entries error");
 }
 
-__attribute__((section(".text._start_PMM_init"), weak))
-void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
+__attribute__((section(".text._start_PMM_init"), weak)) void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
 {
-    const int tot_entries = _sys_info->num_mem_map_entries;
-    volatile boot_MEM_MAP_Info_Entry_t* mem_map = MEM_MAP_ENTRY_PTR(_sys_info);
+    const int                           tot_entries = _sys_info->num_mem_map_entries;
+    volatile boot_MEM_MAP_Info_Entry_t* mem_map     = MEM_MAP_ENTRY_PTR(_sys_info);
 
     CON_puts("Init PMM\n");
     PMM_init(_sys_info->tot_mem, kernel_end, _sys_info->boot_drive);
     CON_puts("Memory Regions\n");
     con_col_t old_col = CON_getConsoleColor();
     CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
-    for(int i = 0; i < tot_entries; i++)
+    for (int i = 0; i < tot_entries; i++)
     {
         const char* mem_types[] = {
             "Available",
@@ -201,10 +200,9 @@ void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_e
             memi.length_hi,
             memi.length_lo,
             memi.type,
-            mem_types[memi.type - 1]
-        );
+            mem_types[memi.type - 1]);
 
-        if(memi.type == MEM_MAP_TYPE_AVAILABLE)
+        if (memi.type == MEM_MAP_TYPE_AVAILABLE)
         {
             // Because 32 bits, the High part is always zero.
             // can't address more the 4GB after all..
@@ -216,7 +214,7 @@ void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_e
     PMM_MemMap_deinit_kernel(KERNEL_SEG, kernel_size);
     PMM_store_MemMapInfo(_sys_info->num_mem_map_entries, mem_map);
 
-    CON_setConsoleColor((con_col_t){.bg_col=VGA_COLOR_BLUE, .fg_col=VGA_COLOR_YELLOW});
+    CON_setConsoleColor((con_col_t) {.bg_col = VGA_COLOR_BLUE, .fg_col = VGA_COLOR_YELLOW});
     CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
     CON_setConsoleColor(old_col);
 }

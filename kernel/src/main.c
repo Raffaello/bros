@@ -5,8 +5,7 @@
 #include <lib/stdlib.h>
 
 
-noreturn void main()    __attribute__((section(".text.main"), __aligned__(16)));
-
+noreturn void main() __attribute__((section(".text.main"), __aligned__(16)));
 
 noreturn void main()
 {
@@ -17,11 +16,12 @@ noreturn void main()
 
     VGA_update_cursor(0, 24);
 
-// Page Fault Test
+    // Page Fault Test
     // intptr_t* t = (intptr_t*)0xFFFFFFFF;
     // *t=0;
 
-    for(;;) {
+    for (;;)
+    {
         __asm__("hlt");
     }
 }

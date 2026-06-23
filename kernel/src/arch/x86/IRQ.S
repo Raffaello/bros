@@ -11,7 +11,7 @@
 .globl IRQ_INT_\x
 IRQ_INT_\x:
   cli
-  push 0    # this can be used instead for the re-maped interrupt value
+  push 0    # this can be used instead for the re-mapped interrupt value
   push \x
   jmp IRQ_universal_handler_caller
 .type IRQ_INT_\x, @function
@@ -42,7 +42,7 @@ IRQ_universal_handler_caller:
   mov ax, ds                # Lower 16-bits of eax = ds.
   push ax                   # save the data segment descriptor
   # load the kernel data segment descriptor
-#   mov ax, DATA_SEG
+  #   mov ax, DATA_SEG
   mov ax, 0x10              # hardcoded for now
   mov ds, ax
   mov es, ax

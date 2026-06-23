@@ -13,7 +13,7 @@ FAT_SEG = KERNEL_SEG  # temporary loading here, replacing ROOT_DIR
 # Variables Root Directory Section
 ROOT_DIR_ENTRY_SIZE     = 32
 ROOT_DIR_TOTAL_SIZE     = ROOT_DIR_ENTRY_SIZE * _RootEntCnt
-ROOT_DIR_TOTAL_SECTORS  = (ROOT_DIR_TOTAL_SIZE + _BytsPerSec - 1) / _BytsPerSec
+ROOT_DIR_TOTAL_SECTORS  = (ROOT_DIR_TOTAL_SIZE + _BytesPerSec - 1) / _BytesPerSec
 ROOT_DIR_SEC_OFFSET         = FAT_SEC_OFFSET + (_NumFATs * FAT_TOTAL_SECTORS)
 ROOT_DIR_SEG = FAT_SEG  # temporary loading here,
                         # then take the information required
@@ -21,7 +21,7 @@ ROOT_DIR_SEG = FAT_SEG  # temporary loading here,
                         # then load kernel here
 
 # Variables Loading File
-MAX_CLUSTERS = _TotSec16 / _SecPerClus
+MAX_CLUSTERS = _TotSec16 / _SecPerCluster
 DATA_SEC_OFFSET = ROOT_DIR_SEC_OFFSET + ROOT_DIR_TOTAL_SECTORS
 
 
@@ -31,7 +31,7 @@ DATA_SEC_OFFSET = ROOT_DIR_SEC_OFFSET + ROOT_DIR_TOTAL_SECTORS
 # ************************************* #
 # Load FAT into memory region FAT_SEG   #
 # ------------------------------------- #
-# Paramters:                            #
+# Parameters:                           #
 #  DL = Drive Number                    #
 # Returns:                              #
 #   Loaded into mem at FAT_SEG          #
@@ -125,7 +125,7 @@ RootDirFindFile_found:
 # ----------------------------------------------------- #
 # Requirements:                                         #
 #  FAT loaded in FAT_SEG                                #
-# Paramters:                                            #
+# Parameters:                                           #
 #  AX = NumCluster                                      #
 #  BX = Memory Offset                                   #
 #  DL = Num Drive                                       #
@@ -196,7 +196,7 @@ LoadFile_readClusters:
   # sub ax, 2
   # add ax, FAT_DATA_SEC_OFFSET
   add ax, DATA_SEC_OFFSET - 2
-  mov dx, _SecPerClus     # 
+  mov dx, _SecPerCluster     # 
   mul dx                  # the mul could be skipped as it is 1
   call LBA2CHS
 
@@ -207,11 +207,11 @@ LoadFile_readClusters:
   pop ax              # restore loop counter in ax
   pop bx              # restore Memory Segment
   push ax             # store loop counter
-  mov al, _SecPerClus     # copy _SecPerClus in AL, sector to read
+  mov al, _SecPerCluster     # copy _SecPerCluster in AL, sector to read
   call DriveReadSectors
   # AL sector counts
   xor ah,ah
-  mov dx, _BytsPerSec
+  mov dx, _BytesPerSec
   mul dx              # result in DX:AX
   add bx, ax          # update buffer offset (+512)
   pop cx              # restore loop counter

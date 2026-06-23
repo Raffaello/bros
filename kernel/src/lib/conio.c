@@ -6,18 +6,20 @@
 
 #define BUF_SIZE 13
 
-static uint8_t _col = 7;
+static uint8_t _col  = 7;
 static uint8_t _curX = 0;
 static uint8_t _curY = 0;
 
-static void _AdjscrollDrown()
+static void _AdjScrollDrown()
 {
-    if(_curX >= CON_WIDTH) {
+    if (_curX >= CON_WIDTH)
+    {
         _curX = 0;
         _curY++;
     }
 
-    if(_curY >= CON_HEIGHT) {
+    if (_curY >= CON_HEIGHT)
+    {
         VGA_scroll_down();
         _curY--;
     }
@@ -47,7 +49,7 @@ void CON_setForegroundColor(const uint8_t fg_col)
 
 con_col_t CON_getConsoleColor()
 {
-    return (con_col_t) { .bg_col = _col >> 4, .fg_col = _col & 0xF };
+    return (con_col_t) {.bg_col = _col >> 4, .fg_col = _col & 0xF};
 }
 
 uint8_t CON_getConsoleColor2()
@@ -71,36 +73,36 @@ void CON_getXY(uint8_t* x, uint8_t* y)
 
 void CON_putc(const char ch)
 {
-    switch(ch)
+    switch (ch)
     {
     case '\n':
         CON_newline();
-    break;
+        break;
     default:
         VGA_WriteChar(_curX, _curY, ch, _col);
         _curX++;
-        _AdjscrollDrown();
-    break;
+        _AdjScrollDrown();
+        break;
     }
 }
 
 void CON_puts(const char str[])
 {
-    for(int i = 0; str[i] != 0; i++)
+    for (int i = 0; str[i] != 0; i++)
         CON_putc(str[i]);
 }
 
 void CON_newline()
 {
     CON_gotoXY(0, _curY + 1);
-    _AdjscrollDrown();
+    _AdjScrollDrown();
 }
 
 int CON_printf(const char* fmt, ...)
 {
-    char buf[256];
+    char    buf[256];
     va_list args;
-    int i;
+    int     i;
 
     va_start(args, fmt);
     i = CON_vsprintf(buf, fmt, args);
@@ -113,7 +115,7 @@ int CON_printf(const char* fmt, ...)
 int CON_sprintf(char* str, const char* fmt, ...)
 {
     va_list args;
-    int i;
+    int     i;
 
     va_start(args, fmt);
     i = CON_vsprintf(str, fmt, args);
@@ -123,11 +125,11 @@ int CON_sprintf(char* str, const char* fmt, ...)
 
 int CON_vsprintf(char* str, const char* fmt, va_list args)
 {
-    size_t length   = 0;
-    int base        = 0;
+    size_t length = 0;
+    int    base   = 0;
     // bool number     = false;
     const char* s = str;
-    char buf[BUF_SIZE];
+    char        buf[BUF_SIZE];
 
     for (; *fmt; ++fmt)
     {
@@ -140,64 +142,64 @@ int CON_vsprintf(char* str, const char* fmt, va_list args)
         ++fmt;
         switch (*fmt)
         {
-            case '%':
-            {
-                *str++ = '%';
-                continue;
-            }
-            /*** characters ***/
-            case 'c':
-            {
-                char c = (char) va_arg (args, int);
-                *str++ = c;
-                continue;
-            }
-            /*** string ***/
-            case 's':
-            {
-                const char* s = va_arg (args, char*);
-                length = strlen(s);
-                memcpy(str, s, length);
-                str += length;
-                continue;
-            }
+        case '%':
+        {
+            *str++ = '%';
+            continue;
+        }
+        /*** characters ***/
+        case 'c':
+        {
+            char c = (char) va_arg(args, int);
+            *str++ = c;
+            continue;
+        }
+        /*** string ***/
+        case 's':
+        {
+            const char* s = va_arg(args, char*);
+            length        = strlen(s);
+            memcpy(str, s, length);
+            str += length;
+            continue;
+        }
             /*** integers ***/
-            
-            case 'd':
-            case 'i':
-            {
-                int i = va_arg (args, int);
-                itoa(i, buf, 10);
-                length = strnlen(buf, BUF_SIZE);
-                memcpy(str, buf, length);
-                str += length;
-                continue;
-            }
-            case 'u':
-            {
-                base = 10;
-                // number = true;
-                break;
-            }
-            /*** display in hex ***/
-            case 'X':
-            case 'x':
-            {
-                base = 16;
-                // number = true;
-                break;
-            }
-            default:
-            {
-                *str++ = '%';
-                *str++ = *fmt;
-                continue;
-            }
+
+        case 'd':
+        case 'i':
+        {
+            int i = va_arg(args, int);
+            itoa(i, buf, 10);
+            length = strnlen(buf, BUF_SIZE);
+            memcpy(str, buf, length);
+            str += length;
+            continue;
+        }
+        case 'u':
+        {
+            base = 10;
+            // number = true;
+            break;
+        }
+        /*** display in hex ***/
+        case 'X':
+        case 'x':
+        {
+            base = 16;
+            // number = true;
+            break;
+        }
+        default:
+        {
+            *str++ = '%';
+            *str++ = *fmt;
+            continue;
+        }
         }
 
         // if(number)
         {
-            unsigned u = va_arg (args, unsigned int);
+            unsigned u = va_arg(args, unsigned int);
             utoa(u, buf, base);
             length = strnlen(buf, BUF_SIZE);
             memcpy(str, buf, length);
