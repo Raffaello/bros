@@ -7,11 +7,13 @@ RUN dnf -y install \
     mtools \
     qemu \
     bochs \
-    bochs-debugger
+    bochs-debugger \
+    iproute \
+    ps
 
 WORKDIR /code
 
 # docker build -t bros .
-# docker run --rm -ti -v .:/code bros /bin/bash
-# qemu-system-i386 -no-reboot -display curses -drive file=br-dos.img,if=floppy,format=raw
+# docker run --rm -ti -p 1234:1234 -v .:/code bros /bin/bash
+# qemu-system-i386 -no-reboot -display curses -drive file=br-dos.img,if=floppy,format=raw -s -S
 

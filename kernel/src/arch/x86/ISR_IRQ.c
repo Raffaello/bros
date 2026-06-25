@@ -134,14 +134,14 @@ void IRQ_init()
     IDT_set_gate(PIC1_BASE_INT + IRQ_DISKETTE, IRQ_INT_6);
     IDT_set_gate(PIC1_BASE_INT + IRQ_PARALLEL1, IRQ_INT_7);
     // PIC 2
-    IDT_set_gate(PIC2_BASE_INT + IRQ_CMOSTIMER, IRQ_INT_8);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_CGARETRACE, IRQ_INT_9);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_OPEN1, IRQ_INT_10);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_OPEN2, IRQ_INT_11);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_AUX, IRQ_INT_12);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_FPU, IRQ_INT_13);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_ATA_PRIMARY, IRQ_INT_14);
-    IDT_set_gate(PIC2_BASE_INT + IRQ_ATA_SECONDARY, IRQ_INT_15);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_CMOSTIMER, IRQ_INT_8);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_CGARETRACE, IRQ_INT_9);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_OPEN1, IRQ_INT_10);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_OPEN2, IRQ_INT_11);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_AUX, IRQ_INT_12);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_FPU, IRQ_INT_13);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_ATA_PRIMARY, IRQ_INT_14);
+    IDT_set_gate(PIC1_BASE_INT + IRQ_ATA_SECONDARY, IRQ_INT_15);
 }
 
 void IRQ_register_interrupt_handler(const uint8_t n, ISR_Handler_t handler)

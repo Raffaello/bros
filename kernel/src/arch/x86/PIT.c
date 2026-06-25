@@ -47,7 +47,7 @@ static void timer_callback(ISR_registers_t r)
 
     _ticks++;
     itoa(_ticks, buf, 10);
-    VGA_WriteString(0, 24, buf, VGA_COLOR_BRIGHT_GREEN);
+    VGA_WriteString(70, 0, buf, VGA_COLOR_BRIGHT_GREEN);
 }
 
 void PIT_init(const uint32_t freq)

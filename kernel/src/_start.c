@@ -18,6 +18,8 @@
 #include <arch/x86/mmu/VMM.h>
 #include <sys/panic.h>
 
+#include <drivers/keyboard.h>    // TODO: not in the init, on init drivers eventually. but for now is ok.
+
 
 noreturn void _start();
 noreturn void _start_init();
@@ -119,7 +121,9 @@ _start_init()
     CON_puts("Init IRQ\n");
     IRQ_init();
     CON_puts("Init PIT\n");
-    PIT_init(10);
+    PIT_init(1);
+    // TEST
+    keyboard_init();
     // boot info sanitize
     _start_boot_info(_sys_info);
     // PMM

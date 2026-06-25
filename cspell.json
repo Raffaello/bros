@@ -36,6 +36,7 @@
         "ffreestanding",
         "floppya",
         "floppyb",
+        "gdtd",
         "gdtr",
         "globl",
         "HARDWARETRIG",
