@@ -37,7 +37,7 @@ static inline void _PS2_polling_wait_until_is_ready()
     {
         const uint8_t s = PS2_read_status();
         if ((s & 1) != 0)
-            break;
+            break;    // buffer not empty
     }
 }
 
@@ -47,7 +47,7 @@ static inline void _PS2_polling_wait_until_can_send()
     {
         const uint8_t s = PS2_read_status();
         if ((s & 2) == 0)
-            break;
+            break;    // can write now, buffer empty
     }
 }
 
@@ -69,12 +69,40 @@ static inline uint8_t _PS2_read_data(void)
     return inb(PS2_DATA_PORT);
 }
 
+static void _PS2_polling_send_ack(uint8_t data)
+{
+    _PS2_polling_send_data(data);
+    if (_PS2_read_data() != PS2_RESPONSE_ACK)
+        KERNEL_PANIC("PS/2 response not ACK");
+}
+
+static void _PS2_scancode_set(uint8_t set)
+{
+    _PS2_polling_send_ack(PS2_DATA_KEYBOARD_SCANCODE);
+    _PS2_polling_send_ack(set);
+}
+
+static void _PS2_reset_device()
+{
+    uint8_t data, data2;
+
+    _PS2_polling_send_data(PS2_DATA_RESET);
+    _PS2_polling_wait_until_is_ready();
+    data  = _PS2_read_data();
+    data2 = _PS2_read_data();
+    if (data != PS2_RESPONSE_ACK || data2 != PS2_RESPONSE_SELF_TEST_OK)
+        KERNEL_PANIC("PS/2 PORT RESET FAIL");
+
+    // 2 bytes device ID
+    data  = _PS2_read_data();
+    data2 = _PS2_read_data();
+}
+
 static void _keyboard_handler_scancode_set2(ISR_registers_t r)
 {
     static uint8_t last_c = 0;
-    const uint8_t  c      = _PS2_read_data();
+    uint8_t        c      = _PS2_read_data();
     r.eax                 = c;
-
 
     // if it is a released key...
     if (c == 0xF0 || last_c == 0xF0)
@@ -98,12 +126,16 @@ static void _keyboard_handler_scancode_set2(ISR_registers_t r)
     last_c = c;
 }
 
+static void _mouse_handler(ISR_registers_t r)
+{
+    [[maybe_unused]] uint8_t c = _PS2_read_data();
+}
+
 void PS2_init(void)
 {
-    uint8_t                  data      = 0;
-    [[maybe_unused]] uint8_t data2     = 0;
-    uint8_t                  cfg       = 0;
-    bool                     has_port2 = false;
+    uint8_t data      = 0;
+    uint8_t cfg       = 0;
+    bool    has_port2 = false;
 
     // TODO: init USB controllers to avoid USB Legacy controllers emulating PS/2
     // TODO: check if PS/2 controller exists
@@ -155,10 +187,25 @@ void PS2_init(void)
             KERNEL_PANIC("PS/2 PORT2 TEST Failed");
     }
 
+    // set scancode set 2
+    _PS2_scancode_set(PS2_DATA_KEYBOARD_SET_SCANCODE2);
+    // get Scan code Set, expecting scan code set 2
+    _PS2_scancode_set(PS2_DATA_KEYBOARD_GET_SCANCODE);
+    data = _PS2_read_data();
+    if (data != PS2_DATA_KEYBOARD_SET_SCANCODE2)
+        KERNEL_PANIC("PS/2 Keyboard error");
+
+    // Reset Devices
+    _PS2_reset_device();
+    if (has_port2)
+    {
+        _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
+        _PS2_reset_device();
+    }
+
     // Enable Devices
     _PS2_polling_send_command(PS2_COMMAND_ENABLE_PORT1);
     cfg |= (1 << 0);    // First PS/2 port interrupt (1 = enabled, 0 = disabled)
-    // cfg |= (1 << 6);    // First PS/2 port translation (1 = enabled, 0 = disabled)
     if (has_port2)
     {
         _PS2_polling_send_command(PS2_COMMAND_ENABLE_PORT2);
@@ -168,61 +215,10 @@ void PS2_init(void)
     _PS2_polling_send_command(PS2_COMMAND_WRITE_CFG);
     _PS2_polling_send_data(cfg);
 
-    // Reset Devices
-    _PS2_polling_send_data(PS2_DATA_RESET);
-    _PS2_polling_wait_until_is_ready();
-    data  = _PS2_read_data();
-    data2 = _PS2_read_data();
-    if (data != PS2_RESPONSE_ACK || data2 != PS2_RESPONSE_SELF_TEST_OK)
-        KERNEL_PANIC("PS/2 PORT1 RESET FAIL");
-
-    // 2 bytes device ID
-    data  = _PS2_read_data();
-    data2 = _PS2_read_data();
-
-    if (has_port2)
-    {
-        _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
-        _PS2_polling_send_data(PS2_DATA_RESET);
-        _PS2_polling_wait_until_is_ready();
-        data  = _PS2_read_data();
-        data2 = _PS2_read_data();
-        if (data != PS2_RESPONSE_ACK && data2 != PS2_RESPONSE_SELF_TEST_OK)
-            KERNEL_PANIC("PS/2 PORT2 RESET FAIL");
-
-        // 2 bytes device ID
-        data  = _PS2_read_data();
-        data2 = _PS2_read_data();
-    }
-
-    // get Scan code Set, expecting scan code set 2
-    _PS2_polling_send_data(PS2_DATA_KEYBOARD_SCANCODE);
-    data = _PS2_read_data();
-    if (data != PS2_RESPONSE_ACK)
-        KERNEL_PANIC("PS/2 Keyboard error");
-
-    _PS2_polling_send_data(PS2_DATA_KEYBOARD_GET_SCANCODE);    // get scan code set
-    data = _PS2_read_data();
-    if (data != PS2_RESPONSE_ACK)
-        KERNEL_PANIC("PS/2 Keyboard error");
-
-    data = _PS2_read_data();
-    if (data != 2)
-    {
-        // set scancode set 2
-        _PS2_polling_send_data(PS2_DATA_KEYBOARD_SCANCODE);
-        data = _PS2_read_data();
-        if (data != PS2_RESPONSE_ACK)
-            KERNEL_PANIC("PS/2 Keyboard error");
-
-        _PS2_polling_send_data(PS2_DATA_KEYBOARD_SET_SCANCODE2);    // get scan code set
-        data = _PS2_read_data();
-        if (data != PS2_RESPONSE_ACK)
-            KERNEL_PANIC("PS/2 Keyboard error");
-    }
-
 
     IRQ_register_interrupt_handler(IRQ_KEYBOARD, _keyboard_handler_scancode_set2);
+    if (has_port2)
+        IRQ_register_interrupt_handler(IRQ_AUX, _mouse_handler);
 }
 
 void PS2_send_command(uint8_t command)
