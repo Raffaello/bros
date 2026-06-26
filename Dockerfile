@@ -3,7 +3,7 @@ FROM fedora:latest
 RUN dnf -y update
 RUN dnf -y install \
     gcc \
-    g++ \
+    # g++ \
     gdb \
     mtools \
     qemu \
