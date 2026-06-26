@@ -121,7 +121,7 @@ _start_init()
     CON_puts("Init IRQ\n");
     IRQ_init();
     CON_puts("Init PIT\n");
-    PIT_init(1);
+    PIT_init(10);
     CON_puts("Init PS/2\n");
     PS2_init();
     // boot info sanitize
