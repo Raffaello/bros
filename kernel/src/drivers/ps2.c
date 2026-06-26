@@ -31,14 +31,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // TODO: replace with a generic ring_buffer, when have dynamic memory or kalloc or something.
-#define PS2_RING_BUFFER_SIZE 256
+#define PS2_RING_BUFFER_SIZE 16    // 256
 _Static_assert(PS2_RING_BUFFER_SIZE <= 256);
 
 typedef struct ring_buf_t
 {
-    uint8_t buf[PS2_RING_BUFFER_SIZE];
-    uint8_t head;    // this will overflow, so no need to module PS2_RING_BUFFER_SIZE
-    uint8_t tail;
+    uint8_t          buf[PS2_RING_BUFFER_SIZE];
+    volatile uint8_t head;    // this will overflow, so no need to module PS2_RING_BUFFER_SIZE
+    volatile uint8_t tail;
 } ring_buf_t;
 
 static ring_buf_t g_ring_buf;
@@ -156,16 +156,7 @@ static void _PS2_reset_device()
 static void _keyboard_handler_scancode(ISR_registers_t r)
 {
     _PS2_polling_wait_until_is_ready();
-    uint8_t c = _PS2_read_data();
-
-    // THIS IS JUST A TEST
-    if (_PS2_ring_buf_full())
-    {
-        // flush it;
-        key_event_t k = PS2_get_char();
-        CON_putc(k.ascii);
-    }
-
+    const uint8_t c = _PS2_read_data();
     _PS2_ring_buf_push(c);
 }
 
@@ -286,7 +277,7 @@ uint8_t PS2_get_scancode(void)
     return scancode;
 }
 
-key_event_t PS2_getchar(void)
+key_event_t PS2_get_char(void)
 {
     key_event_t k        = {};
     bool        extended = false;
@@ -294,6 +285,8 @@ key_event_t PS2_getchar(void)
     while (k.scancode == 0)
     {
         uint8_t c = PS2_get_scancode();
+        // if (c == 0)    // TODO: remove this is for testing
+        //     break;
 
         if (c == 0xE0)    // if it is an extended key...
         {
@@ -311,7 +304,7 @@ key_event_t PS2_getchar(void)
         {
             switch (c)
             {
-            case 0x1D:    // R_CTRL (0xE0, 0x1D)
+            case 0x14:    // R_CTRL (0xE0, 0x14)
                 k.modifiers.rctrl = true;
                 break;
 
@@ -340,7 +333,7 @@ key_event_t PS2_getchar(void)
                 k.modifiers.rshift = true;
                 break;
 
-            case 0x15:    // L_CTRL
+            case 0x14:    // L_CTRL
                 k.modifiers.lctrl = true;
                 break;
 
@@ -356,6 +349,76 @@ key_event_t PS2_getchar(void)
     }
 
     // TODO: populate ASCII value
+    // TODO: review the modifiers
+    // k.ascii = 0;
+    if (!k.released)
+    {
+        switch (k.scancode)
+        {
+        default:
+            break;
+        case 0x16:
+            if (k.modifiers.lshift || k.modifiers.rshift)
+                k.ascii = '!';
+            else
+                k.ascii = '1';
+            break;
+        case 0x1E:
+            if (k.modifiers.lshift || k.modifiers.rshift)
+                k.ascii = '@';
+            else
+                k.ascii = '2';
+            break;
+        case 0x26:
+            if (k.modifiers.lshift || k.modifiers.rshift)
+                k.ascii = '#';
+            else
+                k.ascii = '3';
+            break;
+        case 0x25:
+            if (k.modifiers.lshift || k.modifiers.rshift)
+                k.ascii = '$';
+            else
+                k.ascii = '4';
+            break;
+        case 0x2E:
+            if (k.modifiers.lshift || k.modifiers.rshift)
+                k.ascii = '%';
+            else
+                k.ascii = '5';
+            break;
+        case 0x36:
+            if (k.modifiers.lshift || k.modifiers.rshift)
+                k.ascii = '^';
+            else
+                k.ascii = '6';
+            break;
+        case 0x3D:
+            if (k.modifiers.lshift || k.modifiers.rshift)
+                k.ascii = '&';
+            else
+                k.ascii = '7';
+            break;
+        case 0x3E:
+            if (k.modifiers.lshift || k.modifiers.rshift)
+                k.ascii = '*';
+            else
+                k.ascii = '8';
+            break;
+        case 0x46:
+            if (k.modifiers.lshift || k.modifiers.rshift)
+                k.ascii = '(';
+            else
+                k.ascii = '9';
+            break;
+        case 0x45:
+            if (k.modifiers.lshift || k.modifiers.rshift)
+                k.ascii = ')';
+            else
+                k.ascii = '0';
+            break;
+        }
+    }
 
     return k;
 }
