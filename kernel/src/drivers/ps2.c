@@ -8,6 +8,7 @@
 #include <sys/panic.h>
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #define PS2_DATA_PORT 0x60
 #define PS2_STATUS    0x64
@@ -19,27 +20,79 @@
 #define PS2_DATA_KEYBOARD_SET_SCANCODE1 0x01
 #define PS2_DATA_KEYBOARD_SET_SCANCODE2 0x02
 #define PS2_DATA_KEYBOARD_SET_SCANCODE3 0x03
+#define PS2_DATA_MOUSE_SET_DEFAULTS     0xFA
+#define PS2_DATA_MOUSE_ENABLE_DATA_REP  0xF4
 
 
 #define PS2_RESPONSE_CTRL_TEST_OK 0x55
 #define PS2_RESPONSE_ACK          0xFA
 #define PS2_RESPONSE_SELF_TEST_OK 0xAA
 
-// [[maybe_unused]] static char keyboard_scancode_set1[] = {
-//     0x0,
-//     0x1,
-//     '1',
-// };
+///////////////////////////////////////////////////////////////////////////////
 
-// static char keyboard_scancode_set2[] = {
-//     0,
-// }
+// TODO: replace with a generic ring_buffer, when have dynamic memory or kalloc or something.
+#define PS2_RING_BUFFER_SIZE 256
+_Static_assert(PS2_RING_BUFFER_SIZE <= 256);
+
+typedef struct ring_buf_t
+{
+    uint8_t buf[PS2_RING_BUFFER_SIZE];
+    uint8_t head;    // this will overflow, so no need to module PS2_RING_BUFFER_SIZE
+    uint8_t tail;
+} ring_buf_t;
+
+static ring_buf_t g_ring_buf;
+
+static bool _PS2_ring_buf_empty()
+{
+    return g_ring_buf.head == g_ring_buf.tail;
+}
+
+static bool _PS2_ring_buf_full()
+{
+    return (g_ring_buf.head + 1) % PS2_RING_BUFFER_SIZE == g_ring_buf.tail;
+}
+
+static void _PS2_ring_buf_push(uint8_t scancode)
+{
+    // if it is full
+    if (_PS2_ring_buf_full())
+        return;
+
+    g_ring_buf.buf[g_ring_buf.head] = scancode;
+    g_ring_buf.head                 = (g_ring_buf.head + 1) % PS2_RING_BUFFER_SIZE;
+}
+
+static bool _PS2_ring_buf_pop(uint8_t* pScancode)
+{
+    if (pScancode == NULL)
+        return false;
+
+    if (_PS2_ring_buf_empty())
+        return false;
+
+    *pScancode      = g_ring_buf.buf[g_ring_buf.tail];
+    g_ring_buf.tail = (g_ring_buf.tail + 1) % PS2_RING_BUFFER_SIZE;
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+static void _PS2_send_command(uint8_t command)
+{
+    outb(PS2_COMMAND, command);
+}
+
+static uint8_t _PS2_read_status()
+{
+    return inb(PS2_STATUS);
+}
 
 static inline void _PS2_polling_wait_until_is_ready()
 {
     while (true)
     {
-        const uint8_t s = PS2_read_status();
+        const uint8_t s = _PS2_read_status();
         if ((s & 1) != 0)
             break;    // buffer not empty
     }
@@ -49,7 +102,7 @@ static inline void _PS2_polling_wait_until_can_send()
 {
     while (true)
     {
-        const uint8_t s = PS2_read_status();
+        const uint8_t s = _PS2_read_status();
         if ((s & 2) == 0)
             break;    // can write now, buffer empty
     }
@@ -58,8 +111,7 @@ static inline void _PS2_polling_wait_until_can_send()
 static inline void _PS2_polling_send_command(uint8_t cmd)
 {
     _PS2_polling_wait_until_can_send();
-    PS2_send_command(cmd);
-    // _PS2_polling_wait_until_is_ready();
+    _PS2_send_command(cmd);
 }
 
 static inline void _PS2_polling_send_data(uint8_t data)
@@ -76,6 +128,7 @@ static inline uint8_t _PS2_read_data(void)
 static void _PS2_polling_send_ack(uint8_t data)
 {
     _PS2_polling_send_data(data);
+    _PS2_polling_wait_until_is_ready();
     if (_PS2_read_data() != PS2_RESPONSE_ACK)
         KERNEL_PANIC("PS/2 response not ACK");
 }
@@ -88,47 +141,32 @@ static void _PS2_scancode_set(uint8_t set)
 
 static void _PS2_reset_device()
 {
-    uint8_t data, data2;
+    uint8_t data;
 
-    _PS2_polling_send_data(PS2_DATA_RESET);
-    _PS2_polling_wait_until_is_ready();
-    data  = _PS2_read_data();
-    data2 = _PS2_read_data();
-    if (data != PS2_RESPONSE_ACK || data2 != PS2_RESPONSE_SELF_TEST_OK)
+    _PS2_polling_send_ack(PS2_DATA_RESET);
+    data = _PS2_read_data();
+    if (data != PS2_RESPONSE_SELF_TEST_OK)
         KERNEL_PANIC("PS/2 PORT RESET FAIL");
 
     // 2 bytes device ID
-    data  = _PS2_read_data();
-    data2 = _PS2_read_data();
+    data = _PS2_read_data();
+    data = _PS2_read_data();
 }
 
-static void _keyboard_handler_scancode_set2(ISR_registers_t r)
+static void _keyboard_handler_scancode(ISR_registers_t r)
 {
     _PS2_polling_wait_until_is_ready();
-    static uint8_t last_c = 0;
-    uint8_t        c      = _PS2_read_data();
-    r.eax                 = c;
+    uint8_t c = _PS2_read_data();
 
-    // if it is a released key...
-    if (c == 0xF0 || last_c == 0xF0)
+    // THIS IS JUST A TEST
+    if (_PS2_ring_buf_full())
     {
-        last_c = c;
-        return;
+        // flush it;
+        key_event_t k = PS2_get_char();
+        CON_putc(k.ascii);
     }
 
-    switch (c)
-    {
-    case 0x16:
-        CON_putc('1');
-        break;
-    case 0x1E:
-        CON_putc('2');
-        break;
-    default:
-        CON_putc(c);
-    }
-
-    last_c = c;
+    _PS2_ring_buf_push(c);
 }
 
 static void _mouse_handler(ISR_registers_t r)
@@ -206,6 +244,13 @@ void PS2_init(void)
     {
         _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
         _PS2_reset_device();
+
+        // TODO: PS/2 MOUSE has some troubles in QEMU?
+
+        // _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
+        // _PS2_polling_send_ack(PS2_DATA_MOUSE_SET_DEFAULTS);
+        // _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
+        // _PS2_polling_send_ack(PS2_DATA_MOUSE_ENABLE_DATA_REP);
     }
 
     // Enable Devices
@@ -221,17 +266,96 @@ void PS2_init(void)
     _PS2_polling_send_data(cfg);
 
 
-    IRQ_register_interrupt_handler(IRQ_KEYBOARD, _keyboard_handler_scancode_set2);
+    IRQ_register_interrupt_handler(IRQ_KEYBOARD, _keyboard_handler_scancode);
     if (has_port2)
         IRQ_register_interrupt_handler(IRQ_AUX, _mouse_handler);
 }
 
-void PS2_send_command(uint8_t command)
+uint8_t PS2_get_scancode(void)
 {
-    outb(PS2_COMMAND, command);
+    uint8_t scancode = 0;
+
+    while (!_PS2_ring_buf_pop(&scancode))
+    {
+        while (_PS2_ring_buf_empty())
+        {
+            // TODO: wait...
+        }
+    }
+
+    return scancode;
 }
 
-uint8_t PS2_read_status()
+key_event_t PS2_getchar(void)
 {
-    return inb(PS2_STATUS);
+    key_event_t k        = {};
+    bool        extended = false;
+
+    while (k.scancode == 0)
+    {
+        uint8_t c = PS2_get_scancode();
+
+        if (c == 0xE0)    // if it is an extended key...
+        {
+            extended = true;
+            continue;
+        }
+
+        if (c == 0xF0)    // if it is a released key...
+        {
+            k.released = true;
+            continue;
+        }
+
+        if (extended)
+        {
+            switch (c)
+            {
+            case 0x1D:    // R_CTRL (0xE0, 0x1D)
+                k.modifiers.rctrl = true;
+                break;
+
+            case 0x11:    // R_ALT (0xE0, 0x11)
+                k.modifiers.ralt = true;
+                break;
+
+            default:
+                k.scancode = c;
+                break;
+            }
+        }
+        else
+        {
+            switch (c)
+            {
+            case 0xE0:    // if it is an extended key..
+                extended = true;
+                break;
+
+            case 0x12:    // L_SHIFT
+                k.modifiers.lshift = true;
+                break;
+
+            case 0x59:    // R_SHIFT
+                k.modifiers.rshift = true;
+                break;
+
+            case 0x15:    // L_CTRL
+                k.modifiers.lctrl = true;
+                break;
+
+            case 0x11:    // L_ALT
+                k.modifiers.lalt = true;
+                break;
+
+            default:
+                k.scancode = c;
+                break;
+            }
+        }
+    }
+
+    // TODO: populate ASCII value
+
+    return k;
 }

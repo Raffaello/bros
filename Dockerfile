@@ -3,13 +3,24 @@ FROM fedora:latest
 RUN dnf -y update
 RUN dnf -y install \
     gcc \
+    g++ \
     gdb \
     mtools \
     qemu \
     bochs \
     bochs-debugger \
     iproute \
-    ps
+    ps \
+    curl \
+    libvncserver-devel
+
+# RUN curl -O -L https://sourceforge.net/projects/bochs/files/bochs/3.0/bochs-3.0.tar.gz && \
+#     tar xf bochs-3.0.tar.gz && \
+#     cd bochs-3.0 && \
+#     ./configure --with-vncsrv && \
+#     make && \
+#     make install
+
 
 WORKDIR /code
 
