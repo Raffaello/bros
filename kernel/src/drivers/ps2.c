@@ -31,6 +31,10 @@
 //     '1',
 // };
 
+// static char keyboard_scancode_set2[] = {
+//     0,
+// }
+
 static inline void _PS2_polling_wait_until_is_ready()
 {
     while (true)
@@ -100,6 +104,7 @@ static void _PS2_reset_device()
 
 static void _keyboard_handler_scancode_set2(ISR_registers_t r)
 {
+    _PS2_polling_wait_until_is_ready();
     static uint8_t last_c = 0;
     uint8_t        c      = _PS2_read_data();
     r.eax                 = c;
