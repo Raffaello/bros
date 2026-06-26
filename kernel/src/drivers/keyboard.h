@@ -4,4 +4,4 @@
 #include <stdbool.h>
 
 
-char keyboard_getchar(void);
+// char keyboard_getchar(void);
