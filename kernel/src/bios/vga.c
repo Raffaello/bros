@@ -5,13 +5,15 @@
 #include <bios/vga.h>
 #include <arch/x86/io.h>
 
+#include <stddef.h>
+
 #define VGA_MEM_TEXT 0xB8000
 
 #define VGA_REG_CTRL 0x3D4
 #define VGA_REG_DATA 0x3D5
 
-#define VGA_TEXT_WIDTH  80
-#define VGA_TEXT_HEIGHT 25
+#define VGA_TEXT_WIDTH  VGA_TEXT_MODE_3_COLS
+#define VGA_TEXT_HEIGHT VGA_TEXT_MODE_3_ROWS
 
 void VGA_fill(const uint8_t fg_col, const uint8_t bg_col)
 {
@@ -33,8 +35,19 @@ void VGA_WriteChar(const int x, const int y, const char ch, uint8_t col)
 {
     uint8_t*  video_mem = (uint8_t*) VGA_MEM_TEXT;
     const int off       = (y * VGA_TEXT_WIDTH + x) * 2;
-    video_mem[off]      = ch;
-    video_mem[off + 1]  = col;
+    if (off < 0)
+        return;
+
+    video_mem[off]     = ch;
+    video_mem[off + 1] = col;
+}
+
+void VGA_Write(const int x, const int y, VGA_char_t* ch)
+{
+    if (ch == NULL)
+        return;
+
+    VGA_WriteChar(x, y, ch->ch, ch->col);
 }
 
 void VGA_WriteString(const int x, const int y, const char str[], uint8_t col)
@@ -44,6 +57,22 @@ void VGA_WriteString(const int x, const int y, const char str[], uint8_t col)
         // TODO: check end of screen?
         VGA_WriteChar(x + i, y, str[i], col);
     }
+}
+
+uint16_t VGA_GetChar(const int x, const int y)
+{
+    uint8_t*  video_mem = (uint8_t*) VGA_MEM_TEXT;
+    const int off       = (y * VGA_TEXT_WIDTH + x) * 2;
+
+    return video_mem[off] | (video_mem[off + 1] << 8);
+}
+
+VGA_char_t VGA_Read(const int x, const int y)
+{
+    uint8_t*  video_mem = (uint8_t*) VGA_MEM_TEXT;
+    const int off       = (y * VGA_TEXT_WIDTH + x) * 2;
+
+    return (VGA_char_t) {.ch = video_mem[off], .col = video_mem[off + 1]};
 }
 
 void VGA_enable_cursor(const uint8_t cursor_start, const uint8_t cursor_end)

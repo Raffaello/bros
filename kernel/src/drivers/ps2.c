@@ -6,6 +6,7 @@
 #include <arch/x86/defs/IRQ.h>
 #include <lib/conio.h>
 #include <sys/panic.h>
+#include <bios/vga.h>
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -34,10 +35,11 @@
 #define PS2_DATA_KEYBOARD_SET_SCANCODE2 0x02
 #define PS2_DATA_KEYBOARD_SET_SCANCODE3 0x03
 
-#define PS2_DATA_MOUSE_SET_SCALING1_1  0xE6
-#define PS2_DATA_MOUSE_SET_SCALING2_1  0xE7
-#define PS2_DATA_MOUSE_SET_RESOLUTION  0xE8
-#define PS2_DATA_MOUSE_SET_SAMPLE_RATE 0xF3
+#define PS2_DATA_MOUSE_SET_SCALING1_1        0xE6
+#define PS2_DATA_MOUSE_SET_SCALING2_1        0xE7
+#define PS2_DATA_MOUSE_SET_RESOLUTION        0xE8
+#define PS2_DATA_MOUSE_SET_SAMPLE_RATE       0xF3
+#define PS2_DATA_MOUSE_ENABLE_DATA_REPORTING 0xF4
 
 
 #define PS2_RESPONSE_CTRL_TEST_OK 0x55
@@ -205,8 +207,41 @@ static void _keyboard_handler_scancode(ISR_registers_t r)
 
 static void _mouse_handler(ISR_registers_t r)
 {
-    [[maybe_unused]] uint8_t c = _PS2_read_data();
-    [[maybe_unused]] int     i = 0;
+    static int16_t    mouse_x     = VGA_TEXT_MODE_3_COLS / 2;
+    static int16_t    mouse_y     = VGA_TEXT_MODE_3_ROWS / 2;
+    static int16_t    old_mouse_x = -1;
+    static int16_t    old_mouse_y = -1;
+    static VGA_char_t saved_char  = {};
+
+    const uint8_t b0 = _PS2_read_data();
+    if ((b0 & 0x08) == 0)
+        return;
+
+    const uint8_t b1 = _PS2_read_data();
+    const uint8_t b2 = _PS2_read_data();
+
+    mouse_x += (b1 - ((b0 << 4) & 0x100));    // / 5;
+    mouse_y -= (b2 - ((b0 << 3) & 0x100));    // / 4;
+
+    // clamp coordinates, this could be a VGA utility
+    if (mouse_x < 0)
+        mouse_x = 0;
+    else if (mouse_x >= VGA_TEXT_MODE_3_COLS)
+        mouse_x = VGA_TEXT_MODE_3_COLS - 1;
+    if (mouse_y < 0)
+        mouse_y = 0;
+    else if (mouse_y >= VGA_TEXT_MODE_3_ROWS)
+        mouse_y = VGA_TEXT_MODE_3_ROWS - 1;
+
+    if (old_mouse_x == mouse_x && old_mouse_y == mouse_y)
+        return;
+
+    // Draw cursor
+    VGA_Write(old_mouse_x, old_mouse_y, &saved_char);
+    saved_char  = VGA_Read(mouse_x, mouse_y);
+    old_mouse_x = mouse_x;
+    old_mouse_y = mouse_y;
+    VGA_WriteChar(mouse_x, mouse_y, saved_char.ch, ((saved_char.col & 0x0F) << 4) | ((saved_char.col & 0XF0) >> 4));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -282,10 +317,12 @@ void PS2_init(void)
         _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
         _PS2_reset_device();
 
-        // TODO: PS/2 MOUSE has some troubles in QEMU? need to do anything before using it?
+        // Enabling PS/2 MOUSE
         _PS2_mouse_set_scaling(1);
         _PS2_mouse_set_resolution(0);
-        _PS2_mouse_set_sample_rate(100);
+        _PS2_mouse_set_sample_rate(20);
+        _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
+        _PS2_polling_send_ack(PS2_DATA_MOUSE_ENABLE_DATA_REPORTING);
     }
 
     // Enable Devices
