@@ -8,7 +8,7 @@ _Static_assert(sizeof(void*) == sizeof(uint32_t));
 /*----------------------*
  * GDT defined in GDT.S *
  *----------------------*/
-#define MAX_GDT_DESCRIPTORS 5
+#define MAX_GDT_DESCRIPTORS 6
 
 // const static GDT_descriptor_t gdtd[MAX_GDT_DESCRIPTORS] = {
 //     0x0000000000000000, // null
@@ -33,38 +33,64 @@ _Static_assert(sizeof(void*) == sizeof(uint32_t));
 #define GDT_DATA_ATTR_DPL(x)   GDT_CODE_ATTR_DPL(x)
 #define GDT_DATA_ATTR_PRESENT  GDT_CODE_ATTR_PRESENT
 #define GDT_DATA_BIG           (1 << 6)
-#define GDT_DATA_GRANULAIRTY   GDT_CODE_GRANULARITY
+#define GDT_DATA_GRANULARITY   GDT_CODE_GRANULARITY
+
+#define GDT_TASK_ATTR_TYPE    0x9    // 1001b
+#define GDT_TASK_ATTR_DPL(x)  GDT_CODE_ATTR_DPL(x)
+#define GDT_TASK_ATTR_PRESENT GDT_CODE_ATTR_PRESENT
+#define GDT_TASK_GRANULARITY  GDT_CODE_GRANULARITY
 
 #define GDT_DPL_KERNEL  0
 #define GDT_DPL_DRIVER1 1
 #define GDT_DPL_DRIVER2 2
 #define GDT_DPL_USER    3
 
-const static GDT_descriptor_t gdtd[MAX_GDT_DESCRIPTORS] = {
+static TSS_t g_tss;
+
+static GDT_descriptor_t gdtd[MAX_GDT_DESCRIPTORS] = {
     {0}, // null-descriptor
+
     {
-     .limit      = 0xFFFF,
-     .base_lo    = 0,
-     .base_mi    = 0,
-     .attr       = GDT_CODE_ATTR_READABLE | GDT_CODE_ATTR | GDT_CODE_ATTR_DPL(GDT_DPL_KERNEL) | GDT_CODE_ATTR_PRESENT,    // 0x9A,
-        .limit_attr = 0xF | GDT_CODE_DEFAULT32 | GDT_CODE_GRANULARITY},
-    {
-     .limit      = 0xFFFF,
-     .base_lo    = 0,
-     .base_mi    = 0,
-     .attr       = GDT_DATA_ATTR_WRITABLE | GDT_DATA_ATTR | GDT_DATA_ATTR_DPL(GDT_DPL_KERNEL) | GDT_DATA_ATTR_PRESENT,    // 0x92,
-        .limit_attr = 0xF | GDT_DATA_BIG | GDT_DATA_GRANULAIRTY                                                              // 0xCF
+     // Kernel Mode Code Segment
+        .limit      = 0xFFFF,                                                                                                  // limit = 0xFFFFF (limit_attr)
+        .base_lo    = 0,                                                                                                       //
+        .base_mi    = 0,                                                                                                       //
+        .attr       = (GDT_CODE_ATTR_READABLE | GDT_CODE_ATTR | GDT_CODE_ATTR_DPL(GDT_DPL_KERNEL) | GDT_CODE_ATTR_PRESENT),    // 0x9A,
+        .limit_attr = 0xF | GDT_CODE_DEFAULT32 | GDT_CODE_GRANULARITY,                                                         // 0xCF
     },
-    {.limit      = 0xFFFF,
-     .base_lo    = 0,
-     .base_mi    = 0,
-     .attr       = GDT_CODE_ATTR_READABLE | GDT_CODE_ATTR | GDT_CODE_ATTR_DPL(GDT_DPL_USER) | GDT_CODE_ATTR_PRESENT,    // 0xFA,
-     .limit_attr = 0xF | GDT_CODE_DEFAULT32 | GDT_CODE_GRANULARITY},
-    {.limit      = 0xFFFF,
-     .base_lo    = 0,
-     .base_mi    = 0,
-     .attr       = GDT_DATA_ATTR_WRITABLE | GDT_DATA_ATTR | GDT_DATA_ATTR_DPL(GDT_DPL_USER) | GDT_DATA_ATTR_PRESENT,    // 0xF2,
-     .limit_attr = 0xF | GDT_DATA_BIG | GDT_DATA_GRANULAIRTY}
+    {
+     // Kernel Mode Data Segment
+        .limit      = 0xFFFF,                                                                                                //
+        .base_lo    = 0,                                                                                                     //
+        .base_mi    = 0,                                                                                                     //
+        .attr       = GDT_DATA_ATTR_WRITABLE | GDT_DATA_ATTR | GDT_DATA_ATTR_DPL(GDT_DPL_KERNEL) | GDT_DATA_ATTR_PRESENT,    // 0x92,
+        .limit_attr = 0xF | GDT_DATA_BIG | GDT_DATA_GRANULARITY,                                                             // 0xCF
+    },
+    {
+     // User Mode Code Segment
+        .limit      = 0xFFFF,                                                                                              //
+        .base_lo    = 0,                                                                                                   //
+        .base_mi    = 0,                                                                                                   //
+        .attr       = GDT_CODE_ATTR_READABLE | GDT_CODE_ATTR | GDT_CODE_ATTR_DPL(GDT_DPL_USER) | GDT_CODE_ATTR_PRESENT,    // 0xFA,
+        .limit_attr = 0xF | GDT_CODE_DEFAULT32 | GDT_CODE_GRANULARITY,                                                     //
+    },
+    {
+     // User Mode Data Segment
+        .limit      = 0xFFFF,                                                                                              //
+        .base_lo    = 0,                                                                                                   //
+        .base_mi    = 0,                                                                                                   //
+        .attr       = GDT_DATA_ATTR_WRITABLE | GDT_DATA_ATTR | GDT_DATA_ATTR_DPL(GDT_DPL_USER) | GDT_DATA_ATTR_PRESENT,    // 0xF2,
+        .limit_attr = 0xF | GDT_DATA_BIG | GDT_DATA_GRANULARITY,                                                           //
+    },
+    {
+     // Task State Segment
+        .limit      = sizeof(TSS_t) - 1,                             //
+        .base_lo    = 0,                                             //
+        .base_mi    = 0,                                             //
+        .attr       = GDT_TASK_ATTR_TYPE | GDT_TASK_ATTR_PRESENT,    //
+        .limit_attr = 0,                                             //
+        .base_hi    = 0,                                             //
+    }
 };
 
 #define GDT_KERNEL_CODE_SEL ((uint32_t) &gdtd[1] - (uint32_t) &gdtd[0])
@@ -96,6 +122,12 @@ __attribute__((naked)) static void GDT_reload_segments()
 
 static inline void GDT_init()
 {
+    // setup the TSS base as it can't be computed at compile time:
+    const uint32_t ptr = (uint32_t) &g_tss;
+    gdtd[5].base_lo    = ptr & 0xFFFF;
+    gdtd[5].base_mi    = (ptr >> 16) & 0xFF;
+    gdtd[5].base_hi    = (ptr >> 24) & 0xFF;
+
     GDT_load(&gdtr);
     GDT_reload_segments();
 }
