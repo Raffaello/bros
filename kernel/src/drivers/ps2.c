@@ -15,6 +15,8 @@
 #define PS2_STATUS    0x64
 #define PS2_COMMAND   0x64
 
+#define PS2_POLL_TIMEOUT 1000000U
+
 
 #define PS2_COMMAND_TEST          0xAA
 #define PS2_COMMAND_TEST_PORT1    0xAB
@@ -108,22 +110,28 @@ static uint8_t _PS2_read_status()
 
 static void _PS2_polling_wait_until_is_ready()
 {
-    while (true)
+    for (uint32_t i = 0; i < PS2_POLL_TIMEOUT; ++i)
     {
         const uint8_t s = _PS2_read_status();
         if ((s & 1) != 0)
-            break;    // buffer not empty
+            return;                                // buffer not empty
+        __asm__ volatile("pause" ::: "memory");    // Hint to CPU
     }
+
+    KERNEL_PANIC("PS/2 POLL TIMED-OUT");
 }
 
 static void _PS2_polling_wait_until_can_send()
 {
-    while (true)
+    for (uint32_t i = 0; i < PS2_POLL_TIMEOUT; ++i)
     {
         const uint8_t s = _PS2_read_status();
         if ((s & 2) == 0)
-            break;    // can write now, buffer empty
+            return;                                // can write now, buffer empty
+        __asm__ volatile("pause" ::: "memory");    // Hint to CPU
     }
+
+    KERNEL_PANIC("PS/2 POLL TIMED-OUT");
 }
 
 static void _PS2_polling_send_command(uint8_t cmd)
@@ -360,8 +368,9 @@ uint8_t PS2_get_scancode(void)
 
 key_event_t PS2_get_char(void)
 {
-    key_event_t k        = {};
-    bool        extended = false;
+    static key_mod_t mod      = {};
+    key_event_t      k        = {};
+    bool             extended = false;
 
     while (k.scancode == 0)
     {
@@ -383,11 +392,11 @@ key_event_t PS2_get_char(void)
             switch (c)
             {
             case 0x14:    // R_CTRL (0xE0, 0x14)
-                k.modifiers.rctrl = true;
+                mod.rctrl = true;
                 break;
 
             case 0x11:    // R_ALT (0xE0, 0x11)
-                k.modifiers.ralt = true;
+                mod.ralt = true;
                 break;
 
             default:
@@ -404,19 +413,19 @@ key_event_t PS2_get_char(void)
                 break;
 
             case 0x12:    // L_SHIFT
-                k.modifiers.lshift = true;
+                mod.lshift = true;
                 break;
 
             case 0x59:    // R_SHIFT
-                k.modifiers.rshift = true;
+                mod.rshift = true;
                 break;
 
             case 0x14:    // L_CTRL
-                k.modifiers.lctrl = true;
+                mod.lctrl = true;
                 break;
 
             case 0x11:    // L_ALT
-                k.modifiers.lalt = true;
+                mod.lalt = true;
                 break;
 
             default:
@@ -428,7 +437,8 @@ key_event_t PS2_get_char(void)
 
     // TODO: populate ASCII value
     // TODO: review the modifiers
-    // k.ascii = 0;
+    k.ascii     = 0;
+    k.modifiers = mod;
     if (!k.released)
     {
         switch (k.scancode)

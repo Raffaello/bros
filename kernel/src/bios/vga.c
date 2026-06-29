@@ -35,7 +35,7 @@ void VGA_WriteChar(const int x, const int y, const char ch, uint8_t col)
 {
     uint8_t*  video_mem = (uint8_t*) VGA_MEM_TEXT;
     const int off       = (y * VGA_TEXT_WIDTH + x) * 2;
-    if (off < 0)
+    if (off < 0 || off > (VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT - 1) * 2)
         return;
 
     video_mem[off]     = ch;
