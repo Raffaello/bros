@@ -55,7 +55,7 @@
  * */
 
 /***
- * System-Segment Descriptor (GDT)
+ * Task-Segment Descriptor (GDT)
  *   segment limit          0..15
  *   base address           16..31
  *   base 23:16             0..7
@@ -72,8 +72,8 @@
  * */
 
 /**
- * Task-Segment Selector ?
- * Local-Segment Selector ?
+ * Task-Segment Selector ? obsolete, just 1 basic required for sys-calls/iret
+ * Local-Segment Selector ? obsolete.
  *
  * NOTES:
  * - The LDTR can only be loaded with a selector for an LDT.
@@ -126,6 +126,52 @@ typedef struct IDT_descriptor_t
 } __attribute__((packed)) IDT_descriptor_t;
 
 _Static_assert(sizeof(IDT_descriptor_t) == 8);
+
+typedef struct TSS_t
+{
+    uint16_t link;
+    uint16_t _reserved0;
+    uint32_t esp0;
+    uint16_t ss0;
+    uint16_t _reserved1;
+    uint32_t esp1;
+    uint16_t ss1;
+    uint16_t reserved2;
+    uint32_t esp2;
+    uint16_t ss2;
+    uint16_t reserved3;
+    uint32_t cr3;
+    uint32_t eip;
+    uint32_t eflags;
+    uint32_t eax;
+    uint32_t ecx;
+    uint32_t edx;
+    uint32_t ebx;
+    uint32_t esp;
+    uint32_t ebp;
+    uint32_t esi;
+    uint32_t edi;
+    uint16_t es;
+    uint16_t reserved4;
+    uint16_t cs;
+    uint16_t reserved5;
+    uint16_t ss;
+    uint16_t reserved6;
+    uint16_t ds;
+    uint16_t reserved7;
+    uint16_t fs;
+    uint16_t reserved8;
+    uint16_t gs;
+    uint16_t reserved9;
+    uint16_t ldtr;
+    uint16_t reserved10;
+    uint16_t reserved11;
+    uint16_t iopb;
+    // uint32_t ssp;    // Shadow Stack pointer, this might not be present if the CPU is too old (for 32-bits)
+
+} __attribute__((packed)) TSS_t;
+
+_Static_assert(sizeof(TSS_t) == 0x68);
 
 // Interrupt handler function type definition
 typedef void((*IDT_Handler)(void) );

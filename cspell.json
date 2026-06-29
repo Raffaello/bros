@@ -43,6 +43,7 @@
         "idtr",
         "ifndef",
         "ioaddr",
+        "iret",
         "iretd",
         "jcxz",
         "lalt",
