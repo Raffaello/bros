@@ -122,7 +122,7 @@ __attribute__((naked)) static void GDT_reload_segments()
 
 static inline void GDT_init()
 {
-    // set upt the TSS base as it can't be computed at compile time:
+    // setup the TSS base as it can't be computed at compile time:
     const uint32_t ptr = (uint32_t) &g_tss;
     gdtd[5].base_lo    = ptr & 0xFFFF;
     gdtd[5].base_mi    = (ptr >> 16) & 0xFF;
