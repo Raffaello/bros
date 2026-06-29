@@ -18,6 +18,8 @@
 #include <arch/x86/mmu/VMM.h>
 #include <sys/panic.h>
 
+#include <drivers/ps2.h>    // TODO: not in the init, on init drivers eventually. but for now is ok. but is it a driver?
+
 
 noreturn void _start();
 noreturn void _start_init();
@@ -120,6 +122,8 @@ _start_init()
     IRQ_init();
     CON_puts("Init PIT\n");
     PIT_init(10);
+    CON_puts("Init PS/2\n");
+    PS2_init();
     // boot info sanitize
     _start_boot_info(_sys_info);
     // PMM

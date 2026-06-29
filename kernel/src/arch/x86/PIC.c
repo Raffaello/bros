@@ -114,9 +114,7 @@ void PIC_init()
 void PIC_EOI(const uint8_t num_int)
 {
     if (num_int > 7)
-    {
         outb(PIC2_REG_STATUS, PIC_OCW2_MASK_EOI);
-    }
 
     outb(PIC1_REG_STATUS, PIC_OCW2_MASK_EOI);
 }
