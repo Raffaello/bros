@@ -33,8 +33,11 @@
 #define PS2_DATA_KEYBOARD_SET_SCANCODE1 0x01
 #define PS2_DATA_KEYBOARD_SET_SCANCODE2 0x02
 #define PS2_DATA_KEYBOARD_SET_SCANCODE3 0x03
-#define PS2_DATA_MOUSE_SET_DEFAULTS     0xFA
-#define PS2_DATA_MOUSE_ENABLE_DATA_REP  0xF4
+
+#define PS2_DATA_MOUSE_SET_SCALING1_1  0xE6
+#define PS2_DATA_MOUSE_SET_SCALING2_1  0xE7
+#define PS2_DATA_MOUSE_SET_RESOLUTION  0xE8
+#define PS2_DATA_MOUSE_SET_SAMPLE_RATE 0xF3
 
 
 #define PS2_RESPONSE_CTRL_TEST_OK 0x55
@@ -45,12 +48,12 @@
 
 // TODO: replace with a generic ring_buffer, when have dynamic memory or kalloc or something.
 #define PS2_RING_BUFFER_SIZE 16    // 256
-_Static_assert(PS2_RING_BUFFER_SIZE <= 256);
+_Static_assert(PS2_RING_BUFFER_SIZE < 256);
 
 typedef struct ring_buf_t
 {
     uint8_t          buf[PS2_RING_BUFFER_SIZE];
-    volatile uint8_t head;    // this will overflow, so no need to module PS2_RING_BUFFER_SIZE
+    volatile uint8_t head;
     volatile uint8_t tail;
 } ring_buf_t;
 
@@ -101,7 +104,7 @@ static uint8_t _PS2_read_status()
     return inb(PS2_STATUS);
 }
 
-static inline void _PS2_polling_wait_until_is_ready()
+static void _PS2_polling_wait_until_is_ready()
 {
     while (true)
     {
@@ -111,7 +114,7 @@ static inline void _PS2_polling_wait_until_is_ready()
     }
 }
 
-static inline void _PS2_polling_wait_until_can_send()
+static void _PS2_polling_wait_until_can_send()
 {
     while (true)
     {
@@ -121,19 +124,19 @@ static inline void _PS2_polling_wait_until_can_send()
     }
 }
 
-static inline void _PS2_polling_send_command(uint8_t cmd)
+static void _PS2_polling_send_command(uint8_t cmd)
 {
     _PS2_polling_wait_until_can_send();
     _PS2_send_command(cmd);
 }
 
-static inline void _PS2_polling_send_data(uint8_t data)
+static void _PS2_polling_send_data(uint8_t data)
 {
     _PS2_polling_wait_until_can_send();
     outb(PS2_DATA_PORT, data);
 }
 
-static inline uint8_t _PS2_read_data(void)
+static uint8_t _PS2_read_data(void)
 {
     return inb(PS2_DATA_PORT);
 }
@@ -166,6 +169,33 @@ static void _PS2_reset_device()
     data = _PS2_read_data();
 }
 
+static void _PS2_mouse_set_scaling(uint8_t scale)
+{
+    _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
+    if (scale == 1)
+        _PS2_polling_send_ack(PS2_DATA_MOUSE_SET_SCALING1_1);
+    else
+        _PS2_polling_send_ack(PS2_DATA_MOUSE_SET_SCALING2_1);
+}
+
+static void _PS2_mouse_set_resolution(uint8_t resolution)
+{
+    _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
+    _PS2_polling_send_ack(PS2_DATA_MOUSE_SET_RESOLUTION);
+    _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
+    _PS2_polling_send_ack(resolution);
+}
+
+static void _PS2_mouse_set_sample_rate(uint8_t rate)
+{
+    _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
+    _PS2_polling_send_ack(PS2_DATA_MOUSE_SET_SAMPLE_RATE);
+    _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
+    _PS2_polling_send_ack(rate);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static void _keyboard_handler_scancode(ISR_registers_t r)
 {
     _PS2_polling_wait_until_is_ready();
@@ -176,7 +206,10 @@ static void _keyboard_handler_scancode(ISR_registers_t r)
 static void _mouse_handler(ISR_registers_t r)
 {
     [[maybe_unused]] uint8_t c = _PS2_read_data();
+    [[maybe_unused]] int     i = 0;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 
 void PS2_init(void)
 {
@@ -249,12 +282,10 @@ void PS2_init(void)
         _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
         _PS2_reset_device();
 
-        // TODO: PS/2 MOUSE has some troubles in QEMU?
-
-        // _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
-        // _PS2_polling_send_ack(PS2_DATA_MOUSE_SET_DEFAULTS);
-        // _PS2_polling_send_command(PS2_COMMAND_WRITE_PORT2);
-        // _PS2_polling_send_ack(PS2_DATA_MOUSE_ENABLE_DATA_REP);
+        // TODO: PS/2 MOUSE has some troubles in QEMU? need to do anything before using it?
+        _PS2_mouse_set_scaling(1);
+        _PS2_mouse_set_resolution(0);
+        _PS2_mouse_set_sample_rate(100);
     }
 
     // Enable Devices
@@ -298,9 +329,6 @@ key_event_t PS2_get_char(void)
     while (k.scancode == 0)
     {
         uint8_t c = PS2_get_scancode();
-        // if (c == 0)    // TODO: remove this is for testing
-        //     break;
-
         if (c == 0xE0)    // if it is an extended key...
         {
             extended = true;
