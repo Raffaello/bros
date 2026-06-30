@@ -1,10 +1,10 @@
 # *** Some "defines" *** #
 
-export CC=gcc
-export AS=as
-export LD=ld
+export CC=i686-elf-gcc
+export AS=i686-elf-as
+export LD=i686-elf-ld
 
-# override with `make BUILD=release`
+# override with `make BUILD_TYPE=release`
 # default to debug build
 export BUILD_TYPE := debug
 

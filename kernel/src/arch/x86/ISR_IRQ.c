@@ -44,7 +44,7 @@ extern void ISR_INT_11();
 extern void ISR_INT_12();
 extern void ISR_INT_13();
 extern void ISR_INT_14();
-extern void ISR_INT_15();
+// extern void ISR_INT_15();
 extern void ISR_INT_16();
 extern void ISR_INT_17();
 extern void ISR_INT_18();
@@ -69,7 +69,7 @@ void ISR_init()
     IDT_set_gate(INT_Stack_Segment_Fault, ISR_INT_12);
     IDT_set_gate(INT_General_Protection, ISR_INT_13);
     IDT_set_gate(INT_Page_Fault, ISR_INT_14);
-    IDT_set_gate(INT_Intel_Reserved, ISR_INT_15);
+    // IDT_set_gate(INT_Intel_Reserved, ISR_INT_15);
     IDT_set_gate(INT_FPU_Error, ISR_INT_16);
     IDT_set_gate(INT_Alignment_Check, ISR_INT_17);
     IDT_set_gate(INT_Machine_Check, ISR_INT_18);

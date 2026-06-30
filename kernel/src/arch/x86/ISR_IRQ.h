@@ -1,6 +1,7 @@
-/**********************************
- *** Interrupt Service Routines ***
- **********************************/
+/*******************************************************************
+ *** Interrupt Service Routines                                  ***
+ *** https://wiki.osdev.org/Interrupt_Descriptor_Table#IDT_items ***
+ *******************************************************************/
 #pragma once
 
 #include <stdint.h>

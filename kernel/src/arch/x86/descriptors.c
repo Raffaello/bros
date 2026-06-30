@@ -45,8 +45,7 @@ _Static_assert(sizeof(void*) == sizeof(uint32_t));
 #define GDT_DPL_DRIVER2 2
 #define GDT_DPL_USER    3
 
-static TSS_t g_tss;
-
+static TSS_t            g_tss;
 static GDT_descriptor_t gdtd[MAX_GDT_DESCRIPTORS] = {
     {0}, // null-descriptor
 
@@ -95,9 +94,12 @@ static GDT_descriptor_t gdtd[MAX_GDT_DESCRIPTORS] = {
 
 #define GDT_KERNEL_CODE_SEL ((uint32_t) &gdtd[1] - (uint32_t) &gdtd[0])
 #define GDT_KERNEL_DATA_SEL ((uint32_t) &gdtd[2] - (uint32_t) &gdtd[0])
+#define GDT_USER_CODE_SEL   ((uint32_t) &gdtd[3] - (uint32_t) &gdtd[0])
+#define GDT_USER_DATA_SEL   ((uint32_t) &gdtd[4] - (uint32_t) &gdtd[0])
+#define GDT_TSS_SEL         ((uint32_t) &gdtd[5] - (uint32_t) &gdtd[0])
 
 const static struct DT_register_t gdtr = {
-    .size   = sizeof(GDT_descriptor_t) * MAX_GDT_DESCRIPTORS - 1,
+    .size   = sizeof(gdtd) - 1,
     .offset = (uint32_t) &gdtd[0]};
 
 static inline void GDT_load(const DT_register_t* dtr)
@@ -152,7 +154,7 @@ static inline void GDT_init()
 static struct /*__attribute__((aligned(16)))*/ IDT_descriptor_t idtd[MAX_INTERRUPTS];
 
 const static struct DT_register_t idtr = {
-    .size   = sizeof(IDT_descriptor_t) * MAX_INTERRUPTS - 1,
+    .size   = (sizeof(IDT_descriptor_t) * MAX_INTERRUPTS) - 1,
     .offset = (uint32_t) &idtd[0]};
 
 static inline void IDT_load(const DT_register_t* dtr)

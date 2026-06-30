@@ -39,13 +39,13 @@ ISR_INT 11, 1
 ISR_INT 12, 1
 ISR_INT 13, 1
 ISR_INT 14, 1
-ISR_INT 15, 0
+# ISR_INT 15, 0
 ISR_INT 16, 0
-ISR_INT 17, 0
+ISR_INT 17, 1
 ISR_INT 18, 0
 ISR_INT 19, 0
 ISR_INT 20, 0
-ISR_INT 21, 0
+ISR_INT 21, 1
 
 # .macro ISR_INT_init from, to
 #    ISR_INT \from
@@ -63,7 +63,7 @@ ISR_universal_handler_caller:
   mov ax, ds                # Lower 16-bits of eax = ds.
   push ax                   # save the data segment descriptor
   # load the kernel data segment descriptor
-#   mov ax, DATA_SEG
+  #mov ax, DATA_SEG
   mov ax, 0x10              # hardcoded for now
   mov ds, ax
   mov es, ax
