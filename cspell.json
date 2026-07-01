@@ -27,6 +27,7 @@
         "cpuid",
         "DDEBUG",
         "defsym",
+        "diffutils",
         "diskerror",
         "DKERNEL",
         "DNDEBUG",
