@@ -26,9 +26,9 @@ jobs:
           cache-to: type=registry,ref=ghcr.io/raffaello/bros:cache,mode=max
   ##############################################################
   ubuntu-build:
-    strategy:
-      matrix:
-        BUILD_TYPE: ["debug", "release", "reldbg"]
+    # strategy:
+    #   matrix:
+    #     BUILD_TYPE: ["debug", "release", "reldbg"]
     runs-on: ubuntu-latest
     needs: docker-build
     steps:
@@ -47,5 +47,9 @@ jobs:
           password: ${{ secrets.REGISTRY_PASS }}
       - name: Pull image
         run: docker pull ghcr.io/raffaello/bros:latest
-      - name: docker make
-        run: docker run --rm -v .:/code:Z ghcr.io/raffaello/bros /bin/bash -c "make BUILD_TYPE=${{ matrix.BUILD_TYPE }} clean all"
+      - name: docker make debug
+        run: docker run --rm -v .:/code:Z ghcr.io/raffaello/bros /bin/bash -c "make BUILD_TYPE=debug clean all"
+      - name: docker make release
+        run: docker run --rm -v .:/code:Z ghcr.io/raffaello/bros /bin/bash -c "make BUILD_TYPE=release clean all"
+      - name: docker make reldbg
+        run: docker run --rm -v .:/code:Z ghcr.io/raffaello/bros /bin/bash -c "make BUILD_TYPE=reldbg clean all"
