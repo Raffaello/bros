@@ -21,7 +21,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/bros:latest
+          tags: ghcr.io/raffaello/bros:latest
           cache-from: type=registry,ref=bros:cache
           cache-to: type=registry,ref=bros:cache,mode=max
   ##############################################################
@@ -46,6 +46,6 @@ jobs:
           username: ${{ secrets.REGISTRY_USER }}
           password: ${{ secrets.REGISTRY_PASS }}
       - name: Pull image
-        run: docker pull ghcr.io/${{ github.repository_owner }}/bros:latest
+        run: docker pull ghcr.io/raffaello/bros:latest
       - name: docker make
         run: docker run --rm -v .:/code:Z bros /bin/bash -c "make BUILD_TYPE=${{ matrix.BUILD_TYPE }} clean all"
