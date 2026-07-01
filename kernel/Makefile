@@ -44,6 +44,7 @@ CFLAGS+=-nostdlib -nodefaultlibs -nostartfiles
 CFLAGS+=-lgcc
 CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
 CFLAGS+=-fno-PIE # Github CI flags
+# CFLAGS+=-fno-omit-frame-pointer # -fno-optimize-sibling-calls
 
 CFLAGS.debug+=-g -DDEBUG
 CFLAGS.release+=-O2 -DNDEBUG

@@ -89,7 +89,7 @@ void ISR_register_interrupt_handler(const uint8_t n, ISR_Handler_t handler)
 // ===============================================
 // ***             IRQ Section                 ***
 // ===============================================
-void IRQ_UniversalHandler(ISR_registers_t r)
+__attribute__((noinline, optimize("no-omit-frame-pointer"))) void IRQ_UniversalHandler(ISR_registers_t r)
 {
     PIC_EOI(r.int_no);
     r.int_no += PIC1_BASE_INT;    // PIC2_BASE is following the first 8 IRQs
