@@ -47,13 +47,13 @@ jobs:
           key: ${{ runner.os }}-docker-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-docker-
-      # - name: Build using local cache
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     load: true
-      #     tags: bros:latest
-      #     cache-from: type=local,src=.docker-cache
-      #     cache-to: type=local,dest=.docker-cache,mode=max
+      - name: Build using local cache
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+          tags: bros:latest
+          cache-from: type=local,src=.docker-cache
+          cache-to: type=local,dest=.docker-cache,mode=max
       - name: docker make
         run: docker run --rm -v .:/code:Z bros /bin/bash -c "make BUILD_TYPE=${{ matrix.BUILD_TYPE }} clean all"
