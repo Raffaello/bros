@@ -3,17 +3,9 @@ name: Build
 on: [push]
 
 jobs:
-  ubuntu-build:
-    strategy:
-      matrix:
-        BUILD_TYPE: ["debug", "release", "reldbg"]
+  docker-build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2.0.0
-      # - run: sudo apt-get -y install mtools
-      # - run: gcc -v
-      # - run: make BUILD_TYPE=${{ matrix.BUILD_TYPE }} clean all
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Restore Docker build cache
@@ -31,5 +23,34 @@ jobs:
           tags: bros:latest
           cache-from: type=local,src=.docker-cache
           cache-to: type=local,dest=.docker-cache,mode=max
+
+  ubuntu-build:
+    strategy:
+      matrix:
+        BUILD_TYPE: ["debug", "release", "reldbg"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+      # - run: sudo apt-get -y install mtools
+      # - run: gcc -v
+      # - run: make BUILD_TYPE=${{ matrix.BUILD_TYPE }} clean all
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v3
+      # - name: Restore Docker build cache
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: .docker-cache
+      #     key: ${{ runner.os }}-docker-${{ github.sha }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-docker-
+      # - name: Build using local cache
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: .
+      #     load: true
+      #     tags: bros:latest
+      #     cache-from: type=local,src=.docker-cache
+      #     cache-to: type=local,dest=.docker-cache,mode=max
       - name: docker make
         run: docker run --rm -v .:/code:Z bros /bin/bash -c "make BUILD_TYPE=${{ matrix.BUILD_TYPE }} clean all"
