@@ -48,4 +48,4 @@ jobs:
       - name: Pull image
         run: docker pull ghcr.io/raffaello/bros:latest
       - name: docker make
-        run: docker run --rm -v .:/code:Z bros /bin/bash -c "make BUILD_TYPE=${{ matrix.BUILD_TYPE }} clean all"
+        run: docker run --rm -v .:/code:Z ghcr.io/raffaello/bros /bin/bash -c "make BUILD_TYPE=${{ matrix.BUILD_TYPE }} clean all"
