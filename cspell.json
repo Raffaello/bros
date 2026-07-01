@@ -17,6 +17,7 @@
         "bootsig",
         "BROSKRNL",
         "BROSKRNLSYS",
+        "Buildx",
         "CGARETRACE",
         "chipset",
         "cmosimage",
