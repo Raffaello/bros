@@ -8,7 +8,7 @@
  *       rather than for physical memory                    *
  *       this bitset allocation is more for frames (paging) *
  *       TODO: move in VMM instead                          *
- *       and manage differently phisical memory             *
+ *       and manage differently physical memory             *
  ************************************************************/
 #pragma once
 
