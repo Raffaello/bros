@@ -97,7 +97,8 @@ void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start, const uint8
 
     // align bitset mem_map size, the extra bits won't be used.
     _PMM_mem_map_size = _PMM_mem_map_size +
-                      +PMM_MEM_MAP_BLOCK_PER_BITSET - _PMM_mem_map_size % PMM_MEM_MAP_BLOCK_PER_BITSET;
+                        PMM_MEM_MAP_BLOCK_PER_BITSET -
+                        (_PMM_mem_map_size % PMM_MEM_MAP_BLOCK_PER_BITSET);
 
     _PMM_mem_map   = (bitset32_t) physical_mem_start;
     _PMM_cur_paddr = physical_mem_start + _PMM_mem_map_size;
@@ -191,6 +192,8 @@ void* PMM_malloc(const size_t size)
     // check if current block is allocated
     if (!bitset_test(_PMM_mem_map, _PMM_cur_paddr / PMM_BLOCK_SIZE))
         return PMM_malloc_aligned(size);
+
+    // TODO: this below looks wrong, especially due to the global variable _PMM_cur_paddr.
 
     // already allocated so reuse the same block (page)
     size_t  avail = _PMM_cur_paddr % PMM_BLOCK_SIZE;
