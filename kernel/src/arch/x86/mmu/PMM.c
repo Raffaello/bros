@@ -148,6 +148,11 @@ void PMM_MemMap_deinit_kernel(const uint32_t code_start, const uint32_t code_siz
 
     // TODO: add also something for the stack!
     PMM_MemMap_deinit(code_start, code_size + _PMM_mem_map_size);
+
+    // Reserved block 0 as it is like a NULL, this is a waste of memory.
+    // Indicating that this is bad designed.
+    if (!bitset_test(_PMM_mem_map, 0))
+        bitset_set(_PMM_mem_map, 0);
 }
 
 void PMM_store_MemMapInfo(const uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* mem_map)

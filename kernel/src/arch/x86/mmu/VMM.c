@@ -98,7 +98,7 @@ bool VMM_init()
     // first 1MB identity (here are 4MB)
     for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
     {
-        // page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
+        page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
         CON_printf("table %u\n", i);
         VMM_frame_alloc(&page_table->entries[i], true, false);
     }
