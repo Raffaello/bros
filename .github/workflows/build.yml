@@ -22,8 +22,13 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/raffaello/bros:latest
-          cache-from: type=registry,ref=ghcr.io/raffaello/bros:cache
-          cache-to: type=registry,ref=ghcr.io/raffaello/bros:cache,mode=max
+          cache-from: |
+            type=registry,ref=ghcr.io/raffaello/bros:builder-cache
+            type=registry,ref=ghcr.io/raffaello/bros:runtime-cache
+          cache-to: |
+            type=registry,ref=ghcr.io/raffaello/bros:builder-cache,mode=max
+            type=registry,ref=ghcr.io/raffaello/bros:runtime-cache,mode=max
+
   ##############################################################
   ubuntu-build:
     # strategy:

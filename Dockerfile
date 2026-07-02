@@ -58,72 +58,17 @@ FROM fedora:44
 
 RUN dnf -y update
 RUN dnf -y install \
-    # gcc \
-    # g++ \
-    # bison \
-    # flex \
-    # gmp-devel \
-    # libmpc-devel \
-    # mpfr-devel \
-    # texinfo \
-    # isl-devel \
+    isl \
+    make \
     gdb \
     mtools \
-    qemu \
-    bochs \
-    bochs-debugger
-# iproute \
-# ps \
-# curl \
-# libvncserver-devel
-
-# WORKDIR /src
-
-# ENV PREFIX="/usr/local/cross"
-# ENV TARGET=i686-elf
-# ENV PATH="${PREFIX}/bin:${PATH}"
-
-# ARG BINUTILS=binutils-2.46.1
-# ARG BINUTILS_EXT=.tar.xz
-# ARG BINUTILS_URL=https://mirrors.dotsrc.org/gnu/binutils/${BINUTILS}${BINUTILS_EXT}
-
-# ARG GCC=gcc-16.1.0
-# ARG GCC_EXT=.tar.xz
-# ARG GCC_URL=https://mirror.koddos.net/gcc/releases/${GCC}/${GCC}${GCC_EXT}
+    qemu 
+# bochs \
+# bochs-debugger
 
 
-# RUN curl -O -L ${BINUTILS_URL} && \
-#     curl -O -L ${GCC_URL} 
-
-# RUN tar xf ${BINUTILS}${BINUTILS_EXT} && \
-#     tar xf ${GCC}${GCC_EXT} && \
-#     rm ${BINUTILS}${BINUTILS_EXT} && \
-#     rm ${GCC}${GCC_EXT}
-
-# RUN mkdir build-binutils && \
-#     cd build-binutils && \
-#     ../${BINUTILS}/configure --target=${TARGET} --prefix="${PREFIX}" --with-sysroot --disable-nls --disable-werror --enable-default-execstack=no && \
-#     make && \
-#     make install
-
-# RUN mkdir build-gcc && \
-#     cd build-gcc && \
-#     ../${GCC}/configure --target=${TARGET} --prefix="${PREFIX}" --disable-nls --enable-languages=c,c++ --without-headers --enable-initfini-array --disable-hosted-libstdcxx && \
-#     make all-gcc && \
-#     make all-target-libgcc && \
-#     make all-target-libstdc++-v3 && \
-#     make install-gcc && \
-#     make install-target-libgcc && \
-#     make install-target-libstdc++-v3
-
-
-# RUN curl -O -L https://sourceforge.net/projects/bochs/files/bochs/3.0/bochs-3.0.tar.gz && \
-#     tar xf bochs-3.0.tar.gz && \
-#     cd bochs-3.0 && \
-#     ./configure --with-vncsrv && \
-#     make && \
-#     make install
-
+ENV PREFIX="/usr/local/cross"
+ENV PATH="${PREFIX}/bin:${PATH}"
 COPY --from=build "/usr/local/cross" "/usr/local/cross"
 
 WORKDIR /code
