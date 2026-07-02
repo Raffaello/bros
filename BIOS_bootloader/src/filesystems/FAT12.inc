@@ -13,7 +13,7 @@ FAT_SEG = KERNEL_SEG  # temporary loading here, replacing ROOT_DIR
 # Variables Root Directory Section
 ROOT_DIR_ENTRY_SIZE     = 32
 ROOT_DIR_TOTAL_SIZE     = ROOT_DIR_ENTRY_SIZE * _RootEntCnt
-ROOT_DIR_TOTAL_SECTORS  = (ROOT_DIR_TOTAL_SIZE + _BytesPerSec - 1) / _BytesPerSec
+ROOT_DIR_TOTAL_SECTORS =  14 # (ROOT_DIR_TOTAL_SIZE + _BytesPerSec - 1) / _BytesPerSec
 ROOT_DIR_SEC_OFFSET         = FAT_SEC_OFFSET + (_NumFATs * FAT_TOTAL_SECTORS)
 ROOT_DIR_SEG = FAT_SEG  # temporary loading here,
                         # then take the information required

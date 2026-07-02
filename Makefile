@@ -1,10 +1,18 @@
 # *** Some "defines" *** #
 
-export CC=gcc
-export AS=as
-export LD=ld
+### Check because of the CI
+# ifeq ($(wildcard /usr/local/cross/bin/i686-elf-gcc), )
+# $(warning gcc cross-compiler not detected!)
+# 	export CC=gcc
+# 	export AS=as
+# 	export LD=ld
+# else
+export AS=i686-elf-as
+export CC=i686-elf-gcc
+export LD=i686-elf-ld
+# endif
 
-# override with `make BUILD=release`
+# override with `make BUILD_TYPE=release`
 # default to debug build
 export BUILD_TYPE := debug
 
