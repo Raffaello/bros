@@ -1,10 +1,18 @@
 # *** Some "defines" *** #
 
-export CC=gcc
-export AS=as
-export LD=ld
+### Check because of the CI
+# ifeq ($(wildcard /usr/local/cross/bin/i686-elf-gcc), )
+# $(warning gcc cross-compiler not detected!)
+# 	export CC=gcc
+# 	export AS=as
+# 	export LD=ld
+# else
+export AS=i686-elf-as
+export CC=i686-elf-gcc
+export LD=i686-elf-ld
+# endif
 
-# override with `make BUILD=release`
+# override with `make BUILD_TYPE=release`
 # default to debug build
 export BUILD_TYPE := debug
 
@@ -15,7 +23,7 @@ BIN_DIR.debug=bin/debug
 # release
 BUILD_DIR.release=build/release
 BIN_DIR.release=bin/release
-# releae with debug info
+# release with debug info
 BUILD_DIR.reldbg=build/reldbg
 BIN_DIR.reldbg=bin/reldbg
 
@@ -33,7 +41,7 @@ ifneq ($(BUILD_TYPE), $(filter $(BUILD_TYPE), debug release reldbg))
 $(error BUILD_TYPE must be one of 'debug', 'release', 'reldbg')
 endif
 
-.PHONY: kernel
+.PHONY: kernel bios_bootloader
 
 all: image
 
@@ -42,6 +50,7 @@ t:
 	echo $(BUILD_DIR)
 	echo $(BIN_DIR)
 	echo $(filter $(BUILD_TYPE), debug release reldbg)
+	echo ${FLOPPY_IMAGE_NAME}
 
 bios_bootloader:
 	+$(MAKE) -C ${BIOS_BL_DIR} all
@@ -53,7 +62,7 @@ image: bios_bootloader kernel
 	mdir -i ${FLOPPY_IMAGE_NAME} -a
 
 gdb-kernel-debug:
-	qemu-system-i386 -fda ${FLOPPY_IMAGE_NAME} -S -s &
+	qemu-system-i386 -drive file=${FLOPPY_IMAGE_NAME},if=floppy,format=raw -S -s &
 	gdb ${KERNEL_DIR}/${BUILD_DIR}/kernel.out \
 		-ex 'target remote localhost:1234' \
 		-ex 'layout src' \
@@ -78,5 +87,6 @@ bochs-debug:
 clean:
 	+$(MAKE) -C ${BIOS_BL_DIR} clean
 	+$(MAKE) -C ${KERNEL_DIR} clean
-	rm ${BIN_DIR}/* -fv
+	rm $-rf{BIN_DIR}/* -rfv
+	rm ${BUILD_DIR}/* -rfv
 	rm ${FLOPPY_IMAGE_NAME} -fv

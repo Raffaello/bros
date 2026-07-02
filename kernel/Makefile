@@ -5,7 +5,7 @@ FLOPPY_IMAGE_NAME:=../${FLOPPY_IMAGE_NAME}
 SRC_DIR=src
 
 # NOTE: When working on fixing compiling optimization issues the below TODO could be resolved.
-# TODO: Furher sub-makefiles might be required to define optimizaions/options to compiler/linker
+# TODO: Further sub-makefiles might be required to define optimizations/options to compiler/linker
 #       also need to be later on expanded, listing each single file,
 #       so a further control at file level could be achieved.
 #       for now is ok in this way at the moment.
@@ -35,12 +35,16 @@ CFLAGS+=-masm=intel
 # CFLAGS+=-O2	# optimization are creating issues on the code
 # CFLAGS+=-pedantic
 CFLAGS+=-std=c17
-CFLAGS+=-m32 -c -ffreestanding -I ${INCLUDE_DIR}
+# CFLAGS+=-m32
+CFLAGS+=-c -ffreestanding -I ${INCLUDE_DIR}
+CFLAGS+=-fno-pic -mno-red-zone # -fno-stack-protector
+CFLAGS+=-fno-exceptions # -fno-rtti # C++ options disabled.
 # CFLAGS+= -MMD -MF
-CFLAGS+=-nostartfiles -nostdlib
+CFLAGS+=-nostdlib -nodefaultlibs -nostartfiles
 CFLAGS+=-lgcc
 CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
 CFLAGS+=-fno-PIE # Github CI flags
+# CFLAGS+=-fno-omit-frame-pointer # -fno-optimize-sibling-calls
 
 CFLAGS.debug+=-g -DDEBUG
 CFLAGS.release+=-O2 -DNDEBUG
@@ -49,7 +53,7 @@ CFLAGS.reldbg=-g $(CFLAGS.release)
 CFLAGS+=$(CFLAGS.$(BUILD_TYPE))
 
 
-LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
+# LFLAGS+=-m elf_i386 # change when starting the kernel in long mode
 LFLAGS+=-nostdlib --nmagic
 LFLAGS+=-Tkernel.ld # linker option definition file
 # LFLAGS+=-Ttext ${KERNEL_SEG}
@@ -80,6 +84,7 @@ kernel: $(OBJS) ${OBJS_S}
 	# ${LD} $(LFLAGS) -o ${BIN_DIR}/kernel.sys ${OBJS} ${OBJS_S}
 	${LD} $(LFLAGS) -o ${BUILD_DIR}/kernel.out ${OBJS} ${OBJS_S}
 	objcopy -O binary ${BUILD_DIR}/kernel.out ${BIN_DIR}/kernel.sys
+	cp ${BUILD_DIR}/kernel.out ${BUILD_DIR}/../kernel.out
 
 image: kernel
 	-mattrib -i ${FLOPPY_IMAGE_NAME} -r -h -s -a /${KERNEL_FILENAME}

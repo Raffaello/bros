@@ -1,5 +1,5 @@
 # BIOS print using interrupt 10h, ah=0Eh
-# expecting zero ('\0') terminated string in ds:si as paramter
+# expecting zero ('\0') terminated string in ds:si as parameter
 
 .ifndef PrintString
 

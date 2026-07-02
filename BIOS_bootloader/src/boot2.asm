@@ -75,7 +75,7 @@ load_fat:
 
   # pop dx  # dx
   # pop cx  # cx
-  pop ax  # bx (Numluster)
+  pop ax  # bx (Num cluster)
   # pop ax  # ax Restore Kernel RootDir Index
   # -- #
   mov bx, KERNEL_SEG
@@ -149,7 +149,7 @@ main32:
   mov ds, ax
   mov ss, ax
   mov es, ax
-  mov esp, 0x1000               # stack start below the loaded kernel
+  mov esp, KERNEL_SEG              # stack start below the loaded kernel
   # Store kernel parameters
   mov eax, 0x42524F53           # Bootloader Magic value
   mov ebx, SYS_INFO_SEG         # System Info struct address
@@ -173,4 +173,4 @@ ok_msg:                 .asciz "OK"
 pmode_msg:              .asciz "Enabling Protected Mode and starting Kernel"
 press_a_key_msg:        .asciz "Press any key."
 
-.fill ((_BytsPerSec * (_RsvdSecCnt - 1)) -(. - _start)), 1, 0
+.fill ((_BytesPerSec * (_RsvdSecCnt - 1)) -(. - _start)), 1, 0

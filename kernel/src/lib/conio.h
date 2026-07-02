@@ -8,15 +8,14 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-#define CON_WIDTH 80
+#define CON_WIDTH  80
 #define CON_HEIGHT 25
 
 typedef struct con_col_t
 {
-    uint8_t fg_col:4;
-    uint8_t bg_col:4;
+    uint8_t fg_col : 4;
+    uint8_t bg_col : 4;
 } con_col_t;
-
 
 void CON_setConsoleColor(const con_col_t col);
 void CON_setConsoleColor2(const uint8_t bg_col, const uint8_t fg_col);
@@ -36,6 +35,6 @@ void CON_newline();
 /****************************************
  * basic printf alike functionalities   *
  ***************************************/
-int  CON_printf(const char* fmt, ...);
-int  CON_sprintf(char* str, const char* fmt, ...);
-int  CON_vsprintf(char* str, const char* fmt, va_list args);
+int CON_printf(const char* fmt, ...);
+int CON_sprintf(char* str, const char* fmt, ...);
+int CON_vsprintf(char* str, const char* fmt, va_list args);

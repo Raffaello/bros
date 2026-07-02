@@ -3,8 +3,9 @@ BIN_DIR:=../${BIN_DIR}
 FLOPPY_IMAGE_NAME:=../${FLOPPY_IMAGE_NAME}
 
 SRC=./src
-ASFLAGS+=--fatal-warnings -n --32 -march=i386 -I ${SRC}
-AS_LFLAGS+=-m elf_i386
+# ASFLAGS+=--fatal-warnings -n --32 -march=i386 -I ${SRC}
+ASFLAGS+=--fatal-warnings -n  -I ${SRC}
+# AS_LFLAGS+=-m elf_i386
 
 # SRC=floppy.asm boot2.asm
 
@@ -19,6 +20,8 @@ FAT_BUFFER_SEG=0x600 # same as BOOT_REL_SEG as it won't be used anymore
 SYS_INFO_SEG=0x600 # it will replace the FAT_BUFFER_SEG after the kernel is loaded.
 
 all: image
+
+.PHONY: all image
 
 clean:
 	rm ${BUILD_DIR}/* -frv

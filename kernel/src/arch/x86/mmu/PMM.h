@@ -16,7 +16,7 @@
 #include <stddef.h>
 #include <bios/boot_info.h>
 
-typedef uint32_t paddr_t; // physical address type
+typedef uint32_t paddr_t;    // physical address type
 
 typedef struct PMM_mem_t
 {
@@ -42,11 +42,11 @@ int PMM_Blocks_free();
 /**
  * Aligned page-size mem alloc from bytes.
  * */
-void *PMM_malloc_aligned(const size_t size);
-void PMM_free_aligned(void* ptr, const size_t size);
+void* PMM_malloc_aligned(const size_t size);
+void  PMM_free_aligned(void* ptr, const size_t size);
 
 /**
- * Alloc continuosly without align nor page size, can't be free.
+ * Alloc continuously without align nor page size, can't be free.
  * TODO: use a heap, this won't work as soon as free is used...
  * */
-void *PMM_malloc(const size_t size);
+void* PMM_malloc(const size_t size);

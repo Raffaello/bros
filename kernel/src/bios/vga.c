@@ -1,28 +1,30 @@
 /**
- * @link http://web.stanford.edu/class/cs140/projects/pintos/specs/freevga/vga/vga.htm 
-**/
+ * @link http://web.stanford.edu/class/cs140/projects/pintos/specs/freevga/vga/vga.htm
+ **/
 
 #include <bios/vga.h>
 #include <arch/x86/io.h>
+
+#include <stddef.h>
 
 #define VGA_MEM_TEXT 0xB8000
 
 #define VGA_REG_CTRL 0x3D4
 #define VGA_REG_DATA 0x3D5
 
-#define VGA_TEXT_WIDTH 80
-#define VGA_TEXT_HEIGHT 25
+#define VGA_TEXT_WIDTH  VGA_TEXT_MODE_3_COLS
+#define VGA_TEXT_HEIGHT VGA_TEXT_MODE_3_ROWS
 
 void VGA_fill(const uint8_t fg_col, const uint8_t bg_col)
 {
-    uint8_t *video_mem = (uint8_t*) VGA_MEM_TEXT;
-    const register uint8_t v = (bg_col << 4) | fg_col;
-    for(int i = 0; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;) {
-        video_mem[i++]=0;
-        video_mem[i++]=v;
+    uint8_t*               video_mem = (uint8_t*) VGA_MEM_TEXT;
+    const register uint8_t v         = (bg_col << 4) | fg_col;
+    for (int i = 0; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;)
+    {
+        video_mem[i++] = 0;
+        video_mem[i++] = v;
     }
 }
-
 
 inline void VGA_clear()
 {
@@ -31,21 +33,47 @@ inline void VGA_clear()
 
 void VGA_WriteChar(const int x, const int y, const char ch, uint8_t col)
 {
-    uint8_t *video_mem = (uint8_t*) VGA_MEM_TEXT;
-    const int off = (y * VGA_TEXT_WIDTH + x) * 2;
-    video_mem[off] = ch;
+    uint8_t*  video_mem = (uint8_t*) VGA_MEM_TEXT;
+    const int off       = (y * VGA_TEXT_WIDTH + x) * 2;
+    if (off < 0 || off > (VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT - 1) * 2)
+        return;
+
+    video_mem[off]     = ch;
     video_mem[off + 1] = col;
+}
+
+void VGA_Write(const int x, const int y, VGA_char_t* ch)
+{
+    if (ch == NULL)
+        return;
+
+    VGA_WriteChar(x, y, ch->ch, ch->col);
 }
 
 void VGA_WriteString(const int x, const int y, const char str[], uint8_t col)
 {
-    for(int i = 0;str[i] != 0; ++i)
+    for (int i = 0; str[i] != 0; ++i)
     {
         // TODO: check end of screen?
-        VGA_WriteChar(x+i, y, str[i], col);
+        VGA_WriteChar(x + i, y, str[i], col);
     }
 }
 
+uint16_t VGA_GetChar(const int x, const int y)
+{
+    uint8_t*  video_mem = (uint8_t*) VGA_MEM_TEXT;
+    const int off       = (y * VGA_TEXT_WIDTH + x) * 2;
+
+    return video_mem[off] | (video_mem[off + 1] << 8);
+}
+
+VGA_char_t VGA_Read(const int x, const int y)
+{
+    uint8_t*  video_mem = (uint8_t*) VGA_MEM_TEXT;
+    const int off       = (y * VGA_TEXT_WIDTH + x) * 2;
+
+    return (VGA_char_t) {.ch = video_mem[off], .col = video_mem[off + 1]};
+}
 
 void VGA_enable_cursor(const uint8_t cursor_start, const uint8_t cursor_end)
 {
@@ -92,17 +120,17 @@ void VGA_update_cursor(const int x, const int y)
 
 void VGA_scroll_down()
 {
-    uint8_t *video_mem = (uint8_t*) VGA_MEM_TEXT;
-    register uint8_t col = video_mem[VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT) * 2 - 1];
+    uint8_t*         video_mem = (uint8_t*) VGA_MEM_TEXT;
+    register uint8_t col       = video_mem[VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT) * 2 - 1];
 
-    for(int i = 0; i < VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT-1) * 2 ;i++)
+    for (int i = 0; i < VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT - 1) * 2; i++)
     {
-        video_mem[i] = video_mem[i + (VGA_TEXT_WIDTH*2)];
+        video_mem[i] = video_mem[i + (VGA_TEXT_WIDTH * 2)];
     }
 
-    for(int i = VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT-1) * 2; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;)
+    for (int i = VGA_TEXT_WIDTH * (VGA_TEXT_HEIGHT - 1) * 2; i < VGA_TEXT_WIDTH * VGA_TEXT_HEIGHT * 2;)
     {
-        video_mem[i++]=0;
-        video_mem[i++]=col; // last background char
+        video_mem[i++] = 0;
+        video_mem[i++] = col;    // last background char
     }
 }
