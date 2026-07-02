@@ -55,6 +55,9 @@ static inline size_t _size2block(const size_t size)
 
 static paddr_t _PMM_malloc_blocks(const size_t num_blocks)
 {
+    // TODO: ERROR: BAD DESIGN: this function can return pos = 0, so can't return 0 as error...
+    // ----------------------------------------------------------------------------------------
+
     if (PMM_Blocks_free() < num_blocks)
         return 0;
 
