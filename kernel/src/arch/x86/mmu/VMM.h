@@ -86,7 +86,7 @@ void VMM_disable_paging();
 // Frame allocation
 // TODO review PMM and VMM, the physical memory manager is not ok as it is now.
 // TODO VMM works in "BLOCKS" (PAGES) not physical memory.
-// TOOD: also after VMM alloc pages need to be used like physical memory even if it is linear memory,
+// TODO: also after VMM alloc pages need to be used like physical memory even if it is linear memory,
 //       need a LMM?
 
 // anyway PMM is not ok as those malloc are more related to VMM
