@@ -57,13 +57,13 @@ void page_fault_handler(ISR_registers_t regs)
 
     // TODO
 
-    int present = regs.err_code & 0x1;         // Page present?
-    int rw      = regs.err_code & (1 << 1);    // Write operation?
-    int user    = regs.err_code & (1 << 2);    // Processor was in user-mode?
-    int id      = regs.err_code & (1 << 4);    // Caused by an instruction fetch?
+    int present = regs.err_code & 0x1;                // Page present?
+    int rw      = (regs.err_code & (1 << 1)) != 0;    // Write operation?
+    int user    = (regs.err_code & (1 << 2)) != 0;    // Processor was in user-mode?
+    int id      = (regs.err_code & (1 << 4)) != 0;    // Caused by an instruction fetch?
 
     CON_printf("PAGE FAULT addr: %X -- err_code=%X\n", faulting_addr, regs.err_code);
-    CON_printf("- present=%d, rw=%d, user=%d, id=%d", present, rw, user, id);
+    CON_printf("- present=%d, rw=%d, user=%d, id=%d\n", present, rw, user, id);
 }
 
 bool VMM_init()

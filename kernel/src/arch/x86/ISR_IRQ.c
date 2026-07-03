@@ -24,9 +24,9 @@ __attribute__((noinline, optimize("no-omit-frame-pointer"))) void ISR_UniversalH
 
         VGA_clear();
 
-        itoa(r.int_no, buf, 10);
+        itoa(r.int_no, buf, 16);
         VGA_WriteString(1, 2, buf, 15);
-        itoa(r.err_code, buf, 10);
+        itoa(r.err_code, buf, 16);
         VGA_WriteString(1, 3, buf, 15);
     }
 }

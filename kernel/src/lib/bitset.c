@@ -1,24 +1,24 @@
 #include <lib/bitset.h>
 
-#define BITSET_SIZE      (sizeof(bitset32_t) * 8)
+#define BITSET_SIZE      (sizeof(bitset32_t) * 8U)
 #define BITSET_INDEX(x)  (x / BITSET_SIZE)
 #define BITSET_OFFSET(x) (x % BITSET_SIZE)
 
-_Static_assert(BITSET_SIZE == sizeof(uint32_t) * 8);
+_Static_assert(BITSET_SIZE == sizeof(uint32_t) * 8U);
 
 inline void bitset_set(bitset32_t bitset, const uint32_t bit)
 {
-    bitset[BITSET_INDEX(bit)] |= (1 << (BITSET_OFFSET(bit)));
+    bitset[BITSET_INDEX(bit)] |= (1U << (BITSET_OFFSET(bit)));
 }
 
 inline void bitset_clear(bitset32_t bitset, const uint32_t bit)
 {
-    bitset[BITSET_INDEX(bit)] &= ~(1 << (BITSET_OFFSET(bit)));
+    bitset[BITSET_INDEX(bit)] &= ~(1U << (BITSET_OFFSET(bit)));
 }
 
 inline bool bitset_test(bitset32_t bitset, const uint32_t bit)
 {
-    return bitset[BITSET_INDEX(bit)] & (1 << BITSET_OFFSET(bit));
+    return bitset[BITSET_INDEX(bit)] & (1U << BITSET_OFFSET(bit));
 }
 
 bool bitset_find(const bitset32_t bitset, const uint32_t bitset_size, const size_t size, uint32_t* pos)
