@@ -6,16 +6,13 @@
 #include <sys/panic.h>
 
 #define PMM_MEM_MAP_FRAMES_PER_BYTE 8
-#define PMM_FRAME_SIZE              4096
 #define PMM_FRAME_ALIGN             PMM_FRAME_SIZE
 
 
-// static uint32_t   g_PMM_tot_mem_KB   = 0;    // should be size_t ?
 static uint32_t   g_PMM_total_frames = 0;
 static uint32_t   g_PMM_used_frames  = 0;
 static bitset32_t g_PMM_mem_map      = NULL;
 static uint32_t   g_PMM_mem_map_size = 0;
-static paddr_t    g_PMM_cur_paddr    = 0;
 
 static uint64_t align_up(uint64_t value, uint64_t align)
 {
@@ -32,34 +29,6 @@ static inline void _PMM_used_frames_panic(const char* msg)
 static inline size_t _size2frame(const size_t size)
 {
     return (size / PMM_FRAME_SIZE) + ((size % PMM_FRAME_SIZE) ? 1 : 0);
-}
-
-static paddr_t _PMM_malloc_frames(const size_t num_blocks)
-{
-    if (PMM_frames_free() < num_blocks)
-        return 0;
-
-    uint32_t pos;
-    if (!bitset_find(g_PMM_mem_map, g_PMM_mem_map_size, num_blocks, &pos))
-        return 0;
-
-    for (size_t i = 0; i < num_blocks; ++i)
-        bitset_set(g_PMM_mem_map, pos + i);
-
-    g_PMM_used_frames += num_blocks;
-
-    return pos * PMM_FRAME_SIZE;
-}
-
-static void _PMM_free_frames(paddr_t ptr, const size_t num_frames)
-{
-    if (g_PMM_used_frames < num_frames)
-        _PMM_used_frames_panic("PMM_free_frames");
-
-    unsigned int pos = ptr / PMM_FRAME_SIZE;
-    for (size_t i = 0; i < num_frames; i++)
-        bitset_clear(g_PMM_mem_map, pos + i);
-    g_PMM_used_frames -= num_frames;
 }
 
 void PMM_init(uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* mem_map, const paddr_t physical_mem_start, const uint32_t kernel_start, const uint32_t kernel_size)
@@ -128,33 +97,33 @@ inline int PMM_frames_free()
     return g_PMM_total_frames - g_PMM_used_frames;
 }
 
-void* PMM_malloc(const size_t size)
+void* PMM_malloc(const uint32_t size)
 {
-    paddr_t ptr     = _PMM_malloc_frames(_size2frame(size));
-    g_PMM_cur_paddr = ptr + size;
+    const uint32_t num_frames = _size2frame(size);
+    if (PMM_frames_free() < num_frames)
+        return NULL;
+
+    uint32_t pos;
+    if (!bitset_find(g_PMM_mem_map, g_PMM_mem_map_size, num_frames, &pos))
+        return NULL;
+
+    for (size_t i = 0; i < num_frames; ++i)
+        bitset_set(g_PMM_mem_map, pos + i);
+
+    g_PMM_used_frames += num_frames;
+
+    paddr_t ptr = pos * PMM_FRAME_SIZE;
     return (void*) ptr;
 }
 
-void PMM_free(void* ptr, const size_t size)
+void PMM_free(void* ptr, const uint32_t size)
 {
-    _PMM_free_frames((paddr_t) ptr, _size2frame(size));
-}
+    const uint32_t num_frames = _size2frame(size);
+    if (g_PMM_used_frames < num_frames)
+        _PMM_used_frames_panic("PMM_free_frames");
 
-void* PMM_malloc_linear(const size_t size)
-{
-    // check if current block is allocated
-    if (!bitset_test(g_PMM_mem_map, g_PMM_cur_paddr / PMM_FRAME_SIZE))
-        return PMM_malloc(size);
-
-    // already allocated so reuse the same block (page)
-    size_t  avail = g_PMM_cur_paddr % PMM_FRAME_SIZE;
-    paddr_t tmp   = g_PMM_cur_paddr;
-    // mark next block(s) allocated
-    if (size > avail && PMM_malloc(size - avail) == NULL)
-        _PMM_used_frames_panic("PMM_malloc no more free memory");
-
-    // size here is <= avail, or if greater next block(s) are allocated
-    g_PMM_cur_paddr += size;
-
-    return (void*) tmp;
+    unsigned int pos = (paddr_t) ptr / PMM_FRAME_SIZE;
+    for (size_t i = 0; i < num_frames; i++)
+        bitset_clear(g_PMM_mem_map, pos + i);
+    g_PMM_used_frames -= num_frames;
 }

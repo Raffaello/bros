@@ -24,9 +24,12 @@
 #define PDE_WRITABLE 2
 #define PDE_USERMODE 4
 
+// __attribute__((aligned(PMM_FRAME_SIZE))) static page_table_t      g_kernel_page_table;
+// __attribute__((aligned(PMM_FRAME_SIZE))) static page_directory_t  g_kernel_directory;
+// __attribute__((aligned(PMM_FRAME_SIZE))) static page_directory_t* g_pCurrent_directory = NULL;
 
-static page_directory_t* _kernel_directory  = NULL;
-static page_directory_t* _current_directory = NULL;
+static page_directory_t* g_pKernel_directory  = NULL;
+static page_directory_t* g_pCurrent_directory = NULL;
 
 /****************************************************************************
  * Error code bits:                                                         *
@@ -62,46 +65,54 @@ void page_fault_handler(ISR_registers_t regs)
 
     // TODO
 
-    // The error code gives us details of what happened.
-    // int present   = !(regs.err_code & 0x1); // Page not present
-    // int rw = regs.err_code & 0x2;           // Write operation?
-    // int us = regs.err_code & 0x4;           // Processor was in user-mode?
-    // int reserved = regs.err_code & 0x8;     // Overwritten CPU-reserved bits of page entry?
-    // int id = regs.err_code & 0x10;          // Caused by an instruction fetch?
+    int present  = !(regs.err_code & 0x1);      // Page not present
+    int rw       = regs.err_code & (1 << 1);    // Write operation?
+    int user     = regs.err_code & (1 << 2);    // Processor was in user-mode?
+    int reserved = regs.err_code & (1 << 3);    // Overwritten CPU-reserved bits of page entry?
+    int id       = regs.err_code & (1 << 4);    // Caused by an instruction fetch?
 
     CON_printf("PAGE FAULT addr: %X -- err_code=%X\n", faulting_addr, regs.err_code);
+    CON_printf("- present=%d, rw=%d, user=%d, id=%d", present, rw, user, id);
 }
 
 bool VMM_init()
 {
-    // TODO pass MemMap informations
-
-    _kernel_directory = PMM_malloc(sizeof(page_directory_t));
-
+    g_pKernel_directory      = PMM_malloc(sizeof(page_directory_t));
     page_table_t* page_table = PMM_malloc(sizeof(page_table_t));
 
-    if (page_table == NULL || _kernel_directory == NULL)
+    if (page_table == NULL || g_pKernel_directory == NULL)
         return false;
 
-    memset(_kernel_directory, 0, sizeof(page_directory_t));
+    memset(g_pKernel_directory, 0, sizeof(page_directory_t));
     memset(page_table, 0, sizeof(page_table_t));
 
-    // TODO: need to allocate some space for the stack too somewhere...
+    // *******************************************************************
+    // TODO: need to allocate some space for the stack too somewhere...  *
+    // *******************************************************************
 
-    // first 1MB, identity (actually here is 4MB)
-    for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
+    // first 1MB
+    for (uint32_t i = 0; i <= (1024 * 1024 / PMM_FRAME_SIZE); ++i)
     {
+        // g_kernel_page_table.entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
         page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
     }
 
-    _kernel_directory->entries[0] = (PDE_t) page_table | PDE_PRESENT | PDE_WRITABLE;
+    // first 4MB after 1st 1MB
+    for (uint32_t i = (1024 * 1024 / PMM_FRAME_SIZE) + 1; i < PAGE_TABLE_ENTRIES; i++)
+    {
+        // g_kernel_page_table.entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
+        page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
+    }
+
+    // g_kernel_directory.entries[0] = (PDE_t) &g_kernel_page_table | PDE_PRESENT | PDE_WRITABLE;
+    g_pKernel_directory->entries[0] = (PDE_t) page_table | PDE_PRESENT | PDE_WRITABLE;
 
     ISR_register_interrupt_handler(INT_Page_Fault, page_fault_handler);
-    if (!VMM_switch_page_directory(_kernel_directory))
+    // if (!VMM_switch_page_directory(&g_kernel_directory))
+    if (!VMM_switch_page_directory(g_pKernel_directory))
         return false;
 
     VMM_enable_paging();
-
     return true;
 }
 
@@ -110,7 +121,7 @@ bool VMM_switch_page_directory(page_directory_t* page_directory)
     if (page_directory == NULL)
         return false;
 
-    _current_directory = page_directory;
+    g_pCurrent_directory = page_directory;
     __asm__ volatile("mov cr3, %0" : : "a"(page_directory));
 
     return true;
