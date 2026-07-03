@@ -181,8 +181,6 @@ __attribute__((section(".text._start_PMM_init"), weak)) void _start_PMM_init(vol
     const int                           tot_entries = _sys_info->num_mem_map_entries;
     volatile boot_MEM_MAP_Info_Entry_t* mem_map     = MEM_MAP_ENTRY_PTR(_sys_info);
 
-    CON_puts("Init PMM\n");
-    PMM_init(_sys_info->tot_mem, kernel_end, _sys_info->boot_drive);
     CON_puts("Memory Regions\n");
     con_col_t old_col = CON_getConsoleColor();
     CON_setConsoleColor2(VGA_COLOR_RED, VGA_COLOR_BRIGHT_CYAN);
@@ -205,20 +203,12 @@ __attribute__((section(".text._start_PMM_init"), weak)) void _start_PMM_init(vol
             memi.length_lo,
             memi.type,
             mem_types[memi.type - 1]);
-
-        if (memi.type == MEM_MAP_TYPE_AVAILABLE)
-        {
-            // Because 32 bits, the High part is always zero.
-            // can't address more the 4GB after all..
-            PMM_MemMap_init(memi.base_addr_lo, memi.length_lo);
-        }
     }
 
-    // reserve the kernel memory area plus the PMM Bit set
-    PMM_MemMap_deinit_kernel(KERNEL_SEG, kernel_size);
-    PMM_store_MemMapInfo(_sys_info->num_mem_map_entries, mem_map);
+    CON_puts("Init PMM\n");
+    PMM_init(tot_entries, mem_map, kernel_end, KERNEL_SEG, kernel_size);
 
     CON_setConsoleColor((con_col_t) {.bg_col = VGA_COLOR_BLUE, .fg_col = VGA_COLOR_YELLOW});
-    CON_printf("PMM Blocks: used=%u --- free=%u\n", PMM_Blocks_used(), PMM_Blocks_free());
+    CON_printf("PMM frames: used=%u --- free=%u\n", PMM_frames_used(), PMM_frames_free());
     CON_setConsoleColor(old_col);
 }

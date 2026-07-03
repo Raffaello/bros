@@ -18,19 +18,9 @@ typedef struct PMM_mem_t
     uint32_t type;
 } PMM_mem_t;
 
-void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start, const uint8_t boot_drive);
-void PMM_MemMap_init(const paddr_t physical_addr, const uint32_t size);
-void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size);
-
-/*
- * Mark the kernel memory as in use
- */
-void PMM_MemMap_deinit_kernel(const uint32_t code_start, const uint32_t code_size);
-
-void PMM_store_MemMapInfo(const uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* mem_map);
-
-int PMM_Blocks_used();
-int PMM_Blocks_free();
+void PMM_init(uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* mem_map, const paddr_t physical_mem_start, const uint32_t kernel_start, const uint32_t kernel_size);
+int  PMM_frames_used();
+int  PMM_frames_free();
 
 /**
  * Aligned page-size mem alloc from bytes.
