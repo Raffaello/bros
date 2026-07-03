@@ -4,7 +4,7 @@
 #define BITSET_INDEX(x)  (x / BITSET_SIZE)
 #define BITSET_OFFSET(x) (x % BITSET_SIZE)
 
-_Static_assert(BITSET_SIZE == 32);
+_Static_assert(BITSET_SIZE == sizeof(uint32_t) * 8);
 
 inline void bitset_set(bitset32_t bitset, const uint32_t bit)
 {
