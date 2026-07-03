@@ -62,7 +62,7 @@ typedef uint32_t PTE_t;
 typedef struct page_table_t
 {
     PTE_t entries[PAGE_TABLE_ENTRIES];
-} page_table_t;
+} __attribute__((aligned(4))) page_table_t;
 
 _Static_assert(sizeof(page_table_t) == PAGE_TABLE_ENTRIES * sizeof(uint32_t));
 
