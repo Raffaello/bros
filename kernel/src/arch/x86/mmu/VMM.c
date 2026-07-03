@@ -88,7 +88,7 @@ bool VMM_init()
 
     // TODO: need to allocate some space for the stack too somewhere...
 
-    // first 1MB, identity
+    // first 1MB, identity (actually here is 4MB)
     for (uint32_t i = 0; i < PAGE_TABLE_ENTRIES; i++)
     {
         page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
