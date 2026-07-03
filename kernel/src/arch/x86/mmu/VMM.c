@@ -5,7 +5,7 @@
 #include <arch/x86/ISR_IRQ.h>
 #include <lib/conio.h>
 
-#define PAGE_SIZE 4096
+// #define PAGE_SIZE 4096
 
 // #define PAGE_DIR_INDEX(x) (((x) >> 22) & 0x3FF)
 // #define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
@@ -88,6 +88,9 @@ bool VMM_init()
 
     // *******************************************************************
     // TODO: need to allocate some space for the stack too somewhere...  *
+    //       this must be done when doing the high-half kernel,
+    //       at the moment is ok to start the stack from the KERNEL_SEG
+    //       and already initialized in _start()
     // *******************************************************************
 
     // first 1MB

@@ -68,7 +68,7 @@ _start()
     // TODO move the minimum requirement here before jumping
     //      somewhere else.
 
-    // __asm__ volatile("mov esp, %0"::"i"(&__stack_end));
+    __asm__ volatile("mov esp, %0" ::"i"(KERNEL_SEG));
     __asm__ volatile("jmp %0" ::"i"(&_start_init));
 }
 
