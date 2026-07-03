@@ -5,14 +5,6 @@
 #include <arch/x86/ISR_IRQ.h>
 #include <lib/conio.h>
 
-// #define PAGE_SIZE 4096
-
-// #define PAGE_DIR_INDEX(x) (((x) >> 22) & 0x3FF)
-// #define PAGE_TABLE_INDEX(x) (((x) >> 12) & 0x3FF)
-// #define PAGE_GET_PHYSICAL_ADDR(x) (*x & ~0xFFF)
-
-// #define CR0_PG_MASK 0x80000000
-
 
 #define PTE_FRAME(x) (x << 12)
 #define PTE_PRESENT  1
@@ -65,11 +57,10 @@ void page_fault_handler(ISR_registers_t regs)
 
     // TODO
 
-    int present = !(regs.err_code & 0x1);      // Page not present
+    int present = regs.err_code & 0x1;         // Page present?
     int rw      = regs.err_code & (1 << 1);    // Write operation?
     int user    = regs.err_code & (1 << 2);    // Processor was in user-mode?
-    // int reserved = regs.err_code & (1 << 3);    // Overwritten CPU-reserved bits of page entry?
-    int id = regs.err_code & (1 << 4);    // Caused by an instruction fetch?
+    int id      = regs.err_code & (1 << 4);    // Caused by an instruction fetch?
 
     CON_printf("PAGE FAULT addr: %X -- err_code=%X\n", faulting_addr, regs.err_code);
     CON_printf("- present=%d, rw=%d, user=%d, id=%d", present, rw, user, id);
@@ -91,6 +82,7 @@ bool VMM_init()
     //       this must be done when doing the high-half kernel,
     //       at the moment is ok to start the stack from the KERNEL_SEG
     //       and already initialized in _start()
+    //       and it was already set it up in the bootloader (boot2.ams)
     // *******************************************************************
 
     // first 1MB
