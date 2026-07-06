@@ -11,7 +11,7 @@
 
 static uint32_t   g_PMM_total_frames = 0;
 static uint32_t   g_PMM_used_frames  = 0;
-static bitset32_t g_PMM_mem_map      = NULL;
+static bitset32_t g_PMM_frames_map   = NULL;
 
 // static uint32_t   g_PMM_mem_map_size = 0;
 
@@ -46,15 +46,12 @@ void PMM_init(uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* me
             high_end = end;
     }
 
-    g_PMM_total_frames = align_up(high_end, PMM_FRAME_ALIGN) / PMM_FRAME_SIZE;
-    // g_PMM_mem_map_size = (g_PMM_total_frames + PMM_MEM_MAP_FRAMES_PER_BYTE - 1) / PMM_MEM_MAP_FRAMES_PER_BYTE;
+    g_PMM_used_frames           = 0;
+    g_PMM_total_frames          = align_up(high_end, PMM_FRAME_ALIGN) / PMM_FRAME_SIZE;
     const uint32_t mem_map_size = (g_PMM_total_frames + PMM_MEM_MAP_FRAMES_PER_BYTE - 1) / PMM_MEM_MAP_FRAMES_PER_BYTE;
-
-    const paddr_t bitmap_paddr = (paddr_t) align_up(physical_mem_start, PMM_MEM_MAP_FRAMES_PER_BYTE);
-    g_PMM_mem_map              = (bitset32_t) (uint32_t) bitmap_paddr;
-    memset(g_PMM_mem_map, 0, mem_map_size);
-    g_PMM_used_frames = 0;
-
+    const paddr_t  bitmap_paddr = (paddr_t) align_up(physical_mem_start, PMM_MEM_MAP_FRAMES_PER_BYTE);
+    g_PMM_frames_map            = (bitset32_t) (uint32_t) bitmap_paddr;
+    memset(g_PMM_frames_map, 0, mem_map_size);
     for (uint32_t i = 0; i < num_entries; ++i)
     {
         if (mem_map[i].type == MEM_MAP_TYPE_AVAILABLE)
@@ -67,9 +64,9 @@ void PMM_init(uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* me
 
         for (uint32_t f = start_frame; f < end_frame; ++f)
         {
-            if (!bitset_test(g_PMM_mem_map, f))
+            if (!bitset_test(g_PMM_frames_map, f))
             {
-                bitset_set(g_PMM_mem_map, f);
+                bitset_set(g_PMM_frames_map, f);
                 ++g_PMM_used_frames;
             }
         }
@@ -81,9 +78,9 @@ void PMM_init(uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* me
         const uint32_t end_frame   = align_up(kernel_start + kernel_size, PMM_FRAME_ALIGN) / PMM_FRAME_SIZE;
         for (uint32_t f = start_frame; f < end_frame; ++f)
         {
-            if (!bitset_test(g_PMM_mem_map, f))
+            if (!bitset_test(g_PMM_frames_map, f))
             {
-                bitset_set(g_PMM_mem_map, f);
+                bitset_set(g_PMM_frames_map, f);
                 ++g_PMM_used_frames;
             }
         }
@@ -95,9 +92,9 @@ void PMM_init(uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* me
         const uint32_t end_frame   = align_up(bitmap_paddr + mem_map_size, PMM_FRAME_ALIGN) / PMM_FRAME_SIZE;
         for (uint32_t f = start_frame; f < end_frame; ++f)
         {
-            if (!bitset_test(g_PMM_mem_map, f))
+            if (!bitset_test(g_PMM_frames_map, f))
             {
-                bitset_set(g_PMM_mem_map, f);
+                bitset_set(g_PMM_frames_map, f);
                 ++g_PMM_used_frames;
             }
         }
@@ -121,11 +118,11 @@ void* PMM_malloc(const uint32_t size)
         return NULL;
 
     uint32_t pos;
-    if (!bitset_find(g_PMM_mem_map, g_PMM_total_frames, num_frames, &pos))
+    if (!bitset_find(g_PMM_frames_map, g_PMM_total_frames, num_frames, &pos))
         return NULL;
 
     for (size_t i = 0; i < num_frames; ++i)
-        bitset_set(g_PMM_mem_map, pos + i);
+        bitset_set(g_PMM_frames_map, pos + i);
 
     g_PMM_used_frames += num_frames;
 
@@ -142,6 +139,6 @@ void PMM_free(void* ptr, const uint32_t size)
 
     unsigned int pos = (paddr_t) ptr / PMM_FRAME_SIZE;
     for (size_t i = 0; i < num_frames; i++)
-        bitset_clear(g_PMM_mem_map, pos + i);
+        bitset_clear(g_PMM_frames_map, pos + i);
     g_PMM_used_frames -= num_frames;
 }
