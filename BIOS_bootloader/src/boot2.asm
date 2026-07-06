@@ -153,7 +153,7 @@ main32:
   # Store kernel parameters
   mov eax, 0x42524F53           # Bootloader Magic value
   mov ebx, SYS_INFO_SEG         # System Info struct address
-  jmp GDT_CODE_SEG:KERNEL_SEG   # not sure the kernel will never return, so no point to 'call'
+  jmp GDT_CODE_SEG:KERNEL_SEG   # the kernel will never return, so no point to 'call'
   # dead code below, it will be overridden by kernel memory manager anyway
 main32_stop:
   cli
