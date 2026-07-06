@@ -13,8 +13,6 @@ static uint32_t   g_PMM_total_frames = 0;
 static uint32_t   g_PMM_used_frames  = 0;
 static bitset32_t g_PMM_frames_map   = NULL;
 
-// static uint32_t   g_PMM_mem_map_size = 0;
-
 static uint64_t align_up(uint64_t value, uint64_t align)
 {
     return (value + align - 1) & ~(align - 1);
