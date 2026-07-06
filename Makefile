@@ -83,6 +83,6 @@ bochs-debug:
 clean:
 	+$(MAKE) -C ${BIOS_BL_DIR} clean
 	+$(MAKE) -C ${KERNEL_DIR} clean
-	rm $-rf{BIN_DIR}/* -rfv
+	rm -rf ${BIN_DIR}/* -rfv
 	rm ${BUILD_DIR}/* -rfv
 	rm ${FLOPPY_IMAGE_NAME} -fv
