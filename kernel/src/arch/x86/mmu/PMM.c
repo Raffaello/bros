@@ -5,183 +5,138 @@
 #include <lib/string.h>
 #include <sys/panic.h>
 
-// TODO: having a block size of 4096 if i have to allocate few bytes is a lot of waste...
-//       something is not ok ... it should be more fine granted
-//       instead of alloc 1 block at time so a minimum of 4096 bytes
-// ...
-// e.g. mem_map and mem_map_info can just use 1 block in common...
-
-// TODO need a more efficient malloc that doesn't alloc a PAGE/BLOCK at time, too much memory wasteful
-//      especially for the internal kernel variables
-
-#define PMM_MEM_MAP_BLOCKS_PER_BYTE 8
-// PAGE_SIZE
-#define PMM_BLOCK_SIZE  4096
-#define PMM_BLOCK_ALIGN PMM_BLOCK_SIZE
+#define PMM_MEM_MAP_FRAMES_PER_BYTE 8
+#define PMM_FRAME_ALIGN             PMM_FRAME_SIZE
 
 
-static uint8_t    _PMM_boot_drive   = 0;
-static uint32_t   _PMM_tot_mem      = 0;    // should be size_t ?
-static uint32_t   _PMM_max_blocks   = 0;
-static uint32_t   _PMM_used_blocks  = 0;
-static bitset32_t _PMM_mem_map      = NULL;
-static uint32_t   _PMM_mem_map_size = 0;
+static uint32_t   g_PMM_total_frames = 0;
+static uint32_t   g_PMM_used_frames  = 0;
+static bitset32_t g_PMM_frames_map   = NULL;
 
-static PMM_mem_t* _PMM_mem_map_info        = NULL;
-static uint32_t   _PMM_mem_map_info_length = 0;
-static paddr_t    _PMM_cur_paddr           = 0;
+static uint64_t align_up(uint64_t value, uint64_t align)
+{
+    return (value + align - 1) & ~(align - 1);
+}
 
-static inline void _PMM_used_blocks_panic(const char* msg)
+static inline void _PMM_used_frames_panic(const char* msg)
 {
     char str[128];
-    CON_sprintf(str, "%s: %u (%u)", msg, _PMM_used_blocks, _PMM_max_blocks);
+    CON_sprintf(str, "%s: %u (%u)", msg, g_PMM_used_frames, g_PMM_total_frames);
     KERNEL_PANIC(str);
 }
 
-static inline size_t _size2block(const size_t size)
+static inline size_t _size2frame(const size_t size)
 {
-    return (size / PMM_BLOCK_SIZE) + ((size % PMM_BLOCK_SIZE) ? 1 : 0);
+    return (size / PMM_FRAME_SIZE) + ((size % PMM_FRAME_SIZE) ? 1 : 0);
 }
 
-static paddr_t _PMM_malloc_blocks(const size_t num_blocks)
+void PMM_init(uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* mem_map, const paddr_t physical_mem_start, const uint32_t kernel_start, const uint32_t kernel_size)
 {
-    if (PMM_Blocks_free() < num_blocks)
-        return 0;
-
-    unsigned int pos;
-    if (!bitset_find(_PMM_mem_map, _PMM_mem_map_size, num_blocks, &pos))
-        return 0;
-
-    for (size_t i = 0; i < num_blocks; ++i)
-        bitset_set(_PMM_mem_map, pos + i);
-
-    _PMM_used_blocks += num_blocks;
-
-    return pos * PMM_BLOCK_SIZE;
-}
-
-static void _PMM_free_blocks(paddr_t ptr, const size_t num_blocks)
-{
-    if (_PMM_used_blocks < num_blocks)
-        _PMM_used_blocks_panic("PMM_free_blocks");
-
-    unsigned int pos = ptr / PMM_BLOCK_SIZE;
-    for (size_t i = 0; i < num_blocks; i++)
-        bitset_clear(_PMM_mem_map, pos + i);
-    _PMM_used_blocks -= num_blocks;
-}
-
-void PMM_init(const uint32_t tot_mem_KB, paddr_t physical_mem_start, const uint8_t boot_drive)
-{
-    _PMM_boot_drive  = boot_drive;
-    _PMM_tot_mem     = tot_mem_KB;
-    _PMM_max_blocks  = tot_mem_KB * 1024 / PMM_BLOCK_SIZE;    // there is no extra block in this case for the reminder
-    _PMM_used_blocks = _PMM_max_blocks;
-
-
-    _PMM_mem_map_size = _PMM_max_blocks / PMM_MEM_MAP_BLOCKS_PER_BYTE;
-    _PMM_mem_map      = (bitset32_t) physical_mem_start;
-    _PMM_cur_paddr    = physical_mem_start + _PMM_mem_map_size;
-
-    // All Memory in use, as not known if it can be really used...
-    memset(_PMM_mem_map, 0xF, _PMM_mem_map_size);
-}
-
-void PMM_MemMap_init(const paddr_t physical_addr, const uint32_t size)
-{
-    uint32_t block_addr = physical_addr / PMM_BLOCK_SIZE;
-    // const uint32_t blocks = _size2block(size);
-    uint32_t blocks = (size / PMM_BLOCK_SIZE);    // can't have the reminder as another block ..
-
-    if (blocks > _PMM_used_blocks)
-        blocks = _PMM_used_blocks;
-
-    for (uint32_t i = 0; i < blocks; ++i)
+    uint64_t high_end = 0;
+    _Static_assert(sizeof(uint64_t) == 2 * sizeof(uint32_t));
+    for (uint32_t i = 0; i < num_entries; ++i)
     {
-        bitset_clear(_PMM_mem_map, block_addr++);
-        _PMM_used_blocks--;
+        if (mem_map[i].length_hi != 0 || mem_map[i].base_addr_hi != 0)
+            KERNEL_PANIC("unable to address more then 4GB");
+
+        const uint64_t end = ((uint64_t) mem_map[i].base_addr_lo) + mem_map[i].length_lo;
+        if (end > high_end)
+            high_end = end;
     }
 
-    if (_PMM_used_blocks > _PMM_max_blocks)
-        _PMM_used_blocks_panic("PMM_MemMap_init used blocks");
-}
-
-void PMM_MemMap_deinit(const paddr_t physical_addr, const uint32_t size)
-{
-    uint32_t       block_addr = physical_addr / PMM_BLOCK_SIZE;
-    const uint32_t blocks     = _size2block(size);
-
-    for (uint32_t i = 0; i < blocks; ++i)
+    g_PMM_used_frames           = 0;
+    g_PMM_total_frames          = align_up(high_end, PMM_FRAME_ALIGN) / PMM_FRAME_SIZE;
+    const uint32_t mem_map_size = (g_PMM_total_frames + PMM_MEM_MAP_FRAMES_PER_BYTE - 1) / PMM_MEM_MAP_FRAMES_PER_BYTE;
+    const paddr_t  bitmap_paddr = (paddr_t) align_up(physical_mem_start, PMM_MEM_MAP_FRAMES_PER_BYTE);
+    g_PMM_frames_map            = (bitset32_t) (uint32_t) bitmap_paddr;
+    memset(g_PMM_frames_map, 0, mem_map_size);
+    for (uint32_t i = 0; i < num_entries; ++i)
     {
-        bitset_set(_PMM_mem_map, block_addr++);
-        _PMM_used_blocks++;
+        if (mem_map[i].type == MEM_MAP_TYPE_AVAILABLE)
+            continue;
+
+        const uint32_t start_frame = mem_map[i].base_addr_lo / PMM_FRAME_SIZE;
+        const uint32_t end_frame   = align_up(((uint64_t) mem_map[i].base_addr_lo) + mem_map[i].length_lo, PMM_FRAME_ALIGN) / PMM_FRAME_SIZE;
+        if (end_frame > g_PMM_total_frames)
+            KERNEL_PANIC("end frame > total frames");
+
+        for (uint32_t f = start_frame; f < end_frame; ++f)
+        {
+            if (!bitset_test(g_PMM_frames_map, f))
+            {
+                bitset_set(g_PMM_frames_map, f);
+                ++g_PMM_used_frames;
+            }
+        }
     }
 
-    if (_PMM_used_blocks > _PMM_max_blocks)
-        _PMM_used_blocks_panic("PMM_MemMap_deinit too many used blocks");
-}
-
-void PMM_MemMap_deinit_kernel(const uint32_t code_start, const uint32_t code_size)
-{
-    // extern uint32_t __size;
-    // extern uint32_t __code_start;
-
-    // TODO: add also something for the stack!
-    PMM_MemMap_deinit(code_start, code_size + _PMM_mem_map_size);
-}
-
-void PMM_store_MemMapInfo(const uint32_t num_entries, const volatile boot_MEM_MAP_Info_Entry_t* mem_map)
-{
-    _PMM_mem_map_info_length = num_entries;
-    _PMM_mem_map_info        = PMM_malloc_linear(sizeof(PMM_mem_t) * _PMM_mem_map_info_length);
-    if (_PMM_mem_map_info == NULL)
-        KERNEL_PANIC("PMM_store_MemMapInfo");
-
-    for (int i = 0; i < _PMM_mem_map_info_length; i++)
+    // mark the kernel part
     {
-        _PMM_mem_map_info[i].addr   = mem_map[i].base_addr_lo;
-        _PMM_mem_map_info[i].length = mem_map[i].length_lo;
-        _PMM_mem_map_info[i].type   = mem_map[i].type;
+        const uint32_t start_frame = kernel_start / PMM_FRAME_SIZE;
+        const uint32_t end_frame   = align_up(kernel_start + kernel_size, PMM_FRAME_ALIGN) / PMM_FRAME_SIZE;
+        for (uint32_t f = start_frame; f < end_frame; ++f)
+        {
+            if (!bitset_test(g_PMM_frames_map, f))
+            {
+                bitset_set(g_PMM_frames_map, f);
+                ++g_PMM_used_frames;
+            }
+        }
+    }
+
+    // mark the bitmap's own backing frames as used
+    {
+        const uint32_t start_frame = (uint32_t) bitmap_paddr / PMM_FRAME_SIZE;
+        const uint32_t end_frame   = align_up(bitmap_paddr + mem_map_size, PMM_FRAME_ALIGN) / PMM_FRAME_SIZE;
+        for (uint32_t f = start_frame; f < end_frame; ++f)
+        {
+            if (!bitset_test(g_PMM_frames_map, f))
+            {
+                bitset_set(g_PMM_frames_map, f);
+                ++g_PMM_used_frames;
+            }
+        }
     }
 }
 
-inline int PMM_Blocks_used()
+inline int PMM_frames_used()
 {
-    return _PMM_used_blocks;
+    return g_PMM_used_frames;
 }
 
-inline int PMM_Blocks_free()
+inline int PMM_frames_free()
 {
-    return _PMM_max_blocks - _PMM_used_blocks;
+    return g_PMM_total_frames - g_PMM_used_frames;
 }
 
-void* PMM_malloc(const size_t size)
+void* PMM_malloc(const uint32_t size)
 {
-    paddr_t ptr    = _PMM_malloc_blocks(_size2block(size));
-    _PMM_cur_paddr = ptr + size;
+    const uint32_t num_frames = _size2frame(size);
+    if (PMM_frames_free() < num_frames)
+        return NULL;
+
+    uint32_t pos;
+    if (!bitset_find(g_PMM_frames_map, g_PMM_total_frames, num_frames, &pos))
+        return NULL;
+
+    for (size_t i = 0; i < num_frames; ++i)
+        bitset_set(g_PMM_frames_map, pos + i);
+
+    g_PMM_used_frames += num_frames;
+
+    paddr_t ptr = pos * PMM_FRAME_SIZE;
+
     return (void*) ptr;
 }
 
-void PMM_free(void* ptr, const size_t size)
+void PMM_free(void* ptr, const uint32_t size)
 {
-    _PMM_free_blocks((paddr_t) ptr, _size2block(size));
-}
+    const uint32_t num_frames = _size2frame(size);
+    if (g_PMM_used_frames < num_frames)
+        _PMM_used_frames_panic("PMM_free_frames");
 
-void* PMM_malloc_linear(const size_t size)
-{
-    // check if current block is allocated
-    if (!bitset_test(_PMM_mem_map, _PMM_cur_paddr / PMM_BLOCK_SIZE))
-        return PMM_malloc(size);
-
-    // already allocated so reuse the same block (page)
-    size_t  avail = _PMM_cur_paddr % PMM_BLOCK_SIZE;
-    paddr_t tmp   = _PMM_cur_paddr;
-    // mark next block(s) allocated
-    if (size > avail && PMM_malloc(size - avail) == NULL)
-        _PMM_used_blocks_panic("PMM_kmalloc no more free memory");
-
-    // size here is <= avail, or if greater next block(s) are allocated
-    _PMM_cur_paddr += size;
-
-    return (void*) tmp;
+    unsigned int pos = (paddr_t) ptr / PMM_FRAME_SIZE;
+    for (size_t i = 0; i < num_frames; i++)
+        bitset_clear(g_PMM_frames_map, pos + i);
+    g_PMM_used_frames -= num_frames;
 }

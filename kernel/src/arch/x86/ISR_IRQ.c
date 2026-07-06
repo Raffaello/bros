@@ -11,21 +11,23 @@
 
 static ISR_Handler_t isr_handlers[MAX_INTERRUPTS];
 
-void ISR_UniversalHandler(ISR_registers_t r)
+__attribute__((noinline, optimize("no-omit-frame-pointer"))) void ISR_UniversalHandler(ISR_registers_t r)
 {
-    char buf[10];
-
-    VGA_clear();
-
-    itoa(r.int_no, buf, 10);
-    VGA_WriteString(1, 2, buf, 15);
-    itoa(r.err_code, buf, 10);
-    VGA_WriteString(1, 3, buf, 15);
-
     if (isr_handlers[r.int_no] != NULL)
     {
         ISR_Handler_t handler = isr_handlers[r.int_no];
         handler(r);
+    }
+    else
+    {
+        char buf[10];
+
+        VGA_clear();
+
+        itoa(r.int_no, buf, 16);
+        VGA_WriteString(1, 2, buf, 15);
+        itoa(r.err_code, buf, 16);
+        VGA_WriteString(1, 3, buf, 15);
     }
 }
 

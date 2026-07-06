@@ -8,7 +8,7 @@
  *** TODO:                                                              ***
  *** optimizing page size on process based with 3 level paging e.g.:    ***
  *** mix 4k, 2MB and 1GB pages. No need to use uniform page size.       ***
- *** So a process having 9MB of data can get 4 2MB pages and            ***
+ *** So a process having 9MB of data can get 2 4MB pages and            ***
  *** the rest with 4k pages.                                            ***
  *** That saves paging structures, improves TLB usage                   ***
  *** and does not increase the overhead at all.                         ***
@@ -62,7 +62,7 @@ typedef uint32_t PTE_t;
 typedef struct page_table_t
 {
     PTE_t entries[PAGE_TABLE_ENTRIES];
-} page_table_t;
+} __attribute__((aligned(4))) page_table_t;
 
 _Static_assert(sizeof(page_table_t) == PAGE_TABLE_ENTRIES * sizeof(uint32_t));
 
@@ -73,7 +73,7 @@ typedef struct page_directory_t
     // page_table_t* page_tables[PAGE_TABLE_ENTRIES];
     // uint32_t page_table_physical[1024];
     // uint32_t physical_addr;
-} page_directory_t;
+} __attribute__((aligned(4))) page_directory_t;
 
 _Static_assert(sizeof(page_directory_t) == PAGE_DIR_ENTRIES * sizeof(uint32_t));
 
