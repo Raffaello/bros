@@ -86,14 +86,14 @@ bool VMM_init()
     // *******************************************************************
 
     // first 1MB
-    for (uint32_t i = 0; i <= (1024 * 1024 / PMM_FRAME_SIZE); ++i)
+    for (uint32_t i = 0; i < (1024 * 1024 / PMM_FRAME_SIZE); ++i)
     {
         // g_kernel_page_table.entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
         page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
     }
 
     // first 4MB after 1st 1MB
-    for (uint32_t i = (1024 * 1024 / PMM_FRAME_SIZE) + 1; i < PAGE_TABLE_ENTRIES; i++)
+    for (uint32_t i = (1024 * 1024 / PMM_FRAME_SIZE); i < PAGE_TABLE_ENTRIES; i++)
     {
         // g_kernel_page_table.entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
         page_table->entries[i] = (PTE_t) PTE_FRAME(i) | PTE_PRESENT | PTE_WRITABLE;
