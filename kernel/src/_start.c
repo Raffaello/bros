@@ -190,6 +190,7 @@ __attribute__((section(".text._start_PMM_init"), weak)) void _start_PMM_init(vol
             mem_types[memi.type - 1]);
     }
 
+    CON_setConsoleColor(old_col);
     CON_puts("Init PMM\n");
     PMM_init(tot_entries, mem_map, kernel_end, KERNEL_SEG, kernel_size);
 
