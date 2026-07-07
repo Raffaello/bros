@@ -100,7 +100,7 @@ RootDirFindFile_loop:
   mov cx, 11
   mov si, bx
   push di
-  repe stosb # todo could be done 1 byte cmp then using stosw
+  repe stosb # TODO: could be done 1 byte cmp then using stosw
   pop di
   je RootDirFindFile_found
   pop cx

@@ -20,7 +20,8 @@
 typedef struct boot_SYS_Info_t
 {
     uint32_t begin_marker;
-    uint32_t tot_mem;    // in kb
+    uint32_t tot_mem;        // in kb
+    uint32_t kernel_size;    // in bytes
     uint8_t  boot_drive;
     uint8_t  num_mem_map_entries;
     // TODO:
@@ -32,7 +33,7 @@ typedef struct boot_SYS_Info_t
 
 } __attribute__((packed)) boot_SYS_Info_t;
 
-_Static_assert(sizeof(boot_SYS_Info_t) == 10);
+_Static_assert(sizeof(boot_SYS_Info_t) == 10 + 4);
 
 typedef struct boot_MEM_MAP_Info_Entry_t
 {

@@ -33,10 +33,10 @@ It also passes the total low memory in KB as the first value in the stack.
 
 ---
 
-The 2nd stage is searching the Kernel file in the FAT12 filesystem and loading it at `0x1000`.
+The 2nd stage is searching the Kernel file in the FAT12 filesystem and loading it at `0x0:0x1000`.
 
 Then It switches the CPU to Protected Mode (32 bits) and enabling A20 Gate (addressing up to 4GB RAM),
- then it executes the kernel.
+then it executes the kernel.
 
 **NOTE:**
 
@@ -62,6 +62,7 @@ uint32_t        begin_marker;                        // 4 bytes magic marker to 
 uint32_t        total_ram;                           // total_mem in KB less 1MB, expect max value (0x3FFC00) (4GB), above this value won't be used.
                                                      // a value of 0 represent an error at BIOS level and should trigger a kernel panic or running is own
                                                      // routines to detect RAM.
+uint32_t        kernel_size;                         // kernel file size in bytes
 uint8_t         boot_device;                         // boot "letter"
 uint8_t         num_mem_map_entries                  // BIOS MEM_MAP entries 24 bytes each in size
 MEM_MAP_ENTRIES mem_map_entries[num_mem_map_entries] // array of mem map entries
