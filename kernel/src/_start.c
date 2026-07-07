@@ -67,15 +67,15 @@ _start_init()
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmultichar"
-    uint32_t __BROS = (uint32_t) ('BROS');
+    const uint32_t __BROS = (uint32_t) ('BROS');
 #pragma GCC diagnostic pop
     // 1. check boot sector EAX value
     // 2. point to EBX SYS_INFO struct
     // 3. if not in the Kernel aspected address...
+    extern void      _start();
     boot_SYS_Info_t* _sys_info            = (boot_SYS_Info_t*) _ebx;
     const uint32_t*  _sys_info_end_marker = SYS_INFO_END_MARKER_PTR(_sys_info);
-    extern void      _start();
-    const uint32_t*  _startPtr = (uint32_t*) &_start;
+    const uint32_t*  _startPtr            = (uint32_t*) &_start;
     // self-relocating kernel checks
     extern const uint32_t __end;
     // extern const uint32_t __size;

@@ -53,6 +53,8 @@ main:
   lea si, file_missing_msg
   call BootFailure
 load_fat:
+  push dx
+  push cx # file size in CX:DX
   # push ax   # Store Kernel RootDir Index AL
   push bx   # Store NumCluster
   # push cx   # Store Hi 16 bits FileSize
@@ -73,10 +75,7 @@ load_fat:
   lea si, load_kernel_file_msg
   call PrintStringDots
 
-  # pop dx  # dx
-  # pop cx  # cx
   pop ax  # bx (Num cluster)
-  # pop ax  # ax Restore Kernel RootDir Index
   # -- #
   mov bx, KERNEL_SEG
   mov dl, DrvNum
@@ -93,9 +92,15 @@ load_fat:
   mov eax, 0x12345678           # begin_marker
   stosd
   call GetTotalMemorySize
+  pop cx
+  pop bx                        # kernel file size CX:BX
   xor edx,edx
   pop dx                        # lower mem from 1st stage
-  add eax, edx
+  add eax, edx                  # total memory
+  stosd
+  movzx ax, cx                  # kernel file size
+  shl   eax, 16
+  mov   ax, bx                  # eax = CX:BX
   stosd
   mov al, DrvNum                # boot_device
   stosb

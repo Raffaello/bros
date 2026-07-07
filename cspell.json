@@ -81,6 +81,7 @@
         "memset",
         "mformat",
         "movsw",
+        "movzx",
         "mpfr",
         "MSBONLY",
         "msrs",
