@@ -98,7 +98,7 @@ load_fat:
   pop dx                        # lower mem from 1st stage
   add eax, edx                  # total memory
   stosd
-  movzx ax, cx                  # kernel file size
+  movzx eax, cx                 # kernel file size
   shl   eax, 16
   mov   ax, bx                  # eax = CX:BX
   stosd
