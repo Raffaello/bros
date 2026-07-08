@@ -37,7 +37,7 @@ CFLAGS+=-fno-exceptions # -fno-rtti # C++ options disabled.
 # CFLAGS+= -MMD -MF
 CFLAGS+=-nostdlib -nodefaultlibs -nostartfiles
 CFLAGS+=-lgcc
-CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
+CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG} -DKERNEL_HIMEM=${KERNEL_HIMEM}
 CFLAGS+=-fno-PIE # Github CI flags
 # CFLAGS+=-fno-omit-frame-pointer # -fno-optimize-sibling-calls
 
@@ -52,7 +52,7 @@ CFLAGS+=$(CFLAGS.$(BUILD_TYPE))
 LFLAGS+=-nostdlib --nmagic
 LFLAGS+=-Tkernel.ld # linker option definition file
 # LFLAGS+=-Ttext ${KERNEL_SEG}
-LFLAGS+=--defsym=KERNEL_SEG=$(KERNEL_SEG)
+LFLAGS+=--defsym=KERNEL_SEG=$(KERNEL_SEG) --defsym=KERNEL_HIMEM=${KERNEL_HIMEM}
 
 all: image
 
@@ -88,3 +88,4 @@ image: kernel
 
 clean:
 	rm ${BUILD_DIR}/* -frv
+	rm ${BUILD_DIR}/../kernel.out -fv

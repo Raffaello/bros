@@ -41,6 +41,7 @@ boot2:
 	@mkdir -p ${BUILD_DIR} ${BIN_DIR}
 	${AS} ${ASFLAGS} \
 		--defsym=KERNEL_SEG=${KERNEL_SEG} \
+		--defsym=KERNEL_HIMEM=${KERNEL_HIMEM} \
 		--defsym=FAT_BUFFER_SEG=${FAT_BUFFER_SEG} \
 		--defsym=SYS_INFO_SEG=${SYS_INFO_SEG} \
 		--defsym=FAT_RESERVED_SECTORS=${FAT_RESERVED_SECTORS} \

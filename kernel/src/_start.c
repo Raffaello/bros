@@ -44,7 +44,11 @@ void          _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t
 #ifndef KERNEL_SEG
 #error KERNEL_SEG define missing
 #endif
-#define KERNEL_ADDR ((uint32_t*) (KERNEL_SEG))
+
+#ifndef KERNEL_HIMEM
+#error KERNEL_HIMEM define missing
+#endif
+#define KERNEL_ADDR ((uint32_t*) (KERNEL_HIMEM))
 
 // TODO: this function can be merged with the other _start_init
 //       i don't think there is nothing to do ...
@@ -52,12 +56,15 @@ __attribute__((section(".text._start"), naked, weak))
 noreturn void
 _start()
 {
+    // using a for sure available stack memory region,
+    // it will be re-assigned after enabling virtual memory
     __asm__("cli");
-    __asm__ volatile("mov esp, %0" ::"i"(KERNEL_SEG));
+    __asm__ volatile("mov esp, %0" ::"i"(KERNEL_SEG));    // This should be set up already by the bootloader.
+    __asm__ volatile("mov ebp, esp");                     // This should be set up already by the bootloader.
     __asm__ volatile("jmp %0" ::"i"(&_start_init));
 }
 
-__attribute__((section(".text._start_init"), force_align_arg_pointer, weak))
+__attribute__((section(".text._start_init"), weak))
 noreturn void
 _start_init()
 {
@@ -65,10 +72,7 @@ _start_init()
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmultichar"
-    const uint32_t __BROS = (uint32_t) ('BROS');
-#pragma GCC diagnostic pop
+    const uint32_t __BROS = (uint32_t) 0x42524F53;    // ('BROS');
     // 1. check boot sector EAX value
     // 2. point to EBX SYS_INFO struct
     // 3. if not in the Kernel aspected address...
@@ -83,6 +87,9 @@ _start_init()
     extern void    main();
     const uint32_t kernel_size = (uint32_t) &__end - (uint32_t) (&main);
 
+    // Init VGA Console
+    _start_VGA_init();
+
     if (_eax != __BROS)
         KERNEL_PANIC("EAX error");
     if (_startPtr != KERNEL_ADDR)
@@ -92,9 +99,6 @@ _start_init()
     {
         KERNEL_PANIC("SYS_INFO error");
     }
-
-    // Init VGA Console
-    _start_VGA_init();
 
     /* before paging or interrupt can be done after paging too? */
     CON_puts("Init DTs\n");
@@ -118,8 +122,7 @@ _start_init()
     if (!VMM_init())
         KERNEL_PANIC("VMM error");
 
-
-    // TODO: self-relocate the kernel
+    // TODO: self-relocate the kernel (this requires a pre-kernel loader)
     // TODO to self-relocate the kernel, when? if doing it here can't drop this function,
     //      i should do at the end before calling main, so i can drop the _start* functions
     // TODO to do optimally all the instruction and functions called here to do init,
@@ -131,7 +134,10 @@ _start_init()
     // TODO: init other cpu cores...
 
 
-    // // TODO: set up kernel stack, EBP,ESP ... and align it
+    // TODO: set up kernel stack, EBP,ESP ... and align it (here in virtual memory)
+    // __asm__ volatile("mov esp, %0" ::"i"(KERNEL_STACK));    // This should be set up already by the bootloader.
+    // __asm__ volatile("mov ebp, esp");                     // This should be set up already by the bootloader.
+
     __asm__ volatile("sti");
     __asm__ volatile("jmp %0" ::"i"(&main));
     for (;;)
