@@ -103,6 +103,7 @@
         "optromimage",
         "parport",
         "penryn",
+        "PHDRS",
         "pmode",
         "popa",
         "popad",
