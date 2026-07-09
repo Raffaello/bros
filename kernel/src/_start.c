@@ -85,7 +85,7 @@ _start_init()
     // extern const uint32_t __size;
     // NOTE: with optimization there is a difference about alignment main is 16 bytes aligned
     extern void    main();
-    const uint32_t kernel_size = (uint32_t) &__end - (uint32_t) (&main);
+    const uint32_t kernel_size = (uint32_t) &__end - (uint32_t) (KERNEL_ADDR);
 
     // Init VGA Console
     _start_VGA_init();
