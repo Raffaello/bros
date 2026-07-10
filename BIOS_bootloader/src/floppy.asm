@@ -71,7 +71,7 @@ main:
   # NOTE: at the linker level it was addressed at 0x600,
   #       so the labels are already correct after relocation.
   # jmp 0:BOOT_RELOCATE_SEG + (main_relocated - _start)
-  jmp 0:main_relocated 
+  jmp 0:main_relocated
 
 main_relocated:
   mov  sp, BOOT_RELOCATE_SEG - 2     # Stack grows down from offset 0x600 toward 0x0000.
