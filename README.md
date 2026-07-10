@@ -21,6 +21,8 @@ The main goal of this project and its evolution is just for **educational** purp
 
 ## The Bootloader
 
+### First Stage
+
 It boots from a FAT12 Boot sector (0).
 
 It is self-relocating to `0x600` memory region and chain loading the FAT extra Reserved Sectors in its previous address at `0x7C00` using BIOS interrupts for screen and disk I/O.
@@ -31,11 +33,13 @@ So when jumping to the 2nd stage, that information is passed on through a CPU Re
 
 It also passes the total low memory in KB as the first value in the stack.
 
----
+### Second Stage
 
 The 2nd stage is searching the Kernel file in the FAT12 filesystem and loading it at `0x0:0x1000`.
 
 Then It switches the CPU to Protected Mode (32 bits) and enabling A20 Gate (addressing up to 4GB RAM),
+
+It moves then the loaded kernel into the `HIMEM` section at `0x100000` (1MB),
 then it executes the kernel.
 
 **NOTE:**
@@ -96,17 +100,17 @@ The actual memory mapping is:
 
 2. The 2nd stage Boot is loaded at `0x7C00`, at the original boot memory location.
 
-
     This step uses the `0x1000` location for loading the Fat Root Directory, then the FAT and finally the kernel.
 
     The stack during the bootloader process is set to start from `0x600-2` = `0x5FE`
 
-    Also a buffer at `0x600` is used to store the values from the FAT linked list to read the file from disk,
+    Also a buffer at `0x600` is used to store the values from the FAT linked list to read the file from disk:
 
-    so after have scanned the linked list of the file, the FAT table can be disposed and it is replaced by the kernel itself.
-
+    after it has scanned the linked list of the file, the FAT table can be disposed and it is replaced by the kernel itself.
 
 3. Finally the kernel is loaded at `0x1000`, after that is executed.
+
+4. Then is moved to `0x100000` after entering protected mode.
 
 
 ## The Kernel (32 bits)
@@ -119,7 +123,7 @@ The name must be `BROSKRNL.SYS` with Hidden, System, Read-Only attributes.
 
 The kernel is a 32 bit executable and therefore need at least a `80386` CPU running in protected mode.
 
-At its very entry point, it performs some validation checks, it has been loaded correctly from the bootloader and retrieving some information passed by the bootloader at some given memory location.
+At its very entry point, it performs some validation checks: if it has been loaded correctly from the bootloader and retrieving some information passed by the bootloader at some given memory location.
 
  It performs the re-initialization of protected memory and interrupts as a per Intel specs, also setting up the `PIC` and the `PIT` and managing memory.
 
@@ -135,17 +139,17 @@ At the moment is using a simple bitset to track the physical memory usage, and u
 
 It is using an identity paging for the first 4MB of RAM only at the moment.
 
-> TODO ...
+> TODO ... (move to higher-half, set up the stack pointer, etc...)
 
 #### Physical Memory Management
 
-for now a simple silly bitset allocation and tracking. slow to find a free chunk, susceptible to fragmentation
+for now a simple bitset allocation and tracking for a page frame. Slow to find a free chunk and susceptible to fragmentation.
 
 > TODO improvements
 
 #### Virtual Memory Management
 
-for now a simple 1st 4MB identity paging. no real management happening yet
+for now a simple 1st 4MB identity paging. no real management happening yet.
 
 > TODO
 
@@ -155,7 +159,7 @@ for now a simple 1st 4MB identity paging. no real management happening yet
 
 ### Filesystem
 
-> TODO
+> TODO Floppy driver, FAT12 driver
 
 ### Network
 
@@ -163,7 +167,7 @@ for now a simple 1st 4MB identity paging. no real management happening yet
 
 ### Drivers
 
-> TODO
+> TODO (PS/2 keyboard, mouse, USB, Floppy)
 
 #### Keyboard
 
@@ -196,6 +200,7 @@ TODO: test it with VirtualBox.
 - dd
 - qemu / bochs
 - mtools (mformat, mcopy, mdir, mattrib)
+- or just use `docker`/`podman`
 
 ### Compiling
 
@@ -207,6 +212,7 @@ TODO: test it with VirtualBox.
 - to run using `qemu`: `qemu-system-i386 -fda br-dos.img` or similar.
 - to run with  `bochs`: `bochs -q -f bochs.rs` or similar.
 - to run with `bochs` debugger: `bochs-debugger -q -f bochs.rs` or similar
+- to run with in VSCode: you can run the docker container and then inside the container run `qemu` in `vnc` mode, then use a vnc client to connect to it and VSCode to run the gdb debugger
 
 To debug can be used `gdb`: `target remote localhost:1234`
 
@@ -214,6 +220,3 @@ To debug can be used `gdb`: `target remote localhost:1234`
 
 - GCC inline assembly is just silly, must be checked as is generating stupid asm.
 - consider switching from GAS to NASM
-- eventually consider supporting MSVC too as exercise.
-- consider doing C++  along side C kernel
-- consider doing Rust along side C kernel as well..

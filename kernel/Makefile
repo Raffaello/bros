@@ -4,22 +4,54 @@ FLOPPY_IMAGE_NAME:=../${FLOPPY_IMAGE_NAME}
 
 SRC_DIR=src
 
-SRC = $(wildcard \
-	${SRC_DIR}/*.c \
-	${SRC_DIR}/lib/*.c \
-	${SRC_DIR}/arch/x86/*.c \
-	${SRC_DIR}/arch/x86/mmu/*.c \
-	${SRC_DIR}/bios/*.c \
-	${SRC_DIR}/drivers/*.c \
-	${SRC_DIR}/sys/*.c)
+# SRC = $(wildcard \
+# 	${SRC_DIR}/*.c \
+# 	${SRC_DIR}/lib/*.c \
+# 	${SRC_DIR}/arch/x86/*.c \
+# 	${SRC_DIR}/arch/x86/mmu/*.c \
+# 	${SRC_DIR}/bios/*.c \
+# 	${SRC_DIR}/drivers/*.c \
+# 	${SRC_DIR}/sys/*.c)
+
+SRC = \
+	${SRC_DIR}/_start.c \
+	${SRC_DIR}/main.c \
+	${SRC_DIR}/lib/bitset.c \
+	${SRC_DIR}/lib/conio.c \
+	${SRC_DIR}/lib/ctype.c \
+	${SRC_DIR}/lib/stdlib.c \
+	${SRC_DIR}/lib/string.c \
+	${SRC_DIR}/arch/x86/APIC.c \
+	${SRC_DIR}/arch/x86/cpuid.c \
+	${SRC_DIR}/arch/x86/descriptors.c \
+	${SRC_DIR}/arch/x86/io.c \
+	${SRC_DIR}/arch/x86/ISR_IRQ.c \
+	${SRC_DIR}/arch/x86/PIC.c \
+	${SRC_DIR}/arch/x86/PIT.c \
+	${SRC_DIR}/arch/x86/mmu/PMM.c \
+	${SRC_DIR}/arch/x86/mmu/VMM.c \
+	${SRC_DIR}/bios/boot_info.c \
+	${SRC_DIR}/bios/vga.c \
+	${SRC_DIR}/drivers/ps2.c \
+	${SRC_DIR}/drivers/keyboard.c \
+	${SRC_DIR}/sys/panic.c
 
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)
 
-SRC_S  = $(wildcard \
-	${SRC_DIR}/arch/x86/lib/*.S \
-	${SRC_DIR}/arch/x86/*.S \
-	${SRC_DIR}/arch/x86/mmu/*.S \
-	${SRC_DIR}/drivers/*.S)
+# SRC_S  = $(wildcard \
+# 	${SRC_DIR}/arch/x86/lib/*.S \
+# 	${SRC_DIR}/arch/x86/*.S \
+# 	${SRC_DIR}/arch/x86/mmu/*.S \
+# 	${SRC_DIR}/drivers/*.S)
+
+SRC_S = \
+	${SRC_DIR}/arch/x86/lib/stdlib.S \
+	${SRC_DIR}/arch/x86/lib/string.S \
+	${SRC_DIR}/arch/x86/GDT.S \
+	${SRC_DIR}/arch/x86/IRQ.S \
+	${SRC_DIR}/arch/x86/ISR.S \
+	${SRC_DIR}/arch/x86/mmu/VMM.S \
+
 
 OBJS_S = $(SRC_S:${SRC_DIR}/%.S=${BUILD_DIR}/%.oS)
 
@@ -37,7 +69,7 @@ CFLAGS+=-fno-exceptions # -fno-rtti # C++ options disabled.
 # CFLAGS+= -MMD -MF
 CFLAGS+=-nostdlib -nodefaultlibs -nostartfiles
 CFLAGS+=-lgcc
-CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG}
+CFLAGS+=-DKERNEL_SEG=${KERNEL_SEG} -DKERNEL_HIMEM=${KERNEL_HIMEM}
 CFLAGS+=-fno-PIE # Github CI flags
 # CFLAGS+=-fno-omit-frame-pointer # -fno-optimize-sibling-calls
 
@@ -52,7 +84,7 @@ CFLAGS+=$(CFLAGS.$(BUILD_TYPE))
 LFLAGS+=-nostdlib --nmagic
 LFLAGS+=-Tkernel.ld # linker option definition file
 # LFLAGS+=-Ttext ${KERNEL_SEG}
-LFLAGS+=--defsym=KERNEL_SEG=$(KERNEL_SEG)
+LFLAGS+=--defsym=KERNEL_SEG=$(KERNEL_SEG) --defsym=KERNEL_HIMEM=${KERNEL_HIMEM}
 
 all: image
 
@@ -88,3 +120,4 @@ image: kernel
 
 clean:
 	rm ${BUILD_DIR}/* -frv
+	rm ${BUILD_DIR}/../kernel.out -fv

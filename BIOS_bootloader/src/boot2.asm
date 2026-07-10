@@ -102,6 +102,7 @@ load_fat:
   shl   eax, 16
   mov   ax, bx                  # eax = CX:BX
   stosd
+  push eax                      # store kernel file size for relocating it later
   mov al, DrvNum                # boot_device
   stosb
   push edi
@@ -149,16 +150,30 @@ a20_enabled:
 
 .code32
 main32:
+  pop ecx               # kernel size
   # Set Registers
   mov ax, GDT_DATA_SEG  # set Data segment to data selector (0x10)
   mov ds, ax
   mov ss, ax
   mov es, ax
-  mov esp, KERNEL_SEG              # stack start below the loaded kernel
+
+  # relocating kernel in hi-mem
+  mov eax, ecx
+  shr ecx, 2
+  mov esi, KERNEL_SEG
+  mov edi, KERNEL_HIMEM
+  rep movsd
+  mov ecx, eax
+  and ecx, 3
+  rep movsb
+
+  mov esp, KERNEL_SEG           # stack start below the loaded kernel
+  mov ebp, esp
+
   # Store kernel parameters
   mov eax, 0x42524F53           # Bootloader Magic value
   mov ebx, SYS_INFO_SEG         # System Info struct address
-  jmp GDT_CODE_SEG:KERNEL_SEG   # the kernel will never return, so no point to 'call'
+  jmp GDT_CODE_SEG:KERNEL_HIMEM # the kernel will never return, so no point to 'call'
   # dead code below, it will be overridden by kernel memory manager anyway
 main32_stop:
   cli

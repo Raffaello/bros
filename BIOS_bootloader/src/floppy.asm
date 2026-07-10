@@ -63,10 +63,13 @@ main:
   mov  ss, ax        # SS = CS = 0x0
   
   # *** Self Relocating Boot sector ***
-  mov cx, 256        # 512 bytes => 256 words
+  mov cx, 512/2        # 512 bytes => 256 words
   mov di, BOOT_RELOCATE_SEG
   mov si, BIOS_BOOT_SEG
   rep movsw         # relocating from 0x7c00 to 0x600
+  
+  # NOTE: at the linker level it was addressed at 0x600,
+  #       so the labels are already correct after relocation.
   # jmp 0:BOOT_RELOCATE_SEG + (main_relocated - _start)
   jmp 0:main_relocated
 

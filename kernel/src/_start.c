@@ -42,22 +42,27 @@ void          _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t
 
 
 #ifndef KERNEL_SEG
-#error KERNEL_SEG define missing
+#error "KERNEL_SEG define missing"
 #endif
-#define KERNEL_ADDR ((uint32_t*) (KERNEL_SEG))
 
-// TODO: this function can be merged with the other _start_init
-//       i don't think there is nothing to do ...
-__attribute__((section(".text._start"), naked, weak))
+#ifndef KERNEL_HIMEM
+#error "KERNEL_HIMEM define missing"
+#endif
+#define KERNEL_ADDR ((uint32_t*) (KERNEL_HIMEM))
+
+__attribute__((section(".text._start"), naked))
 noreturn void
 _start()
 {
+    // using a for sure available stack memory region,
+    // it will be re-assigned after enabling virtual memory
     __asm__("cli");
-    __asm__ volatile("mov esp, %0" ::"i"(KERNEL_SEG));
+    __asm__ volatile("mov esp, %0" ::"i"(KERNEL_SEG));    // This should be set up already by the bootloader.
+    __asm__ volatile("mov ebp, esp");                     // This should be set up already by the bootloader.
     __asm__ volatile("jmp %0" ::"i"(&_start_init));
 }
 
-__attribute__((section(".text._start_init"), force_align_arg_pointer, weak))
+__attribute__((section(".text._start_init")))
 noreturn void
 _start_init()
 {
@@ -65,10 +70,6 @@ _start_init()
     __asm__ volatile("mov %0, eax" : "=m"(_eax));
     __asm__ volatile("mov %0, ebx" : "=m"(_ebx));
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmultichar"
-    const uint32_t __BROS = (uint32_t) ('BROS');
-#pragma GCC diagnostic pop
     // 1. check boot sector EAX value
     // 2. point to EBX SYS_INFO struct
     // 3. if not in the Kernel aspected address...
@@ -76,25 +77,22 @@ _start_init()
     boot_SYS_Info_t* _sys_info            = (boot_SYS_Info_t*) _ebx;
     const uint32_t*  _sys_info_end_marker = SYS_INFO_END_MARKER_PTR(_sys_info);
     const uint32_t*  _startPtr            = (uint32_t*) &_start;
-    // self-relocating kernel checks
+    const uint32_t   __BROS               = (uint32_t) 0x42524F53;    // ('BROS');
+    // kernel checks
     extern const uint32_t __end;
-    // extern const uint32_t __size;
     // NOTE: with optimization there is a difference about alignment main is 16 bytes aligned
     extern void    main();
-    const uint32_t kernel_size = (uint32_t) &__end - (uint32_t) (&main);
+    const uint32_t kernel_size = (uint32_t) &__end - (uint32_t) (KERNEL_ADDR);
 
+    // Init VGA Console
+    _start_VGA_init();
     if (_eax != __BROS)
         KERNEL_PANIC("EAX error");
     if (_startPtr != KERNEL_ADDR)
         KERNEL_PANIC("KERNEL_ADDR error");
 
     if (_sys_info->begin_marker != SYS_INFO_BEGIN || *_sys_info_end_marker != SYS_INFO_END)
-    {
         KERNEL_PANIC("SYS_INFO error");
-    }
-
-    // Init VGA Console
-    _start_VGA_init();
 
     /* before paging or interrupt can be done after paging too? */
     CON_puts("Init DTs\n");
@@ -118,27 +116,19 @@ _start_init()
     if (!VMM_init())
         KERNEL_PANIC("VMM error");
 
-
-    // TODO: self-relocate the kernel
-    // TODO to self-relocate the kernel, when? if doing it here can't drop this function,
-    //      i should do at the end before calling main, so i can drop the _start* functions
-    // TODO to do optimally all the instruction and functions called here to do init,
-    //      eventually could be reclaimed as free memory as that code won't be used anymore i guess
-
-    // self-relocating kernel, from main();
-
-
     // TODO: init other cpu cores...
 
+    // TODO: set up kernel stack, EBP,ESP ... and align it (here in virtual memory)
+    // __asm__ volatile("mov esp, %0" ::"i"(KERNEL_STACK));    // This should be set up already by the bootloader.
+    // __asm__ volatile("mov ebp, esp");                     // This should be set up already by the bootloader.
 
-    // // TODO: set up kernel stack, EBP,ESP ... and align it
     __asm__ volatile("sti");
     __asm__ volatile("jmp %0" ::"i"(&main));
     for (;;)
         ;
 }
 
-__attribute__((section(".text._start_VGA_init"), weak)) void _start_VGA_init()
+__attribute__((section(".text._start_VGA_init"))) void _start_VGA_init()
 {
     const int cur_offs = VGA_get_cursor_offset();
     CON_gotoXY(cur_offs % 80, cur_offs / 80);
@@ -151,7 +141,7 @@ __attribute__((section(".text._start_VGA_init"), weak)) void _start_VGA_init()
 #endif
 }
 
-__attribute__((section(".text._start_boot_info"), weak)) void _start_boot_info(volatile boot_SYS_Info_t* _sys_info)
+__attribute__((section(".text._start_boot_info"))) void _start_boot_info(volatile boot_SYS_Info_t* _sys_info)
 {
     uint32_t tot_mem = _sys_info->tot_mem;
     boot_info_sanitize(&tot_mem, _sys_info->num_mem_map_entries, MEM_MAP_ENTRY_PTR(_sys_info));
@@ -161,7 +151,7 @@ __attribute__((section(".text._start_boot_info"), weak)) void _start_boot_info(v
         KERNEL_PANIC("SYS_INFO entries error");
 }
 
-__attribute__((section(".text._start_PMM_init"), weak)) void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
+__attribute__((section(".text._start_PMM_init"))) void _start_PMM_init(volatile boot_SYS_Info_t* _sys_info, const paddr_t kernel_end, const uint32_t kernel_size)
 {
     const int                           tot_entries = _sys_info->num_mem_map_entries;
     volatile boot_MEM_MAP_Info_Entry_t* mem_map     = MEM_MAP_ENTRY_PTR(_sys_info);

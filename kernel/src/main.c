@@ -11,7 +11,6 @@ noreturn void main()
 {
     const char hello_msg[] = "*** HELLO FROM BROSKRNL.SYS ***";
 
-    // VGA_clear();
     VGA_WriteString(20, 10, hello_msg, 15);
 
     VGA_update_cursor(0, 24);

@@ -76,6 +76,7 @@ WORKDIR /code
 # docker build -t bros .
 # docker run --rm -ti -p 1234:1234 -p 5901:5901 -v .:/code bros /bin/bash
 # docker run --rm -p 1234:1234 -p 5901:5901 -p5800:5800  -ti -v .:/code:Z bros /bin/bash
+# docker exec -ti container_id /bin/bash
 
 # qemu-system-i386 -no-reboot -display curses -drive file=br-dos.img,if=floppy,format=raw -s -S
 
