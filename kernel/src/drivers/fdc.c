@@ -56,7 +56,7 @@ static void _fdc_dma_init()
 }
 
 // TODO: evolve into a DMA file unit
-[[maybe_unsused]] static void _fdc_dma_write()
+[[maybe_unused]] static void _fdc_dma_write()
 {
     outb(0x0A, 0x06);    // mask dma channel 2
     outb(0x0B, 0x5A);    // single transfer, address increment, autoinit, write, channel 2
