@@ -19,6 +19,7 @@
 #include <sys/panic.h>
 
 #include <drivers/ps2.h>    // TODO: not in the init, on init drivers eventually. but for now is ok. but is it a driver?
+#include <drivers/fdc.h>
 
 
 noreturn void _start();
@@ -115,6 +116,8 @@ _start_init()
     CON_puts("Init VMM\n");
     if (!VMM_init())
         KERNEL_PANIC("VMM error");
+
+    fdc_init();
 
     // TODO: init other cpu cores...
 
