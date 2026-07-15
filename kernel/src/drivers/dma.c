@@ -207,8 +207,8 @@ void dma_unmask_channel(uint8_t channel)
 
 void dma_set_mode(uint8_t channel, uint8_t mode)
 {
-    int dma  = (channel < 4) ? 0 : 1;
-    int chan = (dma == 0) ? channel : channel - 4;
+    const uint8_t dma  = (channel < 4) ? 0 : 1;
+    const uint8_t chan = (dma == 0) ? channel : channel - 4;
 
     dma_mask_channel(channel);
     outb((channel < 4) ? (DMA0_MODE_REG) : DMA1_MODE_REG, chan | (mode));
