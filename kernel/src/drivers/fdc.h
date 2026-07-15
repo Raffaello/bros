@@ -6,3 +6,5 @@
  *******************************************************/
 
 void fdc_init();
+
+// TODO:  function to read sector from drive A,B ...
