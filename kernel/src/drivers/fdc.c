@@ -173,7 +173,7 @@ static void _fdc_control_motor(uint8_t drive, bool on)
 
 static bool _fdc_calibrate(uint8_t drive)
 {
-    uint32_t st0, cyl;
+    uint8_t st0, cyl;
 
     if (drive >= 4)
         return false;
