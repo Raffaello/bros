@@ -4,8 +4,12 @@
 #include <arch/x86/ISR_IRQ.h>
 #include <arch/x86/defs/IRQ.h>
 #include <arch/x86/PIT.h>
+#include <lib/conio.h>
 
 #include <stdbool.h>
+
+#define FDC_RETRIES    500
+#define FDC_SLEEP_TIME 20
 
 #define FDC_IO_DOR 0x3F2
 #define FDC_IO_MSR 0x3F4
@@ -65,29 +69,36 @@ static void _fdc_dma_init()
 
 static uint8_t _fdc_read_status()
 {
-    //! just return main status register
+    // just return main status register
     return inb(FDC_IO_MSR);
 }
 
 static void _fdc_send_command(uint8_t cmd)
 {
-    //! wait until data register is ready. We send commands to the data register
-    for (int i = 0; i < 500; i++)
+    // wait until data register is ready. send commands to the data register
+    for (int i = 0; i < FDC_RETRIES; i++)
+    {
         if (_fdc_read_status() & FDC_MASK_MSR_DATAREG)
-            return outb(FDC_IO_DR, cmd);
+        {
+            outb(FDC_IO_DR, cmd);
+            return;
+        }
+    }
 }
 
 static uint8_t _fdc_read_data()
 {
-    //! same as above function but returns data register for reading
-    for (int i = 0; i < 500; i++)
+    for (int i = 0; i < FDC_RETRIES; i++)
+    {
         if (_fdc_read_status() & FDC_MASK_MSR_DATAREG)
             return inb(FDC_IO_DR);
+    }
 
-    return 0xFF;
+    // TODO: review this function as it is conceptually wrong
+    return 0xFF;    // TODO: THIS is an error, but it will be undetected!
 }
 
-static void _fdc_check_int(uint32_t* st0, uint32_t* cyl)
+static void _fdc_check_int(uint8_t* st0, uint8_t* cyl)
 {
     _fdc_send_command(FDC_CMD_CHECK_INT);
 
@@ -95,19 +106,27 @@ static void _fdc_check_int(uint32_t* st0, uint32_t* cyl)
     *cyl = _fdc_read_data();
 }
 
-//! wait for irq to fire
 static inline void _fdc_wait_irq()
 {
-    //! wait for irq to fire
+    // wait for irq to fire
     while (!g_fdc_irq)
         ;
 
     g_fdc_irq = false;
 }
 
-static void _fdc_drive_data(uint32_t step_rate, uint32_t load_time, uint32_t unload_time, bool dma)
+/**
+ * @brief This command is used to pass controlling information
+ *        to the FDC about the mechanical drive connected to it.
+ *
+ * @param step_rate
+ * @param load_time     Head Load Time
+ * @param unload_time   Head Unload Time
+ * @param dma           DMA Mode, use DMA?
+ */
+static void _fdc_drive_data(uint8_t step_rate, uint8_t load_time, uint8_t unload_time, bool dma)
 {
-    uint32_t data = 0;
+    uint8_t data = 0;
 
     _fdc_send_command(FDC_CMD_SPECIFY);
     data = ((step_rate & 0xF) << 4) | (unload_time & 0xF);
@@ -149,7 +168,7 @@ static void _fdc_control_motor(uint8_t drive, bool on)
         outb(FDC_IO_DOR, FDC_MASK_DOR_RESET);
 
     // in all cases; wait a little bit for the motor to spin up/turn off
-    sleep(20);
+    sleep(FDC_SLEEP_TIME);
 }
 
 static bool _fdc_calibrate(uint8_t drive)
@@ -163,7 +182,7 @@ static bool _fdc_calibrate(uint8_t drive)
     _fdc_control_motor(drive, true);
     for (int i = 0; i < 10; i++)
     {
-        //! send command
+        // send command
         _fdc_send_command(FDC_CMD_CALIBRATE);
         _fdc_send_command(drive);
         _fdc_wait_irq();
@@ -182,24 +201,24 @@ static bool _fdc_calibrate(uint8_t drive)
 
 static void _fdc_reset(uint8_t drive)
 {
-    uint32_t st0, cyl;
+    uint8_t st0, cyl;
 
-    //! reset the controller
+    // reset the controller
     outb(FDC_IO_DOR, 0);                                        // disable_controller
     outb(FDC_IO_DOR, FDC_MASK_DOR_RESET | FDC_MASK_DOR_DMA);    // enable_controller
     _fdc_wait_irq();
 
-    //! send CHECK_INT/SENSE INTERRUPT command to all drives
+    // send CHECK_INT/SENSE INTERRUPT command to all drives
     for (int i = 0; i < 4; i++)
         _fdc_check_int(&st0, &cyl);
 
-    //! transfer speed 500kb/s
+    // transfer speed 500kb/s
     outb(FDC_IO_CCR, 0);    // write_ccr(0);
 
-    //! pass mechanical drive info. step-rate=3ms, unload time=240ms, load time=16ms
+    // pass mechanical drive info. step-rate=3ms, unload time=240ms, load time=16ms
     _fdc_drive_data(3, 16, 240, true);
 
-    //! calibrate the disk
+    // calibrate the disk
     if (!_fdc_calibrate(drive))
         KERNEL_PANIC("unable to calibrate floppy drive: {}");
 }
@@ -208,7 +227,25 @@ void fdc_init()
 {
     IRQ_register_interrupt_handler(IRQ_DISKETTE, fdc_handler);
 
-    _fdc_dma_init();
-    _fdc_reset(0);    // TODO: get the number of floppies from CMOS ?
-    _fdc_drive_data(13, 1, 0xF, true);
+    _fdc_dma_init();    // TODO: init DMA separately?
+
+    // CMOS Floppy drive decode
+    outb(0x70, 0x10);
+    const uint8_t c            = inb(0x71);    // CMOS floppy drive encoded data
+    const uint8_t a            = c >> 4;
+    const uint8_t b            = c & 0xF;
+    static char*  drive_type[] = {
+        "no floppy drive",
+        "360kb 5.25in floppy drive",
+        "1.2mb 5.25in floppy drive",
+        "720kb 3.5in",
+        "1.44mb 3.5in",
+        "2.88mb 3.5in"};
+    CON_printf("Floppy A: %s --- Floppy B: %s\n", drive_type[a], drive_type[b]);
+    if (a != 0)
+        _fdc_reset(0);
+    if (b != 0)
+        _fdc_reset(1);
+
+    _fdc_drive_data(13, 1, 15, true);
 }
