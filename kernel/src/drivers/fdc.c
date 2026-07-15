@@ -1,4 +1,5 @@
 #include <drivers/fdc.h>
+#include <drivers/dma.h>
 #include <sys/panic.h>
 #include <arch/x86/io.h>
 #include <arch/x86/ISR_IRQ.h>
@@ -25,10 +26,12 @@
 
 #define FDC_MASK_MSR_DATAREG 128
 
-
 #define FDC_CMD_SPECIFY   3
 #define FDC_CMD_CALIBRATE 7
 #define FDC_CMD_CHECK_INT 8
+
+#define FDC_DMA_CHANNEL 2
+
 
 static volatile bool g_fdc_irq = false;
 
@@ -37,34 +40,29 @@ static void fdc_handler(ISR_registers_t)
     g_fdc_irq = true;
 }
 
-// TODO: evolve into a DMA file unit
-static void _fdc_dma_init()
+[[maybe_unused]] static void _fdc_dma_init(uint8_t* buf, uint32_t length)
 {
-    outb(0x0A, 0x06);    // mask dma channel 2
-    outb(0xD8, 0xFF);    // reset master flip-flop
-    outb(0x04, 0);       // address=0x1000
-    outb(0x04, 0x10);
-    outb(0xD8, 0xFF);    // reset master flip-flop
-    outb(0x05, 0xFF);    // count to 0x23ff (number of bytes in a 3.5" floppy disk track)
-    outb(0x05, 0x23);
-    outb(0x80, 0);       // external page register = 0
-    outb(0x0A, 0x02);    // unmask dma channel 2
-}
+    const uint32_t b = (uint32_t) buf;
+    const uint32_t l = length - 1;
 
-// TODO: evolve into a DMA file unit
-[[maybe_unused]] static void _fdc_dma_read()
-{
-    outb(0x0A, 0x06);    // mask dma channel 2
-    outb(0x0B, 0x56);    // single transfer, address increment, autoinit, read, channel 2
-    outb(0x0A, 0x02);    // unmask dma channel 2
-}
+    dma_reset(1);
+    dma_mask_channel(FDC_DMA_CHANNEL);
+    dma_reset_flipflop(1);
+    dma_set_address(FDC_DMA_CHANNEL, b & 0xFF, (b >> 8) & 0xFF);    // TODO: it looks wrong only 16 bits?
+    dma_reset_flipflop(1);
+    dma_set_count(FDC_DMA_CHANNEL, l & 0xFF, (l >> 8) & 0xFF);      // TODO: it looks wrong only 16 bits?
+    dma_set_read(FDC_DMA_CHANNEL);
+    dma_unmask_all(1);
 
-// TODO: evolve into a DMA file unit
-[[maybe_unused]] static void _fdc_dma_write()
-{
-    outb(0x0A, 0x06);    // mask dma channel 2
-    outb(0x0B, 0x5A);    // single transfer, address increment, autoinit, write, channel 2
-    outb(0x0A, 0x02);    // unmask dma channel 2
+    // outb(0x0A, 0x06);    // mask dma channel 2
+    // outb(0xD8, 0xFF);    // reset master flip-flop
+    // outb(0x04, 0);       // address=0x1000
+    // outb(0x04, 0x10);
+    // outb(0xD8, 0xFF);    // reset master flip-flop
+    // outb(0x05, 0xFF);    // count to 0x23ff (number of bytes in a 3.5" floppy disk track)
+    // outb(0x05, 0x23);
+    // outb(0x80, 0);       // external page register = 0
+    // outb(0x0A, 0x02);    // unmask dma channel 2
 }
 
 static uint8_t _fdc_read_status()
@@ -227,7 +225,7 @@ void fdc_init()
 {
     IRQ_register_interrupt_handler(IRQ_DISKETTE, fdc_handler);
 
-    _fdc_dma_init();    // TODO: init DMA separately?
+    // _fdc_dma_init(buf, length);    // TODO: init DMA separately?
 
     // CMOS Floppy drive decode
     outb(0x70, 0x10);
