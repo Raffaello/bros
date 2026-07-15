@@ -3,27 +3,27 @@
 
 #include <stdint.h>
 
-#define DMA0_STATUS_REG             0x08
-#define DMA0_COMMAND_REG            0x08
-#define DMA0_REQUEST_REG            0x09
+// #define DMA0_STATUS_REG             0x08
+// #define DMA0_COMMAND_REG            0x08
+// #define DMA0_REQUEST_REG            0x09
 #define DMA0_CHANMASK_REG           0x0A
 #define DMA0_MODE_REG               0x0B
 #define DMA0_CLEARBYTE_FLIPFLOP_REG 0x0C
-#define DMA0_TEMP_REG               0x0D
-#define DMA0_MASTER_CLEAR_REG       0x0D
-#define DMA0_CLEAR_MASK_REG         0x0E
-#define DMA0_UNMASK_ALL_REG         0x0E
-#define DMA0_MASK_REG               0x0F
+// #define DMA0_TEMP_REG               0x0D
+// #define DMA0_MASTER_CLEAR_REG       0x0D
+// #define DMA0_CLEAR_MASK_REG         0x0E
+#define DMA0_UNMASK_ALL_REG 0x0E
+// #define DMA0_MASK_REG               0x0F
 
-#define DMA1_STATUS_REG             0xD0
-#define DMA1_COMMAND_REG            0xD0
-#define DMA1_REQUEST_REG            0xD2
+// #define DMA1_STATUS_REG             0xD0
+// #define DMA1_COMMAND_REG            0xD0
+// #define DMA1_REQUEST_REG            0xD2
 #define DMA1_CHANMASK_REG           0xD4
 #define DMA1_MODE_REG               0xD6
 #define DMA1_CLEARBYTE_FLIPFLOP_REG 0xD8
-#define DMA1_INTER_REG              0xDA
-#define DMA1_UNMASK_ALL_REG         0xDC
-#define DMA1_MASK_REG               0xDE
+// #define DMA1_INTER_REG              0xDA
+#define DMA1_UNMASK_ALL_REG 0xDC
+// #define DMA1_MASK_REG               0xDE
 
 #define DMA0_CHAN0_ADDR_REG  0
 #define DMA0_CHAN0_COUNT_REG 1
@@ -43,42 +43,43 @@
 #define DMA1_CHAN7_ADDR_REG  0xCC
 #define DMA1_CHAN7_COUNT_REG 0xCE
 
-#define DMA_PAGE_EXTRA0          0x80
+// #define DMA_PAGE_EXTRA0          0x80
 #define DMA_PAGE_CHAN2_ADDRBYTE2 0x81
 #define DMA_PAGE_CHAN3_ADDRBYTE2 0x82
 #define DMA_PAGE_CHAN1_ADDRBYTE2 0x83
-#define DMA_PAGE_EXTRA1          0x84
-#define DMA_PAGE_EXTRA2          0x85
-#define DMA_PAGE_EXTRA3          0x86
+// #define DMA_PAGE_EXTRA1          0x84
+// #define DMA_PAGE_EXTRA2          0x85
+// #define DMA_PAGE_EXTRA3          0x86
 #define DMA_PAGE_CHAN6_ADDRBYTE2 0x87
 #define DMA_PAGE_CHAN7_ADDRBYTE2 0x88
 #define DMA_PAGE_CHAN5_ADDRBYTE2 0x89
-#define DMA_PAGE_EXTRA4          0x8C
-#define DMA_PAGE_EXTRA5          0x8D
-#define DMA_PAGE_EXTRA6          0x8E
-#define DMA_PAGE_DRAM_REFRESH    0x8F
+// #define DMA_PAGE_EXTRA4          0x8C
+// #define DMA_PAGE_EXTRA5          0x8D
+// #define DMA_PAGE_EXTRA6          0x8E
+// #define DMA_PAGE_DRAM_REFRESH    0x8F
 
-#define DMA_CMD_MASK_MEMTOMEM      1
-#define DMA_CMD_MASK_CHAN0ADDRHOLD 2
-#define DMA_CMD_MASK_ENABLE        4
-#define DMA_CMD_MASK_TIMING        8
-#define DMA_CMD_MASK_PRIORITY      0x10
-#define DMA_CMD_MASK_WRITESEL      0x20
-#define DMA_CMD_MASK_DREQ          0x40
-#define DMA_CMD_MASK_DACK          0x8
+// #define DMA_CMD_MASK_MEMTOMEM      1
+// #define DMA_CMD_MASK_CHAN0ADDRHOLD 2
+// #define DMA_CMD_MASK_ENABLE        4
+// #define DMA_CMD_MASK_TIMING        8
+// #define DMA_CMD_MASK_PRIORITY      0x10
+// #define DMA_CMD_MASK_WRITESEL      0x20
+// #define DMA_CMD_MASK_DREQ          0x40
+// #define DMA_CMD_MASK_DACK          0x8
 
-#define DMA_MODE_MASK_SEL           3
-#define DMA_MODE_MASK_TRA           0xc
-#define DMA_MODE_SELF_TEST          0
-#define DMA_MODE_READ_TRANSFER      4
-#define DMA_MODE_WRITE_TRANSFER     8
-#define DMA_MODE_MASK_AUTO          0x10
-#define DMA_MODE_MASK_IDEC          0x20
-#define DMA_MODE_MASK               0xc0
-#define DMA_MODE_TRANSFER_ON_DEMAND 0
-#define DMA_MODE_TRANSFER_SINGLE    0x40
-#define DMA_MODE_TRANSFER_BLOCK     0x80
-#define DMA_MODE_TRANSFER_CASCADE   0xC
+// #define DMA_MODE_MASK_SEL           3
+// #define DMA_MODE_MASK_TRA           0xc
+// #define DMA_MODE_SELF_TEST          0
+#define DMA_MODE_READ_TRANSFER  4
+#define DMA_MODE_WRITE_TRANSFER 8
+#define DMA_MODE_MASK_AUTO      0x10
+// #define DMA_MODE_MASK_IDEC          0x20
+#define DMA_MODE_MASK 0xc0
+// #define DMA_MODE_TRANSFER_ON_DEMAND 0
+#define DMA_MODE_TRANSFER_SINGLE 0x40
+
+// #define DMA_MODE_TRANSFER_BLOCK     0x80
+// #define DMA_MODE_TRANSFER_CASCADE   0xC
 
 ///////////////////////////////////////////////////////////////////////////////
 
