@@ -12,7 +12,7 @@
 #include <stddef.h>
 
 #define FDC_RETRIES           500
-#define FDC_SLEEP_TIME        20
+#define FDC_SLEEP_TIME        5    // 20
 #define FDC_SECTORS_PER_TRACK 18
 #define FDC_DMA_CHANNEL       2
 #define FDC_DMA_BUF_SIZE      512
@@ -46,14 +46,14 @@
 
 
 static volatile bool g_fdc_irq = false;
-static uint8_t*      g_pDmaBuf = (uint8_t*) 0x1000;
+static uint8_t*      g_pDmaBuf = (uint8_t*) 0x600;
 
 static void fdc_handler(ISR_registers_t)
 {
     g_fdc_irq = true;
 }
 
-[[maybe_unused]] static void _fdc_dma_init(uint8_t* buf, uint32_t length)
+static void _fdc_dma_init(uint8_t* buf, uint32_t length)
 {
     const uint32_t b = (uint32_t) buf;
     const uint32_t l = length - 1;
@@ -66,16 +66,6 @@ static void fdc_handler(ISR_registers_t)
     dma_set_count(FDC_DMA_CHANNEL, l & 0xFF, (l >> 8) & 0xFF);      // TODO: it looks wrong only 16 bits?
     dma_set_read(FDC_DMA_CHANNEL);
     dma_unmask_all(1);
-
-    // outb(0x0A, 0x06);    // mask dma channel 2
-    // outb(0xD8, 0xFF);    // reset master flip-flop
-    // outb(0x04, 0);       // address=0x1000
-    // outb(0x04, 0x10);
-    // outb(0xD8, 0xFF);    // reset master flip-flop
-    // outb(0x05, 0xFF);    // count to 0x23ff (number of bytes in a 3.5" floppy disk track)
-    // outb(0x05, 0x23);
-    // outb(0x80, 0);       // external page register = 0
-    // outb(0x0A, 0x02);    // unmask dma channel 2
 }
 
 static uint8_t _fdc_read_status()
