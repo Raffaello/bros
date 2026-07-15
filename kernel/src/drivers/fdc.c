@@ -101,6 +101,7 @@ static inline void _fdc_wait_irq()
     //! wait for irq to fire
     while (!g_fdc_irq)
         ;
+
     g_fdc_irq = false;
 }
 

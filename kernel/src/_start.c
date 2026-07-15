@@ -117,8 +117,6 @@ _start_init()
     if (!VMM_init())
         KERNEL_PANIC("VMM error");
 
-    fdc_init();
-
     // TODO: init other cpu cores...
 
     // TODO: set up kernel stack, EBP,ESP ... and align it (here in virtual memory)
@@ -126,6 +124,9 @@ _start_init()
     // __asm__ volatile("mov ebp, esp");                     // This should be set up already by the bootloader.
 
     __asm__ volatile("sti");
+    CON_puts("Init Floppy Disk Controller\n");
+    fdc_init();
+
     __asm__ volatile("jmp %0" ::"i"(&main));
     for (;;)
         ;
