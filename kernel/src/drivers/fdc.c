@@ -6,11 +6,16 @@
 #include <arch/x86/defs/IRQ.h>
 #include <arch/x86/PIT.h>
 #include <lib/conio.h>
+#include <defs/assert.h>
 
 #include <stdbool.h>
+#include <stddef.h>
 
-#define FDC_RETRIES    500
-#define FDC_SLEEP_TIME 20
+#define FDC_RETRIES           500
+#define FDC_SLEEP_TIME        20
+#define FDC_SECTORS_PER_TRACK 18
+#define FDC_DMA_CHANNEL       2
+#define FDC_DMA_BUF_SIZE      512
 
 #define FDC_IO_DOR 0x3F2
 #define FDC_IO_MSR 0x3F4
@@ -27,13 +32,21 @@
 #define FDC_MASK_MSR_DATAREG 128
 
 #define FDC_CMD_SPECIFY   3
+#define FDC_CMD_READ_SECT 6
 #define FDC_CMD_CALIBRATE 7
 #define FDC_CMD_CHECK_INT 8
+#define FDC_CMD_SEEK      0xF
 
-#define FDC_DMA_CHANNEL 2
+#define FDC_CMD_EXT_SKIP       0x20
+#define FDC_CMD_EXT_DENSITY    0x40
+#define FDC_CMD_EXT_MULTITRACK 0x80
+
+#define FDC_GAP3_LENGTH_3_5 27
+#define FDC_SECTOR_DTL_512  2
 
 
 static volatile bool g_fdc_irq = false;
+static uint8_t*      g_pDmaBuf = (uint8_t*) 0x1000;
 
 static void fdc_handler(ISR_registers_t)
 {
@@ -221,11 +234,67 @@ static void _fdc_reset(uint8_t drive)
         KERNEL_PANIC("unable to calibrate floppy drive: {}");
 }
 
+static bool _fdc_seek(uint8_t drive, uint8_t cyl, uint8_t head)
+{
+    uint8_t st0, cyl0;
+
+    if (drive >= 4)
+        return false;
+
+    for (int i = 0; i < 10; i++)
+    {
+        _fdc_send_command(FDC_CMD_SEEK);
+        _fdc_send_command((head) << 2 | drive);
+        _fdc_send_command(cyl);
+        _fdc_wait_irq();
+        _fdc_check_int(&st0, &cyl0);
+        // found the cylinder?
+        if (cyl0 == cyl)
+            return true;
+    }
+
+    return false;
+}
+
+static void _fdc_read_sector_imp(uint8_t drive, uint8_t head, uint8_t track, uint8_t sector)
+{
+    uint8_t st0, cyl;
+
+    _fdc_dma_init((uint8_t*) g_pDmaBuf, FDC_DMA_BUF_SIZE);                                                     // initialize DMA
+    dma_set_read(FDC_DMA_CHANNEL);                                                                             // set the DMA for read transfer
+    _fdc_send_command(FDC_CMD_READ_SECT | FDC_CMD_EXT_MULTITRACK | FDC_CMD_EXT_SKIP | FDC_CMD_EXT_DENSITY);    // read in a sector
+    _fdc_send_command(head << 2 | drive);
+    _fdc_send_command(track);
+    _fdc_send_command(head);
+    _fdc_send_command(sector);
+    _fdc_send_command(FDC_SECTOR_DTL_512);
+    _fdc_send_command(((sector + 1) >= FDC_SECTORS_PER_TRACK) ? FDC_SECTORS_PER_TRACK : sector + 1);
+    _fdc_send_command(FDC_GAP3_LENGTH_3_5);
+    _fdc_send_command(0xFF);
+    _fdc_wait_irq();
+    // read status info
+    for (int j = 0; j < 7; j++)
+        _fdc_read_data();
+
+    _fdc_check_int(&st0, &cyl);    // let FDC know we handled interrupt
+}
+
+static void _fdc_lba_to_chs(int lba, int* pHead, int* pTrack, int* pSector)
+{
+    assert(pHead != NULL, "");
+    assert(pTrack != NULL, "");
+    assert(pSector != NULL, "");
+
+    *pHead   = (lba % (FDC_SECTORS_PER_TRACK * 2)) / (FDC_SECTORS_PER_TRACK);
+    *pTrack  = lba / (FDC_SECTORS_PER_TRACK * 2);
+    *pSector = lba % FDC_SECTORS_PER_TRACK + 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void fdc_init()
 {
     IRQ_register_interrupt_handler(IRQ_DISKETTE, fdc_handler);
-
-    // _fdc_dma_init(buf, length);    // TODO: init DMA separately?
 
     // CMOS Floppy drive decode
     outb(0x70, 0x10);
@@ -246,4 +315,31 @@ void fdc_init()
         _fdc_reset(1);
 
     _fdc_drive_data(13, 1, 15, true);
+}
+
+void fdc_set_dma_addr(uint8_t* pBuf)
+{
+    g_pDmaBuf = pBuf;
+}
+
+uint8_t* fdc_read_sector(uint8_t drive, int sectorLBA)
+{
+    if (drive >= 4)
+        return NULL;
+
+    // convert LBA sector to CHS
+    int head = 0, track = 0, sector = 1;
+    _fdc_lba_to_chs(sectorLBA, &head, &track, &sector);
+
+    // turn motor on and seek to track
+    _fdc_control_motor(drive, true);
+    if (!_fdc_seek(drive, (uint8_t) track, (uint8_t) head))
+        return NULL;
+
+    //! read sector and turn motor off
+    _fdc_read_sector_imp(drive, head, (uint8_t) track, (uint8_t) sector);
+    _fdc_control_motor(drive, false);
+
+    // TODO: warning: this is a bit hackish
+    return g_pDmaBuf;
 }

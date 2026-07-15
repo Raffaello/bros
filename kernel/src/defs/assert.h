@@ -6,6 +6,6 @@
 #define assert(condition) ((void) 0)
 #else
 #define assert(condition, msg) \
-    if (!condition)            \
+    if (!(condition))          \
     KERNEL_PANIC(msg)
 #endif
