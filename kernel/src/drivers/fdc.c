@@ -58,14 +58,15 @@ static void _fdc_dma_init(uint8_t* buf, uint32_t length)
     const uint32_t b = (uint32_t) buf;
     const uint32_t l = length - 1;
 
-    dma_reset(1);
+    dma_reset(0);
     dma_mask_channel(FDC_DMA_CHANNEL);
-    dma_reset_flipflop(1);
-    dma_set_address(FDC_DMA_CHANNEL, b & 0xFF, (b >> 8) & 0xFF);    // TODO: it looks wrong only 16 bits?
-    dma_reset_flipflop(1);
-    dma_set_count(FDC_DMA_CHANNEL, l & 0xFF, (l >> 8) & 0xFF);      // TODO: it looks wrong only 16 bits?
+    dma_reset_flipflop(0);
+    dma_set_address(FDC_DMA_CHANNEL, b & 0xFF, (b >> 8) & 0xFF);
+    dma_set_external_page_register(FDC_DMA_CHANNEL, (b >> 16) & 0xFF);
+    dma_reset_flipflop(0);
+    dma_set_count(FDC_DMA_CHANNEL, l & 0xFF, (l >> 8) & 0xFF);
     dma_set_read(FDC_DMA_CHANNEL);
-    dma_unmask_all(1);
+    dma_unmask_channel(FDC_DMA_CHANNEL);
 }
 
 static uint8_t _fdc_read_status()

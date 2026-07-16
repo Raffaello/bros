@@ -191,18 +191,18 @@ void dma_set_external_page_register(uint8_t reg, uint8_t val)
 
 void dma_mask_channel(uint8_t channel)
 {
-    if (channel <= 4)
-        outb(DMA0_CHANMASK_REG, (1 << (channel - 1)));
+    if (channel < 4)
+        outb(DMA0_CHANMASK_REG, (4 | (channel)));
     else
-        outb(DMA1_CHANMASK_REG, (1 << (channel - 5)));
+        outb(DMA1_CHANMASK_REG, (4 | (channel - 4)));
 }
 
 void dma_unmask_channel(uint8_t channel)
 {
-    if (channel <= 4)
+    if (channel < 4)
         outb(DMA0_CHANMASK_REG, channel);
     else
-        outb(DMA1_CHANMASK_REG, channel);
+        outb(DMA1_CHANMASK_REG, channel - 4);
 }
 
 void dma_set_mode(uint8_t channel, uint8_t mode)
@@ -212,7 +212,7 @@ void dma_set_mode(uint8_t channel, uint8_t mode)
 
     dma_mask_channel(channel);
     outb((channel < 4) ? (DMA0_MODE_REG) : DMA1_MODE_REG, chan | (mode));
-    dma_unmask_all(dma);
+    dma_unmask_channel(channel);
 }
 
 void dma_set_read(uint8_t channel)
@@ -227,10 +227,7 @@ void dma_set_write(uint8_t channel)
 
 void dma_reset_flipflop(uint8_t dma)
 {
-    // if (dma > 2)
-    //  return;
-
-    //! it doesn't matter what is written to this register
+    // it doesn't matter what is written to this register
     outb((dma == 0) ? DMA0_CLEARBYTE_FLIPFLOP_REG : DMA1_CLEARBYTE_FLIPFLOP_REG, 0xFF);
 }
 
