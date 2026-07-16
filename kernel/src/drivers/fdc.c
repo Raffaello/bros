@@ -58,7 +58,7 @@ static void _fdc_dma_init(uint8_t* buf, uint32_t length)
     const uint32_t b = (uint32_t) buf;
     const uint32_t l = length - 1;
 
-    dma_reset(0);
+    // dma_reset(0);
     dma_mask_channel(FDC_DMA_CHANNEL);
     dma_reset_flipflop(0);
     dma_set_address(FDC_DMA_CHANNEL, b & 0xFF, (b >> 8) & 0xFF);
