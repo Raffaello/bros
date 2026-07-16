@@ -120,6 +120,7 @@ _start_init()
     // TODO: init other cpu cores...
     // TODO: set up kernel stack, EBP,ESP ... and align it (here in virtual memory)
 
+    CON_puts("Enable Interrupts\n");
     __asm__ volatile("sti");
     CON_puts("Init Floppy Disk Controller\n");
     fdc_init();
