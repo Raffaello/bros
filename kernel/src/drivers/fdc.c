@@ -87,24 +87,29 @@ static void _fdc_send_command(uint8_t cmd)
     }
 }
 
-static uint8_t _fdc_read_data()
+static bool _fdc_read_data(uint8_t* pData)
 {
+    if (pData == NULL)
+        return false;
+
     for (int i = 0; i < FDC_RETRIES; i++)
     {
         if (_fdc_read_status() & FDC_MASK_MSR_DATAREG)
-            return inb(FDC_IO_DR);
+        {
+            *pData = inb(FDC_IO_DR);
+            return true;
+        }
     }
 
-    // TODO: review this function as it is conceptually wrong
-    return 0xFF;    // TODO: THIS is an error, but it will be undetected!
+    return false;
 }
 
 static void _fdc_check_int(uint8_t* st0, uint8_t* cyl)
 {
     _fdc_send_command(FDC_CMD_CHECK_INT);
 
-    *st0 = _fdc_read_data();
-    *cyl = _fdc_read_data();
+    if (!_fdc_read_data(st0) || !_fdc_read_data(cyl))
+        KERNEL_PANIC("FDC unable to read data");    // TODO: should report error to the client
 }
 
 static inline void _fdc_wait_irq()
@@ -262,9 +267,10 @@ static void _fdc_read_sector_imp(uint8_t drive, uint8_t head, uint8_t track, uin
     _fdc_send_command(FDC_GAP3_LENGTH_3_5);
     _fdc_send_command(0xFF);
     _fdc_wait_irq();
+
     // read status info
     for (int j = 0; j < 7; j++)
-        _fdc_read_data();
+        _fdc_read_data(&st0);
 
     _fdc_check_int(&st0, &cyl);    // let FDC know we handled interrupt
 }
@@ -292,12 +298,12 @@ void fdc_init()
     const uint8_t a            = c >> 4;
     const uint8_t b            = c & 0xF;
     static char*  drive_type[] = {
-        "no floppy drive",
-        "360kb 5.25in floppy drive",
-        "1.2mb 5.25in floppy drive",
-        "720kb 3.5in",
-        "1.44mb 3.5in",
-        "2.88mb 3.5in"};
+        "None",
+        "360KB  5.25in",
+        "1.2MB  5.25in",
+        "720KB  3.5in",
+        "1.44MB 3.5in",
+        "2.88MB 3.5in"};
     CON_printf("Floppy A: %s --- Floppy B: %s\n", drive_type[a], drive_type[b]);
     if (a != 0)
         _fdc_reset(0);
