@@ -5,6 +5,7 @@
     "dictionaries": [],
     "words": [
         "ACPI",
+        "ADDRHOLD",
         "AEOI",
         "APIC",
         "asciz",
@@ -27,6 +28,7 @@
         "conv",
         "cpuid",
         "ctype",
+        "DACK",
         "DDEBUG",
         "defsym",
         "diffutils",

@@ -34,6 +34,8 @@ SRC = \
 	${SRC_DIR}/bios/vga.c \
 	${SRC_DIR}/drivers/ps2.c \
 	${SRC_DIR}/drivers/keyboard.c \
+	${SRC_DIR}/drivers/dma.c \
+	${SRC_DIR}/drivers/fdc.c \
 	${SRC_DIR}/sys/panic.c
 
 OBJS = $(SRC:${SRC_DIR}/%.c=${BUILD_DIR}/%.o)

@@ -19,6 +19,7 @@
 #include <sys/panic.h>
 
 #include <drivers/ps2.h>    // TODO: not in the init, on init drivers eventually. but for now is ok. but is it a driver?
+#include <drivers/fdc.h>
 
 
 noreturn void _start();
@@ -104,7 +105,7 @@ _start_init()
     CON_puts("Init IRQ\n");
     IRQ_init();
     CON_puts("Init PIT\n");
-    PIT_init(10);
+    PIT_init(1);
     CON_puts("Init PS/2\n");
     PS2_init();
     // boot info sanitize
@@ -117,12 +118,13 @@ _start_init()
         KERNEL_PANIC("VMM error");
 
     // TODO: init other cpu cores...
-
     // TODO: set up kernel stack, EBP,ESP ... and align it (here in virtual memory)
-    // __asm__ volatile("mov esp, %0" ::"i"(KERNEL_STACK));    // This should be set up already by the bootloader.
-    // __asm__ volatile("mov ebp, esp");                     // This should be set up already by the bootloader.
 
+    CON_puts("Enable Interrupts\n");
     __asm__ volatile("sti");
+    CON_puts("Init Floppy Disk Controller\n");
+    fdc_init();
+
     __asm__ volatile("jmp %0" ::"i"(&main));
     for (;;)
         ;
